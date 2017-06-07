@@ -14,7 +14,15 @@
     "size": "webpack -v"
   },
   "repository": "",
-  "keywords": [],
+  "keywords": [
+    "webpack",
+    "brain",
+    "cli",
+    "webpack-cli",
+    "react",
+    "brain-cli",
+    "pack"
+  ],
   "author": "duanguang She",
   "devDependencies": {
     "@types/chai": "^3.4.35",
