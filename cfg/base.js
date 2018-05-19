@@ -180,11 +180,11 @@ function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPa
     }
     function getHtmlWebpackPlugins() {
         if (__DEV__) {
-            return htmlWebpackPlugin_1.default(htmlWebpackPlugin);
+            return htmlWebpackPlugin_1.default();
         }
         else {
             // invariant(apps.length === 1, `在部署环境下仅支持单入口`);
-            return htmlWebpackPlugin_1.default(htmlWebpackPlugin, apps);
+            return htmlWebpackPlugin_1.default(apps);
         }
     }
     const config = {

@@ -30,10 +30,10 @@ module.exports = {
     },
     webpack: {
         dllConfig: {
-            vendors: [`babel-polyfill`,'react']
+            vendors: [`babel-polyfill`]
         },
         disableReactHotLoader: false,
-        commonsChunkPlugin:['react']
+        //commonsChunkPlugin:['react']
     },
     babel: {
         query: {
@@ -58,7 +58,7 @@ module.exports = {
         }
     },
     htmlWebpackPlugin: {
-        title: "111"/*O2O订单管理系统*/,
+        title: ""/*O2O订单管理系统*/,
     },
     apps: ['app2','app1']
 };

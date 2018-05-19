@@ -200,11 +200,11 @@ export default function getBaseConfig({name, devServer, imageInLineSize, default
 
     function getHtmlWebpackPlugins() {
         if (__DEV__) {
-            return htmlWebpackPlugins(htmlWebpackPlugin)
+            return htmlWebpackPlugins()
         }
         else {
             // invariant(apps.length === 1, `在部署环境下仅支持单入口`);
-            return htmlWebpackPlugins(htmlWebpackPlugin,apps);
+            return htmlWebpackPlugins(apps);
         }
     }
     const config: any = {

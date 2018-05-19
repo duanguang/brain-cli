@@ -7,7 +7,7 @@ const fs = require("fs");
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const minify = require('html-minifier').minify;
 const { apps, htmlWebpackPlugin: { title } } = EConfig_1.default.getInstance();
-function htmlWebpackPluginInstance(templatePath, filename, chunks, htmlWebpackPlugin) {
+function htmlWebpackPluginInstance(templatePath, filename, chunks) {
     return new HtmlWebpackPlugin({
         template: templatePath,
         filename: filename,
@@ -15,7 +15,7 @@ function htmlWebpackPluginInstance(templatePath, filename, chunks, htmlWebpackPl
         hash: !env_1.isDev(),
         alwaysWriteToDisk: true,
         chunks: chunks,
-        title: htmlWebpackPlugin.title || 'webApp'
+        title: title || 'webApp'
     });
 }
 function getHtmlWebpackPlugins(htmlWebpackPlugin, entries) {
@@ -25,11 +25,11 @@ function getHtmlWebpackPlugins(htmlWebpackPlugin, entries) {
         const relativeTargetHtml = path.join(relativeTargetDirectory, '/index.html');
         const projectTargetPath = path.resolve(workingDirectory, relativeTargetHtml);
         if (fs.existsSync(projectTargetPath)) {
-            return htmlWebpackPluginInstance(projectTargetPath, relativeTargetHtml, [app, 'common'], htmlWebpackPlugin);
+            return htmlWebpackPluginInstance(projectTargetPath, relativeTargetHtml, [app, 'common']);
         }
         else {
             const baseTarget = path.resolve(__dirname, '../../../tpl/index.ejs');
-            return htmlWebpackPluginInstance(baseTarget, relativeTargetHtml, [app, 'common'], htmlWebpackPlugin);
+            return htmlWebpackPluginInstance(baseTarget, relativeTargetHtml, [app, 'common']);
         }
     });
 }
