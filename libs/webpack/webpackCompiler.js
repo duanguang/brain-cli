@@ -4,9 +4,6 @@ const format_1 = require("../utils/format");
 const webpack_config_1 = require("../../webpack.config");
 const EConfig_1 = require("../settings/EConfig");
 const webpack = require('webpack');
-/**
- * Created by allen on 2016/8/25 0025.
- */
 function webpackCompiler() {
     const webpackConfig = webpack_config_1.default(EConfig_1.default.getInstance());
     if (Array.isArray(webpackConfig.pendings)) {

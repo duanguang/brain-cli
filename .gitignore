@@ -109,3 +109,5 @@ dist
 .idea/legion-cli.iml
 .zip
 .7z
+.history
+.webpack_cache

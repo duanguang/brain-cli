@@ -10,35 +10,46 @@ const nodeModulesPath = path.resolve(process.cwd(), 'node_modules');
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const HtmlWebpackHarddiskPlugin = require('html-webpack-harddisk-plugin');
 const OptimizeCssAssetsPlugin = require('optimize-css-assets-webpack-plugin');
+const HappyPack = require('happypack'), os = require('os'), happyThreadPool = HappyPack.ThreadPool({ size: os.cpus().length });
 function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPath, apps, server, babel, webpack: webpackConfig }) {
     const __DEV__ = env_1.isDev();
     publicPath += name + "/";
-    const { disableReactHotLoader } = webpackConfig;
+    const { disableReactHotLoader, commonsChunkPlugin } = webpackConfig;
+    const DisableReactHotLoader = disableReactHotLoader || false; //默认启用热加载
+    let CommonsChunkPlugin = { name: 'common', value: ['babel-polyfill'] };
+    if (commonsChunkPlugin && commonsChunkPlugin instanceof Array && commonsChunkPlugin.length > 0) {
+        CommonsChunkPlugin.value = [...new Set(commonsChunkPlugin.concat(CommonsChunkPlugin.value))];
+    }
     const { noInfo, proxy } = devServer;
+    const webpackDevEntries = [
+        `webpack-dev-server/client?http://${server}:${defaultPort}`,
+        `webpack/hot/only-dev-server`
+        //'webpack/hot/dev-server'
+    ];
     function getEntries() {
-        const webpackDevEntries = [
-            `webpack-dev-server/client?http://${server}:${defaultPort}`,
-            `webpack/hot/only-dev-server`
-        ];
-        return apps.reduce((prev, app) => {
-            prev = {
-                'common/core': [
-                    'react', 'mobx-react', 'mobx', 'babel-polyfill', 'superagent',
-                    'react-router-dom', 'classnames', 'isomorphic-fetch',
-                    'react-dom', 'history', 'invariant', 'warning', 'hoist-non-react-statics'
-                ]
-            };
+        let entity = apps.reduce((prev, app) => {
+            // prev={
+            //     'common/core':__DEV__?['react']:[
+            //         'react','mobx-react','mobx','babel-polyfill','superagent',
+            //         'react-router-dom','classnames','isomorphic-fetch',
+            //         'react-dom','history','invariant','warning','hoist-non-react-statics'
+            //     ]
+            // }
             prev[app] = `./src/${app}/index`;
-            /*prev[app] = [
-                'babel-polyfill',
-                `./src/${app}/index`
-            ];*/
-            if (__DEV__) {
-                //prev[app].unshift(...webpackDevEntries);
-                prev['common/core'].unshift(...webpackDevEntries);
-            }
+            // prev[app] = [
+            //     'babel-polyfill',
+            //     `./src/${app}/index`
+            // ];
             return prev;
         }, {});
+        let chunk = {};
+        chunk[CommonsChunkPlugin.name] = CommonsChunkPlugin.value;
+        entity = Object.assign(entity, chunk);
+        if (__DEV__) {
+            // entity[app].unshift(...webpackDevEntries);
+            entity[CommonsChunkPlugin.name].unshift(...webpackDevEntries);
+        }
+        return entity;
     }
     function getCssLoaders() {
         const CSS_MODULE_QUERY = `?modules&importLoaders=1&localIdentName=[local]-[hash:base64:6]`;
@@ -48,7 +59,7 @@ function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPa
         else {
             config.plugins.push(
             //new ExtractTextPlugin('[name]/styles/[name].css')
-            new ExtractTextPlugin('[name]/styles/[name].[contenthash:8].bundle.css', { allChunks: true }));
+            new ExtractTextPlugin('[name]/styles/[name].[contenthash:8].bundle.css'));
             config.plugins.push(new OptimizeCssAssetsPlugin({
                 assetNameRegExp: /\.optimize\.css$/g,
                 cssProcessor: require('cssnano'),
@@ -107,7 +118,7 @@ function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPa
             {
                 test: /\.(png|jpg|gif)$/,
                 loaders: [
-                    `url-loader?limit=${imageInLineSize}&name=images/[hash:8].[name].[ext]`,
+                    `url-loader?limit=${imageInLineSize}&name=../common/images/[hash:8].[name].[ext]`,
                     //optimizationLevel似乎没什么用
                     `image-webpack?{optipng:{optimizationLevel:7}, pngquant:{quality: "65-90", speed: 4}, mozjpeg: {quality: 65}}`
                 ]
@@ -125,14 +136,16 @@ function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPa
     function getJSXLoaders() {
         const loaders = [];
         if (__DEV__) {
-            if (!disableReactHotLoader) {
+            console.log(DisableReactHotLoader);
+            if (!DisableReactHotLoader) {
                 // if (!__DEV__) {
                 //     warning(`please turn off the disableReactHotLoader option. it's not supposed to be on in production stage`);
                 //     warning(`skip react-hot-loader`);
                 // }
                 loaders.push({
-                    test: /\.jsx?$/,
-                    loader: 'react-hot',
+                    test: /\.(jsx|js)?$/,
+                    // loader: 'react-hot',
+                    loader: 'react-hot-loader!babel-loader',
                     include: [path.join(process.cwd(), './src')],
                     exclude: [nodeModulesPath],
                 });
@@ -149,6 +162,12 @@ function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPa
                 path.join(process.cwd(), 'node_modules/basics-widget'),
                 path.join(process.cwd(), './src')
             ],
+            exclude: [nodeModulesPath]
+        });
+        loaders.push({
+            test: /\.js|jsx$/,
+            loader: 'HappyPack/loader?id=jsHappy',
+            exclude: /node_modules/
         });
         return loaders;
     }
@@ -174,14 +193,16 @@ function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPa
         port: defaultPort,
         additionalPaths: [],
         output: {
-            path: path.join(process.cwd(), constants_1.DIST),
+            path: path.join(process.cwd(), `${constants_1.DIST}`),
             filename: `[name]/js/bundle.js`,
             chunkFilename: 'bundle/[name]-[id].[chunkhash:5].bundle.js',
             publicPath: __DEV__ ? publicPath : "../"
         },
         devtool: __DEV__ && 'cheap-module-source-map',
         resolve: {
-            alias: {}
+            alias: {},
+            extensions: ['', '.web.js', '.js', '.json', 'ts', '.css', '.tsx', '.jsx'],
+            modulesDirectories: ['', 'src', 'node_modules', path.join(__dirname, '../node_modules')],
         },
         module: {
             loaders: []
@@ -191,7 +212,45 @@ function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPa
         },
         plugins: [
             ...getHtmlWebpackPlugins(),
-            new webpack.optimize.CommonsChunkPlugin('common/core', 'common/core.js'),
+            new webpack.optimize.CommonsChunkPlugin(CommonsChunkPlugin.name, 'common/js/core.js'),
+            new HappyPack({
+                id: 'jsHappy',
+                cache: true,
+                threadPool: happyThreadPool,
+                loaders: [{
+                        path: 'babel',
+                        query: {
+                            cacheDirectory: '.webpack_cache',
+                            presets: [
+                                'es2015',
+                                'react'
+                            ]
+                        }
+                    }]
+            }),
+            //如果有单独提取css文件的话
+            new HappyPack({
+                id: 'lessHappy',
+                loaders: ['style', 'css', 'less']
+            }),
+            // new webpack.optimize.CommonsChunkPlugin({
+            //     name: 'common/core',
+            //     minChunks: function (module, count) {
+            //       // any required modules inside node_modules are extracted to vendor
+            //       return (
+            //         module.resource &&
+            //         /\.js$/.test(module.resource) &&
+            //         module.resource.indexOf(
+            //           path.join(__dirname, '../node_modules')
+            //         ) === 0
+            //       )
+            //     },
+            //     filename: 'common/core.js'
+            //   }),
+            //   new webpack.optimize.CommonsChunkPlugin({
+            //     name: 'manifest',
+            //     chunks: ['common/core']
+            //   }),
             new HtmlWebpackHarddiskPlugin(),
             new webpack.DefinePlugin({
                 "process.env.NODE_ENV": JSON.stringify(process.env.NODE_ENV || constants_1.DEV)
@@ -219,11 +278,15 @@ function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPa
     }
     else {
         config.plugins.push(new webpack.optimize.UglifyJsPlugin({
-            mangle: false,
+            // mangle: false,
+            // 最紧凑的输出
+            //beautify: false,
             compress: {
-                warnings: false
+                warnings: false,
+                drop_debugger: true,
+                drop_console: true
             },
-            comments: false
+            comments: false,
         }));
         config.plugins.push(new webpack.optimize.DedupePlugin());
         config.plugins.push(new LegionExtractStaticFilePlugin_1.default());

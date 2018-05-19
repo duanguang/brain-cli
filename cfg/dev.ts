@@ -15,7 +15,6 @@ export default function getDevConfig(eConfig: EConfig) {
         () => {
             //TODO:暂时放在这里
             const filepath = WebpackDllManifest.getInstance().resolveManifestPath();
-            console.log(filepath);
             if (filepath) {
                 config.plugins.push(new AddAssetHtmlPlugin({includeSourcemap: false, filepath}));
                 const dllReferencePlugin = getDllReferencePlugin();
@@ -26,16 +25,15 @@ export default function getDevConfig(eConfig: EConfig) {
         }
     ];
 
-    /*const deps = [
-        'react/dist/react.js',
-        'react-router/dist/react-router.min.js'
-    ];
+    // const deps = [
+    //     'react/dist/react.js',
+    //     //'react-router/dist/react-router.min.js'
+    // ];
 
-    deps.forEach(function (dep) {
-        const depPath = path.resolve(nodeModulesPath, dep);
-        config.resolve.alias[dep.split(path.sep)[0]] = depPath;
-        config.module.noParse.push(depPath);
-    });*/
-
+    // deps.forEach(function (dep) {
+    //     const depPath = path.resolve(nodeModulesPath, dep);
+    //     config.resolve.alias[dep.split(path.sep)[0]] = depPath;
+    //     config.module.noParse.push(depPath);
+    // });
     return config;
 }

@@ -30,9 +30,10 @@ module.exports = {
     },
     webpack: {
         dllConfig: {
-            vendors: [`babel-polyfill`]
+            vendors: [`babel-polyfill`,'react']
         },
-        disableReactHotLoader: true
+        disableReactHotLoader: false,
+        commonsChunkPlugin:['react']
     },
     babel: {
         query: {
@@ -46,18 +47,18 @@ module.exports = {
                 "add-module-exports",
                 "transform-runtime",
                 "transform-decorators-legacy",
-                [
-                    "import",
-                    [
-                        {libraryName: "@kad/e-antd"},
-                        {libraryName: "antd", style: true}
-                    ]
-                ]
+                // [
+                //     "import",
+                //     [
+                //         {libraryName: "@kad/e-antd"},
+                //         {libraryName: "antd", style: true}
+                //     ]
+                // ]
             ]
         }
     },
     htmlWebpackPlugin: {
         title: ""/*O2O订单管理系统*/,
     },
-    apps: ['app1','app2']
+    apps: ['app2','app1']
 };

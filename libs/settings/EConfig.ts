@@ -9,7 +9,10 @@ const defaultEConfig = require(path.resolve(__dirname, `../../${PROJECT_USER_CON
  * 可选配置列表, 优先级从低到高由左到右
  */
 export const configFileList = [PROJECT_USER_CONFIG_FILE, PROJECT_USER_CONFIG_IGNORE_FILE];
-
+ interface ICommonsChunkPlugin{
+     name:string,
+     value:Array<string>
+ }
 export default class EConfig {
     public name: string;
     public open: boolean;
@@ -31,7 +34,8 @@ export default class EConfig {
         dllConfig: {
             vendors: string[]
         },
-        disableReactHotLoader: boolean
+        disableReactHotLoader: boolean,
+        commonsChunkPlugin:ICommonsChunkPlugin
     };
 
     public babel: {

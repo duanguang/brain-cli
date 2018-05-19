@@ -2,9 +2,6 @@ import {asSeconds} from '../utils/format';
 import getConfig from '../../webpack.config';
 import EConfig from '../settings/EConfig';
 const webpack = require('webpack');
-/**
- * Created by allen on 2016/8/25 0025.
- */
 
 export default function webpackCompiler() {
     const webpackConfig = getConfig(EConfig.getInstance());
