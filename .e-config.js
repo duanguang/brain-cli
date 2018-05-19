@@ -58,7 +58,7 @@ module.exports = {
         }
     },
     htmlWebpackPlugin: {
-        title: ""/*O2O订单管理系统*/,
+        title: "111"/*O2O订单管理系统*/,
     },
     apps: ['app2','app1']
 };

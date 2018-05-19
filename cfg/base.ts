@@ -14,7 +14,7 @@ const OptimizeCssAssetsPlugin = require('optimize-css-assets-webpack-plugin');
 const HappyPack = require('happypack'),
   os = require('os'),
   happyThreadPool = HappyPack.ThreadPool({ size: os.cpus().length });
-export default function getBaseConfig({name, devServer, imageInLineSize, defaultPort, publicPath, apps, server, babel, webpack: webpackConfig}: EConfig) {
+export default function getBaseConfig({name, devServer, imageInLineSize, defaultPort, publicPath, apps, server, babel, webpack: webpackConfig,htmlWebpackPlugin}: EConfig) {
     const __DEV__ = isDev();
 
     publicPath += name + "/";
@@ -149,7 +149,6 @@ export default function getBaseConfig({name, devServer, imageInLineSize, default
     function getJSXLoaders() {
         const loaders = [];
         if (__DEV__) {
-            console.log(DisableReactHotLoader)
             if (!DisableReactHotLoader) {
                 // if (!__DEV__) {
                 //     warning(`please turn off the disableReactHotLoader option. it's not supposed to be on in production stage`);
@@ -201,11 +200,11 @@ export default function getBaseConfig({name, devServer, imageInLineSize, default
 
     function getHtmlWebpackPlugins() {
         if (__DEV__) {
-            return htmlWebpackPlugins()
+            return htmlWebpackPlugins(htmlWebpackPlugin)
         }
         else {
             // invariant(apps.length === 1, `在部署环境下仅支持单入口`);
-            return htmlWebpackPlugins(apps);
+            return htmlWebpackPlugins(htmlWebpackPlugin,apps);
         }
     }
     const config: any = {

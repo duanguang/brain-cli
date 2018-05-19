@@ -11,7 +11,7 @@ const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const HtmlWebpackHarddiskPlugin = require('html-webpack-harddisk-plugin');
 const OptimizeCssAssetsPlugin = require('optimize-css-assets-webpack-plugin');
 const HappyPack = require('happypack'), os = require('os'), happyThreadPool = HappyPack.ThreadPool({ size: os.cpus().length });
-function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPath, apps, server, babel, webpack: webpackConfig }) {
+function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPath, apps, server, babel, webpack: webpackConfig, htmlWebpackPlugin }) {
     const __DEV__ = env_1.isDev();
     publicPath += name + "/";
     const { disableReactHotLoader, commonsChunkPlugin } = webpackConfig;
@@ -136,7 +136,6 @@ function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPa
     function getJSXLoaders() {
         const loaders = [];
         if (__DEV__) {
-            console.log(DisableReactHotLoader);
             if (!DisableReactHotLoader) {
                 // if (!__DEV__) {
                 //     warning(`please turn off the disableReactHotLoader option. it's not supposed to be on in production stage`);
@@ -181,11 +180,11 @@ function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPa
     }
     function getHtmlWebpackPlugins() {
         if (__DEV__) {
-            return htmlWebpackPlugin_1.default();
+            return htmlWebpackPlugin_1.default(htmlWebpackPlugin);
         }
         else {
             // invariant(apps.length === 1, `在部署环境下仅支持单入口`);
-            return htmlWebpackPlugin_1.default(apps);
+            return htmlWebpackPlugin_1.default(htmlWebpackPlugin, apps);
         }
     }
     const config = {

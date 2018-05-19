@@ -7,7 +7,7 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 const minify = require('html-minifier').minify;
 const {apps, htmlWebpackPlugin: {title}} = EConfig.getInstance();
 
-function htmlWebpackPluginInstance(templatePath: string, filename: string, chunks: string[]) {
+function htmlWebpackPluginInstance(templatePath: string, filename: string, chunks: string[],htmlWebpackPlugin:any) {
     return new HtmlWebpackPlugin({
         template: templatePath,
         filename: filename,
@@ -15,21 +15,21 @@ function htmlWebpackPluginInstance(templatePath: string, filename: string, chunk
         hash: !isDev(),
         alwaysWriteToDisk: true,
         chunks: chunks,
-        title:'webApp'
+        title:htmlWebpackPlugin.title||'webApp'
     });
 }
 
-export default function getHtmlWebpackPlugins(entries?): any[] {
+export default function getHtmlWebpackPlugins(htmlWebpackPlugin:any,entries?): any[] {
     return (entries || apps).map((app) => {
         const workingDirectory = process.cwd();
         const relativeTargetDirectory = `${app}`;
         const relativeTargetHtml = path.join(relativeTargetDirectory, '/index.html');
         const projectTargetPath = path.resolve(workingDirectory, relativeTargetHtml);
         if (fs.existsSync(projectTargetPath)) {
-            return htmlWebpackPluginInstance(projectTargetPath, relativeTargetHtml, [app,'common']);
+            return htmlWebpackPluginInstance(projectTargetPath, relativeTargetHtml, [app,'common'],htmlWebpackPlugin);
         } else {
             const baseTarget = path.resolve(__dirname, '../../../tpl/index.ejs');
-            return htmlWebpackPluginInstance(baseTarget, relativeTargetHtml, [app,'common']);
+            return htmlWebpackPluginInstance(baseTarget, relativeTargetHtml, [app,'common'],htmlWebpackPlugin);
         }
     });
 }
