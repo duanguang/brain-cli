@@ -10,7 +10,9 @@ const nodeModulesPath = path.resolve(process.cwd(), 'node_modules');
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const HtmlWebpackHarddiskPlugin = require('html-webpack-harddisk-plugin');
 const OptimizeCssAssetsPlugin = require('optimize-css-assets-webpack-plugin');
-const HappyPack = require('happypack'), os = require('os'), happyThreadPool = HappyPack.ThreadPool({ size: os.cpus().length });
+// const HappyPack = require('happypack'),
+//   os = require('os'),
+//   happyThreadPool = HappyPack.ThreadPool({ size: os.cpus().length });
 function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPath, apps, server, babel, webpack: webpackConfig, htmlWebpackPlugin }) {
     const __DEV__ = env_1.isDev();
     publicPath += name + "/";
@@ -59,7 +61,7 @@ function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPa
         else {
             config.plugins.push(
             //new ExtractTextPlugin('[name]/styles/[name].css')
-            new ExtractTextPlugin('[name]/styles/[name].[contenthash:8].bundle.css'));
+            new ExtractTextPlugin('[name]/styles/[name].[contenthash:8].bundle.css', { allChunks: true }));
             config.plugins.push(new OptimizeCssAssetsPlugin({
                 assetNameRegExp: /\.optimize\.css$/g,
                 cssProcessor: require('cssnano'),
@@ -153,8 +155,15 @@ function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPa
                 babel.query.plugins.push("babel-plugin-legion-hmr");
             }
         }
+        // loaders.push(
+        //     {
+        //       test: /\.js|jsx$/,
+        //       loader: 'HappyPack/loader?id=jsHappy',
+        //       exclude: /node_modules/
+        //     }
+        // )
         loaders.push({
-            test: /\.jsx?$/,
+            test: /\.(jsx|js)?$/,
             loader: `babel-loader`,
             query: babel.query,
             include: [
@@ -162,11 +171,6 @@ function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPa
                 path.join(process.cwd(), './src')
             ],
             exclude: [nodeModulesPath]
-        });
-        loaders.push({
-            test: /\.js|jsx$/,
-            loader: 'HappyPack/loader?id=jsHappy',
-            exclude: /node_modules/
         });
         return loaders;
     }
@@ -201,7 +205,7 @@ function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPa
         resolve: {
             alias: {},
             extensions: ['', '.web.js', '.js', '.json', 'ts', '.css', '.tsx', '.jsx'],
-            modulesDirectories: ['', 'src', 'node_modules', path.join(__dirname, '../node_modules')],
+            modulesDirectories: ['src', 'node_modules', path.join(__dirname, '../node_modules')],
         },
         module: {
             loaders: []
@@ -212,26 +216,27 @@ function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPa
         plugins: [
             ...getHtmlWebpackPlugins(),
             new webpack.optimize.CommonsChunkPlugin(CommonsChunkPlugin.name, 'common/js/core.js'),
-            new HappyPack({
-                id: 'jsHappy',
-                cache: true,
-                threadPool: happyThreadPool,
-                loaders: [{
-                        path: 'babel',
-                        query: {
-                            cacheDirectory: '.webpack_cache',
-                            presets: [
-                                'es2015',
-                                'react'
-                            ]
-                        }
-                    }]
-            }),
+            // new HappyPack({
+            //     id: 'jsHappy',
+            //     cache: true,
+            //     threadPool: happyThreadPool,
+            //     loaders: [{
+            //       path: 'babel',
+            //       query: {
+            //         cacheDirectory: '.webpack_cache',
+            //         presets: [
+            //           'es2015',
+            //           'react'
+            //         ]
+            //       }
+            //     }]
+            //   }),
             //如果有单独提取css文件的话
-            new HappyPack({
-                id: 'lessHappy',
-                loaders: ['style', 'css', 'less']
-            }),
+            // new HappyPack({
+            //    id: 'lessHappy',
+            //    loaders: ['style','css','less']
+            //     // loaders: [ 'style-loader', 'css-loader', 'less-loader' ]
+            // }),
             // new webpack.optimize.CommonsChunkPlugin({
             //     name: 'common/core',
             //     minChunks: function (module, count) {
