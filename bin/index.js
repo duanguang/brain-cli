@@ -8,7 +8,7 @@ const program = require('commander');
 const pkg = require('../package.json');
 /**
  * 如果出现cli的新版本, 通过下面方面能够获得相关提示
- * TODO: 由于@kad/legion-cli在私有源, 估计无法生效或报错
+ *
  */
 const notifier = UpdateNotifier({
     pkg,

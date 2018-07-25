@@ -18,7 +18,6 @@ export default function getBaseConfig({name, devServer, imageInLineSize, default
     const __DEV__ = isDev();
 
     publicPath += name + "/";
-
     const {disableReactHotLoader,commonsChunkPlugin} = webpackConfig;
     const DisableReactHotLoader=disableReactHotLoader||false;//默认启用热加载
     let CommonsChunkPlugin={name:'common',value:['babel-polyfill']}
@@ -175,7 +174,7 @@ export default function getBaseConfig({name, devServer, imageInLineSize, default
         // )
         loaders.push(
             {
-                test: /\.jsx?$/,
+                test: /\.(jsx|js)?$/,
                 loader: `babel-loader`,
                 query: babel.query,
                 include: [

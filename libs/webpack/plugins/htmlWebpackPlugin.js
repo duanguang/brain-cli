@@ -23,7 +23,7 @@ function getHtmlWebpackPlugins(htmlWebpackPlugin, entries) {
         const workingDirectory = process.cwd();
         const relativeTargetDirectory = `${app}`;
         const relativeTargetHtml = path.join(relativeTargetDirectory, '/index.html');
-        const projectTargetPath = path.resolve(workingDirectory, relativeTargetHtml);
+        const projectTargetPath = path.resolve(workingDirectory, 'src/', relativeTargetHtml);
         if (fs.existsSync(projectTargetPath)) {
             return htmlWebpackPluginInstance(projectTargetPath, relativeTargetHtml, [app, 'common']);
         }
