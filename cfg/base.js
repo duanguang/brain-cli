@@ -121,8 +121,6 @@ function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPa
                 test: /\.(png|jpg|gif)$/,
                 loaders: [
                     `url-loader?limit=${imageInLineSize}&name=../common/images/[hash:8].[name].[ext]`,
-                    //optimizationLevel似乎没什么用
-                    `image-webpack?{optipng:{optimizationLevel:7}, pngquant:{quality: "65-90", speed: 4}, mozjpeg: {quality: 65}}`
                 ]
             }
         ];
