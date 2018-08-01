@@ -17,7 +17,7 @@ export default class Test extends React.Component{
      }
      render(){
         return(
-            <div className="bg">11122
+            <div className="bg">2111322
                 <p onClick={this.handleClick.bind(this)}>
                     You  this. Click to toggle.state:{this.state.count}
                 </p>

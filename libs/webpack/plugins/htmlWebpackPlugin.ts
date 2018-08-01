@@ -10,10 +10,12 @@ function htmlWebpackPluginInstance(templatePath: string, filename: string, chunk
     return new HtmlWebpackPlugin({
         template: templatePath,
         filename: filename,
-        minify: isDev() ? false : minify,
+        //minify: isDev() ? false :minify,
         hash: !isDev(),
+        inject: true,
         alwaysWriteToDisk: true,
         chunks: chunks,
+        chunksSortMode: 'dependency',
         title:title||'webApp'
     });
 }
@@ -25,10 +27,10 @@ export default function getHtmlWebpackPlugins(htmlWebpackPlugin:any,entries?): a
         const relativeTargetHtml = path.join(relativeTargetDirectory, '/index.html');
         const projectTargetPath = path.resolve(workingDirectory, 'src/',relativeTargetHtml);
         if (fs.existsSync(projectTargetPath)) {
-            return htmlWebpackPluginInstance(projectTargetPath, relativeTargetHtml, [app,'common']);
+            return htmlWebpackPluginInstance(projectTargetPath, relativeTargetHtml, [app,'manifest','vendor','common']);
         } else {
             const baseTarget = path.resolve(__dirname, '../../../tpl/index.ejs');
-            return htmlWebpackPluginInstance(baseTarget, relativeTargetHtml, [app,'common']);
+            return htmlWebpackPluginInstance(baseTarget, relativeTargetHtml, [app,'manifest','vendor','common']);
         }
     });
 }

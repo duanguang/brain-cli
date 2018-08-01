@@ -7,7 +7,7 @@ module.exports = {
     publicPath: "/public/",
     devServer: {
         noInfo: true,
-        proxy: []
+        proxy: {}
         /*proxy: [{
          context: ['/**', '!/static/**', '!/webpack/**', '!/webpack-dev-server/**', '!/sockjs-node/**', '!/index.html'],
          target: 'http://tstmanage.360kad.com
@@ -33,13 +33,15 @@ module.exports = {
             vendors: [`babel-polyfill`]
         },
         disableReactHotLoader: false,
+        commonsChunkPlugin:['react','babel-polyfill',
+                 'react-dom','invariant'],
         //commonsChunkPlugin:['react']
     },
     babel: {
         query: {
             presets: [
                 "es2015",
-                "stage-0",
+                "stage-2",
                 "react"
             ],
             cacheDirectory: true,

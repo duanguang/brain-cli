@@ -24,6 +24,7 @@ function programInit(program) {
     else if (program.dist) {
         const eConfig = EConfig_1.default.getInstance();
         const webpackConfig = webpack_config_1.default(eConfig);
+        delete webpackConfig.pendings;
         webpack(webpackConfig, function (err, stats) {
             if (err)
                 throw err;

@@ -28,6 +28,7 @@ export default function programInit(program: any) {
     else if (program.dist) {
         const eConfig = EConfig.getInstance();
         const webpackConfig = getConfig(eConfig);
+        delete webpackConfig.pendings;
         webpack(webpackConfig, function (err, stats) {
             if (err) throw err;
             process.stdout.write(stats.toString({

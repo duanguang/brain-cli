@@ -22,7 +22,7 @@ export default class EConfig {
     public publicPath: string;
     public devServer: {
         noInfo: boolean,
-        proxy: Array<any>
+        proxy: Object
     };
     public postcss: {
         autoprefixer: {
