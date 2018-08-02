@@ -79,8 +79,11 @@ export default function getBaseConfig({name, devServer, imageInLineSize, default
         if(px2rem){
             postcss_loader.options.plugins.push(require('px2rem')(px2rem)) 
         }
-        function generateLoaders(loader?:string, loaderOptions?){
-            let style:any= [{ loader: 'css-loader',options:CSS_MODULE_OPTION}];
+        function generateLoaders(cssModule?,loader?:string, loaderOptions?){
+            let style :any= [{ loader: 'css-loader' }];
+            if(cssModule){
+                style[0]=Object.assign(style[0],{ options: cssModule})
+            }
             if(loader){
                 style.push(loader);
             }
@@ -129,7 +132,7 @@ export default function getBaseConfig({name, devServer, imageInLineSize, default
             },
             {
                 test: /\.less/,
-                use:generateLoaders('less-loader',postcss_loader),
+                use: generateLoaders(CSS_MODULE_OPTION,'less-loader', postcss_loader),
                 // use:ExtractTextPlugin.extract(
                 //     {
                 //         fallback: 'style-loader',
@@ -141,7 +144,7 @@ export default function getBaseConfig({name, devServer, imageInLineSize, default
             },
             {
                 test: /\.less/,
-                use:generateLoaders('less-loader',postcss_loader),
+                use: generateLoaders(null,'less-loader'),
                 // use:ExtractTextPlugin.extract(
                 //     {
                 //         fallback: 'style-loader',
@@ -153,7 +156,7 @@ export default function getBaseConfig({name, devServer, imageInLineSize, default
             },
             {
                 test: /\.css$/,
-                use:generateLoaders(null,postcss_loader),
+                use: generateLoaders(null,null, postcss_loader),
                 // use:ExtractTextPlugin.extract(
                 //     {
                 //         fallback: 'style-loader',
@@ -165,7 +168,7 @@ export default function getBaseConfig({name, devServer, imageInLineSize, default
             },
             {
                 test: /\.less/,
-                use:generateLoaders('less-loader',postcss_loader),
+                use: generateLoaders(CSS_MODULE_OPTION,'less-loader', postcss_loader),
                 // use:ExtractTextPlugin.extract(
                 //     {
                 //         fallback: 'style-loader',

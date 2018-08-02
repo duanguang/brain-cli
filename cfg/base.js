@@ -76,8 +76,11 @@ function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPa
         if (px2rem) {
             postcss_loader.options.plugins.push(require('px2rem')(px2rem));
         }
-        function generateLoaders(loader, loaderOptions) {
-            let style = [{ loader: 'css-loader', options: CSS_MODULE_OPTION }];
+        function generateLoaders(cssModule, loader, loaderOptions) {
+            let style = [{ loader: 'css-loader' }];
+            if (cssModule) {
+                style[0] = Object.assign(style[0], { options: cssModule });
+            }
             if (loader) {
                 style.push(loader);
             }
@@ -120,7 +123,7 @@ function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPa
             },
             {
                 test: /\.less/,
-                use: generateLoaders('less-loader', postcss_loader),
+                use: generateLoaders(CSS_MODULE_OPTION, 'less-loader', postcss_loader),
                 // use:ExtractTextPlugin.extract(
                 //     {
                 //         fallback: 'style-loader',
@@ -132,7 +135,7 @@ function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPa
             },
             {
                 test: /\.less/,
-                use: generateLoaders('less-loader', postcss_loader),
+                use: generateLoaders(null, 'less-loader'),
                 // use:ExtractTextPlugin.extract(
                 //     {
                 //         fallback: 'style-loader',
@@ -144,7 +147,7 @@ function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPa
             },
             {
                 test: /\.css$/,
-                use: generateLoaders(null, postcss_loader),
+                use: generateLoaders(null, null, postcss_loader),
                 // use:ExtractTextPlugin.extract(
                 //     {
                 //         fallback: 'style-loader',
@@ -156,7 +159,7 @@ function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPa
             },
             {
                 test: /\.less/,
-                use: generateLoaders('less-loader', postcss_loader),
+                use: generateLoaders(CSS_MODULE_OPTION, 'less-loader', postcss_loader),
                 // use:ExtractTextPlugin.extract(
                 //     {
                 //         fallback: 'style-loader',
