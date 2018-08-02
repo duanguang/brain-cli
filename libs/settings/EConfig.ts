@@ -27,7 +27,8 @@ export default class EConfig {
     public postcss: {
         autoprefixer: {
             browsers: string[]
-        }
+        },
+        px2rem:{}
     };
 
     public webpack: {

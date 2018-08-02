@@ -21,7 +21,7 @@ export default function getBaseConfig({name, devServer, imageInLineSize, default
     publicPath += name + "/";
     const {disableReactHotLoader,commonsChunkPlugin} = webpackConfig;
     const DisableReactHotLoader=disableReactHotLoader||false;//默认启用热加载
-    let CommonsChunkPlugin={name:'vendor',value:['babel-polyfill']}
+    let CommonsChunkPlugin={name:'common',value:['babel-polyfill']}
     if(commonsChunkPlugin&&commonsChunkPlugin instanceof Array&&commonsChunkPlugin.length>0){
         CommonsChunkPlugin.value=[...new Set(commonsChunkPlugin.concat(CommonsChunkPlugin.value))];
     }
@@ -65,22 +65,43 @@ export default function getBaseConfig({name, devServer, imageInLineSize, default
             importLoaders:1,
             localIdentName:`[local]-[hash:base64:6]`
         };
+        let browsers= EConfig.getInstance().postcss.autoprefixer.browsers;
+        let px2rem=EConfig.getInstance().postcss.px2rem;
         const postcss_loader={
             loader: 'postcss-loader',
             options: {
               ident: 'postcss',
               plugins: [
-                require('autoprefixer'),
+                require('autoprefixer')({browsers})
               ]
             }
-          }
-        if (__DEV__) {
-           // ExtractTextPlugin.extract = f => `style-loader!` + f;
         }
-        else {
+        if(px2rem){
+            postcss_loader.options.plugins.push(require('px2rem')(px2rem)) 
+        }
+        function generateLoaders(loader?:string, loaderOptions?){
+            let style:any= [{ loader: 'css-loader',options:CSS_MODULE_OPTION}];
+            if(loader){
+                style.push(loader);
+            }
+            if(loaderOptions){
+                style.push(loaderOptions);
+            }
+            if(__DEV__){
+                let styles=['style-loader',...style]
+                return styles;
+            }         
+            return ExtractTextPlugin.extract(
+            {
+                fallback: 'style-loader',
+                use: style,
+            })
+        }
+        if (!__DEV__) {
+           // ExtractTextPlugin.extract = f => `style-loader!` + f;
             config.plugins.push(
                 //new ExtractTextPlugin('[name]/styles/[name].css')
-               // new ExtractTextPlugin({filename:'[name]/styles/[name].[contenthash:8].bundle.css',allChunks:true})
+                new ExtractTextPlugin({filename:'[name]/styles/[name].[contenthash:8].bundle.css',allChunks:true})
             );
             config.plugins.push(
                 new OptimizeCssAssetsPlugin({
@@ -91,67 +112,68 @@ export default function getBaseConfig({name, devServer, imageInLineSize, default
                 })
             )
         }
+        
         return [
             {
                 test: /\.css$/,
-                use: ExtractTextPlugin.extract(
-                    {
-                        fallback: 'style-loader',
-                        use: [
-                          { loader: 'css-loader' },
+                use:generateLoaders(),
+                // use: ExtractTextPlugin.extract(
+                //     {
+                //         fallback: 'style-loader',
+                //         use: [
+                //           { loader: 'css-loader' },
                           
-                        ]
-                      }),
-                // loader: ExtractTextPlugin.extract('css-loader!resolve-url'),
+                //         ]
+                //       }),
                 include: [nodeModulesPath]
             },
             {
                 test: /\.less/,
-                use:ExtractTextPlugin.extract(
-                    {
-                        fallback: 'style-loader',
-                        use: [
-                            {loader:`css-loader`,options:CSS_MODULE_OPTION},'less-loader',postcss_loader
-                        ]
-                      }),
-                //loader: ExtractTextPlugin.extract(`css-loader${CSS_MODULE_QUERY}!resolve-url!postcss-loader!less-loader`),
+                use:generateLoaders('less-loader',postcss_loader),
+                // use:ExtractTextPlugin.extract(
+                //     {
+                //         fallback: 'style-loader',
+                //         use: [
+                //             {loader:`css-loader`,options:CSS_MODULE_OPTION},'less-loader',postcss_loader
+                //         ]
+                //       }),
                 include: [path.resolve(nodeModulesPath, 'basics-widget')]
             },
             {
                 test: /\.less/,
-                use:ExtractTextPlugin.extract(
-                    {
-                        fallback: 'style-loader',
-                        use: [
-                            {loader:`css-loader`},'less-loader',postcss_loader
-                        ]
-                      }),
-                //loader: ExtractTextPlugin.extract(`css-loader!postcss-loader!less-loader`),
+                use:generateLoaders('less-loader',postcss_loader),
+                // use:ExtractTextPlugin.extract(
+                //     {
+                //         fallback: 'style-loader',
+                //         use: [
+                //             {loader:`css-loader`},'less-loader',postcss_loader
+                //         ]
+                //       }),
                 include: [path.resolve(nodeModulesPath, 'antd')]
             },
             {
                 test: /\.css$/,
-                use:ExtractTextPlugin.extract(
-                    {
-                        fallback: 'style-loader',
-                        use: [
-                            {loader:`css-loader`,options:CSS_MODULE_OPTION},postcss_loader
-                        ]
-                      }),
-                //loader: ExtractTextPlugin.extract(`css-loader?${CSS_MODULE_QUERY}!resolve-url!postcss-loader`),
+                use:generateLoaders(null,postcss_loader),
+                // use:ExtractTextPlugin.extract(
+                //     {
+                //         fallback: 'style-loader',
+                //         use: [
+                //             {loader:`css-loader`,options:CSS_MODULE_OPTION},postcss_loader
+                //         ]
+                //       }),
                 exclude: [nodeModulesPath]
             },
             {
                 test: /\.less/,
-                use:['style-loader',{loader:`css-loader`,options:CSS_MODULE_OPTION},'less-loader',postcss_loader],
+                use:generateLoaders('less-loader',postcss_loader),
                 // use:ExtractTextPlugin.extract(
                 //     {
-                //         fallbackLoader: 'style-loader',
+                //         fallback: 'style-loader',
                 //         use: [
-                //             {loader:`css-loader`,options:CSS_MODULE_OPTION},'less-loader'
+                //             {loader:`css-loader`,options:CSS_MODULE_OPTION},'less-loader',postcss_loader
                 //         ]
-                //       }),
-                //loader: ExtractTextPlugin.extract(`css-loader${CSS_MODULE_QUERY}!resolve-url!postcss-loader!less-loader`),
+                //       }
+                // ),
                 exclude: [nodeModulesPath]
             }
         ]
@@ -180,7 +202,7 @@ export default function getBaseConfig({name, devServer, imageInLineSize, default
                 test: /\.(png|jpg|gif)$/,
                 //loader: `url-loader?limit=${8192}&name=${path.posix.join('common', 'images/[hash:8].[name].[ext]')}`,
                 loaders: [
-                    `url-loader?limit=${imageInLineSize}&name=common/images/[hash:8].[name].[ext]`,
+                    `file-loader?limit=${imageInLineSize}&name=common/images/[hash:8].[name].[ext]`,
                     //optimizationLevel似乎没什么用
                     //`image-webpack?{optipng:{optimizationLevel:7}, pngquant:{quality: "65-90", speed: 4}, mozjpeg: {quality: 65}}`
                 ]
@@ -281,24 +303,14 @@ export default function getBaseConfig({name, devServer, imageInLineSize, default
         module: {
             loaders: []
         },
-        // postcss: () => {
-        //     return [require('autoprefixer')];
-        // },
         plugins: [
             ...getHtmlWebpackPlugins(),
-            // new webpack.LoaderOptionsPlugin({
-            //     postcss: require('autoprefixer')
-            // }),
             // new webpack.optimize.CommonsChunkPlugin({
             //     name: CommonsChunkPlugin.name, 
             //     filename: 'common/js/core.js',
             // }),
             new webpack.optimize.CommonsChunkPlugin({
                 name: CommonsChunkPlugin.name, 
-                minChunks: Infinity,
-            }),
-            new webpack.optimize.CommonsChunkPlugin({
-                name: 'common', 
                 minChunks: function (module) {
                     // 该配置假定你引入的 vendor 存在于 node_modules 目录中
                     return (
@@ -309,13 +321,14 @@ export default function getBaseConfig({name, devServer, imageInLineSize, default
                         ) === 0
                       )
                    // return module.context && module.context.indexOf('node_modules') !== -1;
-                 }
+                 },
+                 filename: 'common/js/core.js',
             }),
             new webpack.optimize.CommonsChunkPlugin({
                 name: 'manifest',
-                chunks: ['vendor','common']
+                chunks: ['common'],
+                filename: 'common/js/manifest.js',
               }),
-            //new webpack.optimize.CommonsChunkPlugin(CommonsChunkPlugin.name,'common/js/core.js'),
             // new HappyPack({
             //     id: 'jsHappy',
             //     cache: true,
@@ -337,24 +350,6 @@ export default function getBaseConfig({name, devServer, imageInLineSize, default
             //    loaders: ['style','css','less']
             //     // loaders: [ 'style-loader', 'css-loader', 'less-loader' ]
             // }),
-            // new webpack.optimize.CommonsChunkPlugin({
-            //     name: 'common/core',
-            //     minChunks: function (module, count) {
-            //       // any required modules inside node_modules are extracted to vendor
-            //       return (
-            //         module.resource &&
-            //         /\.js$/.test(module.resource) &&
-            //         module.resource.indexOf(
-            //           path.join(__dirname, '../node_modules')
-            //         ) === 0
-            //       )
-            //     },
-            //     filename: 'common/core.js'
-            //   }),
-            //   new webpack.optimize.CommonsChunkPlugin({
-            //     name: 'manifest',
-            //     chunks: ['common/core']
-            //   }),
             new HtmlWebpackHarddiskPlugin(),
             new webpack.DefinePlugin({
                 "process.env.NODE_ENV": JSON.stringify(process.env.NODE_ENV || DEV)
@@ -406,10 +401,9 @@ export default function getBaseConfig({name, devServer, imageInLineSize, default
             })
         );
         config.plugins.push(
-            new webpack.optimize.DedupePlugin()
+           // new webpack.optimize.DedupePlugin()//webpack1用于优化重复模块
         );
         config.plugins.push(new LegionExtractStaticFilePlugin());
-        config.plugins.push(new ExtractTextPlugin({filename:'[name]/styles/[name].[contenthash:8].bundle.css',allChunks:true}))
     }
     config.module = {
         rules: [

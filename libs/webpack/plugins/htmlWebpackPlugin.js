@@ -27,11 +27,11 @@ function getHtmlWebpackPlugins(htmlWebpackPlugin, entries) {
         const relativeTargetHtml = path.join(relativeTargetDirectory, '/index.html');
         const projectTargetPath = path.resolve(workingDirectory, 'src/', relativeTargetHtml);
         if (fs.existsSync(projectTargetPath)) {
-            return htmlWebpackPluginInstance(projectTargetPath, relativeTargetHtml, [app, 'manifest', 'vendor', 'common']);
+            return htmlWebpackPluginInstance(projectTargetPath, relativeTargetHtml, [app, 'manifest', 'common']);
         }
         else {
             const baseTarget = path.resolve(__dirname, '../../../tpl/index.ejs');
-            return htmlWebpackPluginInstance(baseTarget, relativeTargetHtml, [app, 'manifest', 'vendor', 'common']);
+            return htmlWebpackPluginInstance(baseTarget, relativeTargetHtml, [app, 'manifest', 'common']);
         }
     });
 }

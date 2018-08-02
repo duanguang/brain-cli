@@ -2,20 +2,24 @@ module.exports = {
     name: "test",
     open: true,
     defaultPort: 8000,
-    server: "0.0.0.0",
+    server: "172.16.21.101",
     imageInLineSize: 8192,
     publicPath: "/public/",
     devServer: {
         noInfo: true,
-        proxy: {}
-        /*proxy: [{
-         context: ['/**', '!/static/**', '!/webpack/**', '!/webpack-dev-server/**', '!/sockjs-node/**', '!/index.html'],
-         target: 'http://tstmanage.360kad.com
-         ',
-         changeOrigin: true
-         }]*/
+        proxy: {
+            // '/cia-j': {
+            //     target: 'http://192.168.1.181:8081',
+            //         onProxyReq: (proxyReq, req, res) => {
+            //         }
+            // },
+        }
     },
     postcss: {
+        // px2rem:{
+        //     rootValue: 75,
+        //     unitPrecision: 3,
+        // },
         autoprefixer: {
             /**
              * 参考dora配置

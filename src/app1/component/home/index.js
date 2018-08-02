@@ -2,7 +2,7 @@
  * @Author: duanguang 
  * @Date: 2018-05-11 10:49:10 
  * @Last Modified by: duanguang
- * @Last Modified time: 2018-08-01 14:20:44
+ * @Last Modified time: 2018-08-02 11:28:10
  */
 import React from "react";
 import styles from "./index.less";
@@ -14,7 +14,11 @@ export default class HomeManage extends React.Component {
     this.delFirstChildStyle = this.delFirstChildStyle.bind(this);
     this.addFirstChildStyle = this.addFirstChildStyle.bind(this);
   }
-  componentDidMount() {}
+  componentDidMount() {
+    fetch(`/cia-j/vat-tax/exportExcel`).then((result)=>{
+      return result;
+    })
+  }
 
   delFirstChildStyle() {
     this.setState({ width: "7.85rem", display: "none" });

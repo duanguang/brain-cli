@@ -65,7 +65,7 @@ LegionExtractStaticFilePlugin.prototype.apply = function (compiler) {
                                 });
                                 delete module.assets[key];
                             });
-                            module.dependencies[0].expression += '+ "/" +' + mainTemplate.requireFn + '.n + "/"';
+                            // module.dependencies[0].expression += '+ "/" +' + mainTemplate.requireFn + '.n + "/"';//解决资源路径require方式路径错误问题
                         }
                     }
                 });
