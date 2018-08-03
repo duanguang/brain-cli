@@ -355,7 +355,8 @@ export default function getBaseConfig({name, devServer, imageInLineSize, default
             // }),
             new HtmlWebpackHarddiskPlugin(),
             new webpack.DefinePlugin({
-                "process.env.NODE_ENV": JSON.stringify(process.env.NODE_ENV || DEV)
+                "process.env.NODE_ENV": JSON.stringify(process.env.NODE_ENV || DEV),
+                'process.env.environment': '\"' + process.env.environment + '\"'
             })
         ]
     };

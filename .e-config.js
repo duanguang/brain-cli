@@ -2,7 +2,7 @@ module.exports = {
     name: "test",
     open: true,
     defaultPort: 8000,
-    server: "172.16.21.101",
+    server: "0.0.0.0",
     imageInLineSize: 8192,
     publicPath: "/public/",
     devServer: {

@@ -333,7 +333,8 @@ function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPa
             // }),
             new HtmlWebpackHarddiskPlugin(),
             new webpack.DefinePlugin({
-                "process.env.NODE_ENV": JSON.stringify(process.env.NODE_ENV || constants_1.DEV)
+                "process.env.NODE_ENV": JSON.stringify(process.env.NODE_ENV || constants_1.DEV),
+                'process.env.environment': '\"' + process.env.environment + '\"'
             })
         ]
     };

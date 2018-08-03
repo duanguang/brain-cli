@@ -2,7 +2,7 @@
  * @Author: duanguang 
  * @Date: 2018-05-11 10:49:10 
  * @Last Modified by: duanguang
- * @Last Modified time: 2018-08-02 11:28:10
+ * @Last Modified time: 2018-08-03 09:37:24
  */
 import React from "react";
 import styles from "./index.less";
@@ -15,9 +15,9 @@ export default class HomeManage extends React.Component {
     this.addFirstChildStyle = this.addFirstChildStyle.bind(this);
   }
   componentDidMount() {
-    fetch(`/cia-j/vat-tax/exportExcel`).then((result)=>{
-      return result;
-    })
+    // fetch(`/cia-j/vat-tax/exportExcel`).then((result)=>{
+    //   return result;
+    // })
   }
 
   delFirstChildStyle() {
@@ -33,7 +33,7 @@ export default class HomeManage extends React.Component {
       <div>
         <section className={styles.container}>
           <section className={styles.content}>
-            <div className={styles.title}>我们不仅仅是设计师</div>
+            <div className={styles.title}>我们不仅仅是设计师{process.env.environment}</div>
             <div className={styles.slogan}>
               <p>
                 棒谷用户体验中心创立于2018年6月28日，为全球首家跨境电商用户体验中心，

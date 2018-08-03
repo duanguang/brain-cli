@@ -7,6 +7,7 @@ exports.PROJECT_USER_CONFIG_IGNORE_FILE = `.e-config-ignore.js`;
 exports.DIST = `dist`;
 exports.DEV = `dev`;
 exports.PRODUCTION = `production`;
+exports.TEST = 'test';
 exports.WEBPACK_DLL_MANIFEST_DIST = path.join(process.cwd(), 'node_modules/.cache', 'library-manifest');
 exports.WORKING_DIRECTORY = `src`;
 exports.HISTORY_REWRITE_FALL_BACK_REGEX_FUNC = (name) => {
