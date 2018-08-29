@@ -1,7 +1,7 @@
 module.exports = {
     name: "test",
     open: true,
-    defaultPort: 8000,
+    defaultPort: 8001,
     server: "0.0.0.0",
     imageInLineSize: 8192,
     publicPath: "/public/",
@@ -34,7 +34,8 @@ module.exports = {
     },
     webpack: {
         dllConfig: {
-            vendors: [`babel-polyfill`]
+            vendors: ['react','babel-polyfill',
+            'react-dom','invariant']
         },
         disableReactHotLoader: false,
         commonsChunkPlugin:['react','babel-polyfill',

@@ -11,7 +11,8 @@ const nodeModulesPath = path.resolve(process.cwd(), 'node_modules');
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const HtmlWebpackHarddiskPlugin = require('html-webpack-harddisk-plugin');
 const OptimizeCssAssetsPlugin = require('optimize-css-assets-webpack-plugin');
-const CopyWebpackPlugin = require('copy-webpack-plugin')
+const CopyWebpackPlugin = require('copy-webpack-plugin');
+const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 // const HappyPack = require('happypack'),
 //   os = require('os'),
 //   happyThreadPool = HappyPack.ThreadPool({ size: os.cpus().length });
@@ -289,7 +290,7 @@ export default function getBaseConfig({name, devServer, imageInLineSize, default
         //additionalPaths: [],
         output: {
             path: path.join(process.cwd(), `${DIST}`),
-            filename: `[name]/js/bundle.js`,
+            filename: `[name]/js/[name].[chunkhash:5].bundle.js`,
             chunkFilename: 'bundle/[name]-[id].[chunkhash:5].bundle.js',
             //chunkFilename:path.posix.join('common', 'js/[name]-[id].[chunkhash:5].bundle.js'),
             publicPath: __DEV__?publicPath:"../"
@@ -325,12 +326,12 @@ export default function getBaseConfig({name, devServer, imageInLineSize, default
                       )
                    // return module.context && module.context.indexOf('node_modules') !== -1;
                  },
-                 filename: 'common/js/core.js',
+                 filename: 'common/js/[name].[chunkhash:5].core.js',
             }),
             new webpack.optimize.CommonsChunkPlugin({
                 name: 'manifest',
                 chunks: ['common'],
-                filename: 'common/js/manifest.js',
+                filename: process.env.NODE_ENV!=='dev'?'common/js/manifest.[chunkhash:5].js':'common/js/manifest.js',
               }),
             // new HappyPack({
             //     id: 'jsHappy',
@@ -404,9 +405,12 @@ export default function getBaseConfig({name, devServer, imageInLineSize, default
                 comments: false,// 删除所有的注释
             })
         );
-        config.plugins.push(
-           // new webpack.optimize.DedupePlugin()//webpack1用于优化重复模块
-        );
+        if(process.env.environment==='report'){
+            config.plugins.push(
+                new BundleAnalyzerPlugin()
+               // new webpack.optimize.DedupePlugin()//webpack1用于优化重复模块
+            );
+        }       
         config.plugins.push(new LegionExtractStaticFilePlugin());
     }
     config.module = {

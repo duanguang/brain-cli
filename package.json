@@ -11,11 +11,13 @@
     "start": "node bin/index.js ",
     "compile-dll": "webpack --config cfg/dll.js",
     "test": "node server.js",
-    "size": "webpack -v",
+    "size": "webpack",
     "dev": "node bin/index.js dev",
     "build:dist": "node bin/index.js dist",
     "build:prod": "node bin/index.js prod",
-    "build:test": "node bin/index.js test"
+    "build:test": "node bin/index.js test",
+    "build:report": "node bin/index.js report",
+    "bundle":"webpack bundleSize --profile --json --config='bin/index.js' --output-filename stats.json"
   },
   "repository": "",
   "keywords": [
@@ -88,7 +90,8 @@
     "update-notifier": "^2.1.0",
     "url-loader": "^0.5.8",
     "webpack": "^2.6.1",
-    "webpack-dev-server": "^2.4.0"
+    "webpack-dev-server": "^2.4.0",
+    "webpack-bundle-analyzer":"2.9.2"
   },
   "main": "index.js",
   "bin": {

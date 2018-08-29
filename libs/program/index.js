@@ -21,7 +21,7 @@ function programInit(program) {
         //noinspection JSIgnoredPromiseFromCall
         server_1.default();
     }
-    else if (program.dist || program.prod || program.test) {
+    else if (program.dist || program.prod || program.test || program.report) {
         const eConfig = EConfig_1.default.getInstance();
         const webpackConfig = webpack_config_1.default(eConfig);
         delete webpackConfig.pendings;

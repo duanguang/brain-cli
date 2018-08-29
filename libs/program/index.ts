@@ -25,7 +25,7 @@ export default function programInit(program: any) {
         //noinspection JSIgnoredPromiseFromCall
         start();
     }
-    else if (program.dist||program.prod||program.test) {
+    else if (program.dist||program.prod||program.test||program.report) {
         const eConfig = EConfig.getInstance();
         const webpackConfig = getConfig(eConfig);
         delete webpackConfig.pendings;
