@@ -7,15 +7,19 @@ module.exports = {
     publicPath: "/public/",
     devServer: {
         noInfo: true,
-        proxy: []
-        /*proxy: [{
-         context: ['/**', '!/static/**', '!/webpack/**', '!/webpack-dev-server/**', '!/sockjs-node/**', '!/index.html'],
-         target: 'http://tstmanage.360kad.com
-         ',
-         changeOrigin: true
-         }]*/
+        proxy: {
+            // '/cia-j': {
+            //     target: 'http://192.168.1.181:8081',
+            //         onProxyReq: (proxyReq, req, res) => {
+            //         }
+            // },
+        }
     },
     postcss: {
+        // px2rem:{
+        //     rootValue: 75,
+        //     unitPrecision: 3,
+        // },
         autoprefixer: {
             /**
              * 参考dora配置
@@ -33,13 +37,15 @@ module.exports = {
             vendors: [`babel-polyfill`]
         },
         disableReactHotLoader: false,
+        commonsChunkPlugin:['react','babel-polyfill',
+                 'react-dom','invariant'],
         //commonsChunkPlugin:['react']
     },
     babel: {
         query: {
             presets: [
                 "es2015",
-                "stage-0",
+                "stage-2",
                 "react"
             ],
             cacheDirectory: true,

@@ -17,16 +17,16 @@ LegionExtractStaticFilePlugin.prototype.apply = function (compiler) {
 
             if (compilation.chunks && compilation.chunks.length > 0 && compilation.chunks[0].name) {
                 const mainTemplate = compilation.mainTemplate;
-                mainTemplate.plugin("require-extensions", function (source, chunk, hash) {
-                    if (chunk.name) {
-                        var buf = [source];
-                        buf.push("");
-                        buf.push("// __legion_app_name__");
-                        buf.push(this.requireFn + ".n = '" + chunk.name + "';");
-                        return this.asString(buf);
-                    }
-                    return source;
-                });
+                // mainTemplate.plugin("require-extensions", function (source, chunk, hash) {
+                //     if (chunk.name) {
+                //         var buf = [source];
+                //         buf.push("");
+                //         buf.push("// __legion_app_name__");
+                //         buf.push(this.requireFn + ".n = '" + chunk.name + "';");
+                //         return this.asString(buf);
+                //     }
+                //     return source;
+                // });
 
                 compilation.children.forEach((c) => {
                     if (c.name == 'extract-text-webpack-plugin') {
@@ -69,7 +69,7 @@ LegionExtractStaticFilePlugin.prototype.apply = function (compiler) {
                                 });
                                 delete module.assets[key];
                             });
-                            module.dependencies[0].expression += '+ "/" +' + mainTemplate.requireFn + '.n + "/"';
+                           // module.dependencies[0].expression += '+ "/" +' + mainTemplate.requireFn + '.n + "/"';//解决资源路径require方式路径错误问题
                         }
                     }
                 });

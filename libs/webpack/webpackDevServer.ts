@@ -11,11 +11,11 @@ export default function startWebpackDevServer() {
     return new Promise((resolve, reject) => {
         const {server} = eConfig;
         const config = webpackConfig(eConfig);
-        new WebpackDevServer(webpackCompiler(), config.devServer).listen(config.port, server, (err) => {
+        new WebpackDevServer(webpackCompiler(), config.devServer).listen(eConfig.defaultPort, server, (err) => {
             if (err) {
                 reject(err);
             }
-            console.log(`监听本地 ${server}:${config.port}`);
+            console.log(`监听本地 ${server}:${eConfig.defaultPort}`);
             resolve();
         });
     });

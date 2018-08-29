@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const path = require("path");
+const EConfig_1 = require("../libs/settings/EConfig");
 const constants_1 = require("../libs/constants/constants");
 const webpack = require("webpack");
 const htmlWebpackPlugin_1 = require("../libs/webpack/plugins/htmlWebpackPlugin");
@@ -10,6 +11,7 @@ const nodeModulesPath = path.resolve(process.cwd(), 'node_modules');
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const HtmlWebpackHarddiskPlugin = require('html-webpack-harddisk-plugin');
 const OptimizeCssAssetsPlugin = require('optimize-css-assets-webpack-plugin');
+const CopyWebpackPlugin = require('copy-webpack-plugin');
 // const HappyPack = require('happypack'),
 //   os = require('os'),
 //   happyThreadPool = HappyPack.ThreadPool({ size: os.cpus().length });
@@ -55,13 +57,50 @@ function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPa
     }
     function getCssLoaders() {
         const CSS_MODULE_QUERY = `?modules&importLoaders=1&localIdentName=[local]-[hash:base64:6]`;
-        if (__DEV__) {
-            ExtractTextPlugin.extract = f => `style-loader!` + f;
+        const CSS_MODULE_OPTION = {
+            modules: true,
+            importLoaders: 1,
+            localIdentName: `[local]-[hash:base64:6]`
+        };
+        let browsers = EConfig_1.default.getInstance().postcss.autoprefixer.browsers;
+        let px2rem = EConfig_1.default.getInstance().postcss.px2rem;
+        const postcss_loader = {
+            loader: 'postcss-loader',
+            options: {
+                ident: 'postcss',
+                plugins: [
+                    require('autoprefixer')({ browsers })
+                ]
+            }
+        };
+        if (px2rem) {
+            postcss_loader.options.plugins.push(require('px2rem')(px2rem));
         }
-        else {
+        function generateLoaders(cssModule, loader, loaderOptions) {
+            let style = [{ loader: 'css-loader' }];
+            if (cssModule) {
+                style[0] = Object.assign(style[0], { options: cssModule });
+            }
+            if (loader) {
+                style.push(loader);
+            }
+            if (loaderOptions) {
+                style.push(loaderOptions);
+            }
+            if (__DEV__) {
+                let styles = ['style-loader', ...style];
+                return styles;
+            }
+            return ExtractTextPlugin.extract({
+                fallback: 'style-loader',
+                use: style,
+            });
+        }
+        if (!__DEV__) {
+            // ExtractTextPlugin.extract = f => `style-loader!` + f;
             config.plugins.push(
             //new ExtractTextPlugin('[name]/styles/[name].css')
-            new ExtractTextPlugin('[name]/styles/[name].[contenthash:8].bundle.css', { allChunks: true }));
+            new ExtractTextPlugin({ filename: '[name]/styles/[name].[contenthash:8].bundle.css', allChunks: true }));
             config.plugins.push(new OptimizeCssAssetsPlugin({
                 assetNameRegExp: /\.optimize\.css$/g,
                 cssProcessor: require('cssnano'),
@@ -72,27 +111,63 @@ function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPa
         return [
             {
                 test: /\.css$/,
-                loader: ExtractTextPlugin.extract('css-loader!resolve-url'),
+                use: generateLoaders(),
+                // use: ExtractTextPlugin.extract(
+                //     {
+                //         fallback: 'style-loader',
+                //         use: [
+                //           { loader: 'css-loader' },
+                //         ]
+                //       }),
                 include: [nodeModulesPath]
             },
             {
                 test: /\.less/,
-                loader: ExtractTextPlugin.extract(`css-loader${CSS_MODULE_QUERY}!resolve-url!postcss-loader!less-loader`),
+                use: generateLoaders(CSS_MODULE_OPTION, 'less-loader', postcss_loader),
+                // use:ExtractTextPlugin.extract(
+                //     {
+                //         fallback: 'style-loader',
+                //         use: [
+                //             {loader:`css-loader`,options:CSS_MODULE_OPTION},'less-loader',postcss_loader
+                //         ]
+                //       }),
                 include: [path.resolve(nodeModulesPath, 'basics-widget')]
             },
             {
                 test: /\.less/,
-                loader: ExtractTextPlugin.extract(`css-loader!postcss-loader!less-loader`),
+                use: generateLoaders(null, 'less-loader'),
+                // use:ExtractTextPlugin.extract(
+                //     {
+                //         fallback: 'style-loader',
+                //         use: [
+                //             {loader:`css-loader`},'less-loader',postcss_loader
+                //         ]
+                //       }),
                 include: [path.resolve(nodeModulesPath, 'antd')]
             },
             {
                 test: /\.css$/,
-                loader: ExtractTextPlugin.extract(`css-loader?${CSS_MODULE_QUERY}!resolve-url!postcss-loader`),
+                use: generateLoaders(null, null, postcss_loader),
+                // use:ExtractTextPlugin.extract(
+                //     {
+                //         fallback: 'style-loader',
+                //         use: [
+                //             {loader:`css-loader`,options:CSS_MODULE_OPTION},postcss_loader
+                //         ]
+                //       }),
                 exclude: [nodeModulesPath]
             },
             {
                 test: /\.less/,
-                loader: ExtractTextPlugin.extract(`css-loader${CSS_MODULE_QUERY}!resolve-url!postcss-loader!less-loader`),
+                use: generateLoaders(CSS_MODULE_OPTION, 'less-loader', postcss_loader),
+                // use:ExtractTextPlugin.extract(
+                //     {
+                //         fallback: 'style-loader',
+                //         use: [
+                //             {loader:`css-loader`,options:CSS_MODULE_OPTION},'less-loader',postcss_loader
+                //         ]
+                //       }
+                // ),
                 exclude: [nodeModulesPath]
             }
         ];
@@ -119,8 +194,9 @@ function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPa
         return [
             {
                 test: /\.(png|jpg|gif)$/,
+                //loader: `url-loader?limit=${8192}&name=${path.posix.join('common', 'images/[hash:8].[name].[ext]')}`,
                 loaders: [
-                    `url-loader?limit=${imageInLineSize}&name=../common/images/[hash:8].[name].[ext]`,
+                    `file-loader?limit=${imageInLineSize}&name=common/images/[hash:8].[name].[ext]`,
                 ]
             }
         ];
@@ -191,29 +267,49 @@ function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPa
     }
     const config = {
         entry: getEntries(),
-        port: defaultPort,
-        additionalPaths: [],
+        //port: defaultPort,
+        //additionalPaths: [],
         output: {
             path: path.join(process.cwd(), `${constants_1.DIST}`),
             filename: `[name]/js/bundle.js`,
             chunkFilename: 'bundle/[name]-[id].[chunkhash:5].bundle.js',
+            //chunkFilename:path.posix.join('common', 'js/[name]-[id].[chunkhash:5].bundle.js'),
             publicPath: __DEV__ ? publicPath : "../"
         },
         devtool: __DEV__ && 'cheap-module-source-map',
         resolve: {
             alias: {},
-            extensions: ['', '.web.js', '.js', '.json', 'ts', '.css', '.tsx', '.jsx'],
-            modulesDirectories: ['src', 'node_modules', path.join(__dirname, '../node_modules')],
+            extensions: ['.web.js', '.js', '.json', 'ts', '.css', '.tsx', '.jsx'],
+            //modulesDirectories: ['src', 'node_modules', path.join(__dirname, '../node_modules')],
+            modules: [
+                'src', 'node_modules', path.join(__dirname, '../node_modules')
+            ]
         },
         module: {
             loaders: []
         },
-        postcss: () => {
-            return [require('autoprefixer')];
-        },
         plugins: [
             ...getHtmlWebpackPlugins(),
-            new webpack.optimize.CommonsChunkPlugin(CommonsChunkPlugin.name, 'common/js/core.js'),
+            // new webpack.optimize.CommonsChunkPlugin({
+            //     name: CommonsChunkPlugin.name, 
+            //     filename: 'common/js/core.js',
+            // }),
+            new webpack.optimize.CommonsChunkPlugin({
+                name: CommonsChunkPlugin.name,
+                minChunks: function (module) {
+                    // 该配置假定你引入的 vendor 存在于 node_modules 目录中
+                    return (module.resource &&
+                        /\.js$/.test(module.resource) &&
+                        module.resource.indexOf(path.join(__dirname, '../node_modules')) === 0);
+                    // return module.context && module.context.indexOf('node_modules') !== -1;
+                },
+                filename: 'common/js/core.js',
+            }),
+            new webpack.optimize.CommonsChunkPlugin({
+                name: 'manifest',
+                chunks: ['common'],
+                filename: 'common/js/manifest.js',
+            }),
             // new HappyPack({
             //     id: 'jsHappy',
             //     cache: true,
@@ -235,27 +331,10 @@ function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPa
             //    loaders: ['style','css','less']
             //     // loaders: [ 'style-loader', 'css-loader', 'less-loader' ]
             // }),
-            // new webpack.optimize.CommonsChunkPlugin({
-            //     name: 'common/core',
-            //     minChunks: function (module, count) {
-            //       // any required modules inside node_modules are extracted to vendor
-            //       return (
-            //         module.resource &&
-            //         /\.js$/.test(module.resource) &&
-            //         module.resource.indexOf(
-            //           path.join(__dirname, '../node_modules')
-            //         ) === 0
-            //       )
-            //     },
-            //     filename: 'common/core.js'
-            //   }),
-            //   new webpack.optimize.CommonsChunkPlugin({
-            //     name: 'manifest',
-            //     chunks: ['common/core']
-            //   }),
             new HtmlWebpackHarddiskPlugin(),
             new webpack.DefinePlugin({
-                "process.env.NODE_ENV": JSON.stringify(process.env.NODE_ENV || constants_1.DEV)
+                "process.env.NODE_ENV": JSON.stringify(process.env.NODE_ENV || constants_1.DEV),
+                'process.env.environment': '\"' + process.env.environment + '\"'
             })
         ]
     };
@@ -273,10 +352,19 @@ function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPa
             port: defaultPort,
             publicPath: publicPath,
             noInfo: noInfo,
-            proxy: proxy
+            proxy: proxy,
+            inline: false,
+            progress: true,
         };
-        config.plugins.push(new webpack.NoErrorsPlugin());
+        config.plugins.push(new webpack.NoEmitOnErrorsPlugin());
         config.plugins.push(new webpack.HotModuleReplacementPlugin());
+        // config.plugins.push(new CopyWebpackPlugin([
+        //     {
+        //       from: path.resolve(__dirname, '../common'),
+        //       to: 'common',
+        //       ignore: ['.*']
+        //     }
+        //   ]))
     }
     else {
         config.plugins.push(new webpack.optimize.UglifyJsPlugin({
@@ -290,11 +378,11 @@ function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPa
             },
             comments: false,
         }));
-        config.plugins.push(new webpack.optimize.DedupePlugin());
+        config.plugins.push();
         config.plugins.push(new LegionExtractStaticFilePlugin_1.default());
     }
     config.module = {
-        loaders: [
+        rules: [
             ...getJSXLoaders(),
             ...getCssLoaders(),
             ...getImageLoaders(),
@@ -302,7 +390,6 @@ function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPa
             ...getFontLoaders(),
             ...getFileResourcesLoaders()
         ],
-        noParse: []
     };
     return config;
 }

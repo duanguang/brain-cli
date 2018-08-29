@@ -6,6 +6,7 @@ export const PROJECT_USER_CONFIG_IGNORE_FILE = `.e-config-ignore.js`;
 export const DIST = `dist`;
 export const DEV = `dev`;
 export const PRODUCTION = `production`;
+export const TEST='test';
 export const WEBPACK_DLL_MANIFEST_DIST = path.join(process.cwd(), 'node_modules/.cache', 'library-manifest');
 
 export const WORKING_DIRECTORY = `src`;

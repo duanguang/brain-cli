@@ -9,6 +9,7 @@ function webpackCompiler() {
     if (Array.isArray(webpackConfig.pendings)) {
         webpackConfig.pendings.forEach(pending => pending());
     }
+    delete webpackConfig.pendings;
     const webpackCompiler = webpack(webpackConfig);
     let bundleStartTime;
     webpackCompiler.plugin('compile', () => {

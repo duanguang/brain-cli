@@ -22,12 +22,13 @@ export default class EConfig {
     public publicPath: string;
     public devServer: {
         noInfo: boolean,
-        proxy: Array<any>
+        proxy: Object
     };
     public postcss: {
         autoprefixer: {
             browsers: string[]
-        }
+        },
+        px2rem:{}
     };
 
     public webpack: {
