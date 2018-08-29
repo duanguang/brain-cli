@@ -26,6 +26,7 @@ program
     .option('-p, --prod', '运行prod生产环境')
     .option('-t, --test', '运行test测试环境')
     .option('-d, --dist', '运行部署预发布环境')
+    .option('-d, --report', '文件信息报告')
     .option('-t, --tpl', '创建APP模板')
     .option('-c, --config', '指定配置文件')
     .option('-ic, --ignoreConfig', '指定用户自定义配置文件, 优先级大于<指定配置文件>')
@@ -53,6 +54,11 @@ else {
         process.env.environment = constants_1.TEST;
         process.env.NODE_ENV = constants_1.PRODUCTION;
         NODE_ENV = '测试环境';
+    }
+    else if (program.report) {
+        process.env.environment = constants_1.REPORT;
+        process.env.NODE_ENV = constants_1.PRODUCTION;
+        NODE_ENV = '正在生成模块信息报告...';
     }
     //  process.env.NODE_ENV = program.dist ? PRODUCTION : DEV;
     console.info(`当前编译环境为: ${process.env.NODE_ENV}[${NODE_ENV}]`);
