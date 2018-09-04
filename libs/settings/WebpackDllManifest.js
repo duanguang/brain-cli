@@ -56,7 +56,8 @@ class WebpackDllManifest {
          * require.resolve为了提前判断是否存在该模块
          */
         try {
-            return require.resolve(path.resolve(this.distPath, this.getVendorsHash() + `.js`));
+            // return require.resolve(path.resolve(this.distPath, this.getVendorsHash() + `.js`))
+            return require.resolve(path.resolve(this.distPath, 'vendor.dll' + `.js`));
         }
         catch (e) {
             return null;

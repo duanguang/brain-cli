@@ -40,6 +40,7 @@ module.exports = {
         disableReactHotLoader: false,
         commonsChunkPlugin:['react','babel-polyfill',
                  'react-dom','invariant'],
+        disableHappyPack:false      
         //commonsChunkPlugin:['react']
     },
     babel: {
@@ -65,7 +66,7 @@ module.exports = {
         }
     },
     htmlWebpackPlugin: {
-        title: "webApp"/*O2O订单管理系统*/,
+        title: "webApp"/**/,
     },
     apps: ['app2','app1']
 };

@@ -6,9 +6,9 @@ const EConfig_1 = require("../settings/EConfig");
 const webpack = require('webpack');
 function webpackCompiler() {
     const webpackConfig = webpack_config_1.default(EConfig_1.default.getInstance());
-    if (Array.isArray(webpackConfig.pendings)) {
-        webpackConfig.pendings.forEach(pending => pending());
-    }
+    // if (Array.isArray(webpackConfig.pendings)) {
+    //     webpackConfig.pendings.forEach(pending => pending());
+    // }
     delete webpackConfig.pendings;
     const webpackCompiler = webpack(webpackConfig);
     let bundleStartTime;

@@ -9,14 +9,15 @@ const webpackDllManifest = WebpackDllManifest_1.default.getInstance();
 const distPath = webpackDllManifest.distPath;
 const isVendorExist = vendors && vendors.length;
 if (isVendorExist) {
-    const distFileName = webpackDllManifest.getVendorsHash();
+    // const distFileName = webpackDllManifest.getVendorsHash();
     module.exports = {
         entry: {
             vendors
         },
         output: {
             path: distPath,
-            filename: `${distFileName}.js`,
+            // filename: `${distFileName}.js`,
+            filename: `vendor.dll.js`,
             /**
              * output.library
              * 将会定义为 window.${output.library}
@@ -31,13 +32,26 @@ if (isVendorExist) {
                  * 定义 manifest 文件生成的位置
                  * [name]的部分由entry的名字替换
                  */
-                path: path.join(distPath, `${distFileName}.json`),
+                // path: path.join(distPath, `${distFileName}.json`),
+                path: path.join(distPath, `vendor.dll.json`),
                 /**
                  * name
                  * dll bundle 输出到那个全局变量上
                  * 和 output.library 一样即可。
                  */
                 name: '[name]_library'
+            }),
+            new webpack.optimize.UglifyJsPlugin({
+                compress: {
+                    warnings: false,
+                    drop_console: true,
+                    drop_debugger: true
+                },
+                output: {
+                    // 去掉注释内容
+                    comments: false,
+                },
+                sourceMap: false
             })
         ]
     };

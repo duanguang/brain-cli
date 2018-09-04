@@ -5,9 +5,9 @@ const webpack = require('webpack');
 
 export default function webpackCompiler() {
     const webpackConfig = getConfig(EConfig.getInstance());
-    if (Array.isArray(webpackConfig.pendings)) {
-        webpackConfig.pendings.forEach(pending => pending());
-    }
+    // if (Array.isArray(webpackConfig.pendings)) {
+    //     webpackConfig.pendings.forEach(pending => pending());
+    // }
     delete webpackConfig.pendings;
     const webpackCompiler = webpack(webpackConfig);
 

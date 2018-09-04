@@ -36,7 +36,8 @@ export default class EConfig {
             vendors: string[]
         },
         disableReactHotLoader: boolean,
-        commonsChunkPlugin:ICommonsChunkPlugin
+        commonsChunkPlugin:ICommonsChunkPlugin,
+        disableHappyPack:boolean//是否禁用多线程
     };
 
     public babel: {

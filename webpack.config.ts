@@ -3,29 +3,31 @@ import getDistConfig from './cfg/dist';
 import EConfig from './libs/settings/EConfig';
 const path = require('path');
 
-let env;
 
-if (process.env.NODE_ENV === 'dist') {
-    env = 'dist';
-} else {
-    env = process.env.NODE_ENV = 'dev';
-}
 
 /**
  * Build the webpack configuration
  * @param  {String} wantedEnv The wanted environment
  * @return {Object} Webpack config
  */
-function buildConfig(wantedEnv) {
+function buildConfig() {
     return (eConfig: EConfig) => {
-        switch (wantedEnv) {
-            case 'dist':
+        let env;
+        if (process.env.NODE_ENV === 'production') {
+            env = 'production';
+        } else {
+            env = process.env.NODE_ENV = 'dev';
+        }
+        switch (env) {
+            case 'production':
+                //return getDistConfig(eConfig);
                 return getDistConfig(eConfig);
             case 'dev':
+               // return getDevConfig(eConfig);
                 return getDevConfig(eConfig);
         }
     }
 }
 
-const getConfig = buildConfig(env);
+const getConfig = buildConfig();
 export default getConfig;

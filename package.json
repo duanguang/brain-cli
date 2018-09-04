@@ -1,7 +1,7 @@
 {
   "name": "brain-cli",
   "license": "MIT",
-  "version": "0.3.2",
+  "version": "0.3.3",
   "description": "A command line tool used to run  projects",
   "scripts": {
     "clean": "rimraf dist/*",
@@ -11,7 +11,6 @@
     "start": "node bin/index.js ",
     "compile-dll": "webpack --config cfg/dll.js",
     "test": "node server.js",
-    "size": "webpack",
     "dev": "node bin/index.js dev",
     "build:dist": "node bin/index.js dist",
     "build:prod": "node bin/index.js prod",
@@ -91,7 +90,8 @@
     "url-loader": "^0.5.8",
     "webpack": "^2.6.1",
     "webpack-dev-server": "^2.4.0",
-    "webpack-bundle-analyzer":"2.9.2"
+    "webpack-bundle-analyzer":"2.9.2",
+    "happypack":"^5.0.0"
   },
   "main": "index.js",
   "bin": {

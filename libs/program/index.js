@@ -24,6 +24,9 @@ function programInit(program) {
     else if (program.dist || program.prod || program.test || program.report) {
         const eConfig = EConfig_1.default.getInstance();
         const webpackConfig = webpack_config_1.default(eConfig);
+        if (Array.isArray(webpackConfig.pendings)) {
+            webpackConfig.pendings.forEach(pending => pending());
+        }
         delete webpackConfig.pendings;
         webpack(webpackConfig, function (err, stats) {
             if (err)
