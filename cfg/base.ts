@@ -317,14 +317,14 @@ export default function getBaseConfig({name, devServer, imageInLineSize, default
                 name: CommonsChunkPlugin.name, 
                 minChunks: function (module) {
                     // 该配置假定你引入的 vendor 存在于 node_modules 目录中
-                    return (
-                        module.resource &&
-                        /\.js$/.test(module.resource) &&
-                        module.resource.indexOf(
-                          path.join(__dirname, '../node_modules')
-                        ) === 0
-                      )
-                   // return module.context && module.context.indexOf('node_modules') !== -1;
+                    // return (
+                    //     module.resource &&
+                    //     /\.js$/.test(module.resource) &&
+                    //     module.resource.indexOf(
+                    //       path.join(__dirname, '../node_modules')
+                    //     ) === 0
+                    //   )
+                    return module.context && module.context.indexOf('node_modules') !== -1;
                  },
                  filename: 'common/js/[name].[chunkhash:5].core.js',
             }),
