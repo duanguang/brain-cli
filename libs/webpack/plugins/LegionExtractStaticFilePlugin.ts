@@ -4,7 +4,7 @@ export default function LegionExtractStaticFilePlugin(options?) {
 
 LegionExtractStaticFilePlugin.prototype.apply = function (compiler) {
     const extracts = [];
-
+    // compilation（'编译器'对'编译ing'这个事件的监听）
     compiler.plugin("compilation", function (compilation) {
         compilation.plugin("before-chunk-assets", function () {
             compilation.mainTemplate.plugin('asset-path', function (path, data) {
@@ -76,7 +76,7 @@ LegionExtractStaticFilePlugin.prototype.apply = function (compiler) {
             }
         });
     });
-
+    // emit（'编译器'对'生成最终资源'这个事件的监听）
     compiler.plugin("emit", function (compilation,callback) {
         extracts.forEach((extract) => {
             extract.files.forEach((file) => {

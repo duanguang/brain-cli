@@ -8,5 +8,15 @@ brain-cli
 ## 使用
  npm install brain-cli -D 或者 yarn add brain-cli
 
+## barin-cli 优势
+- 基于最新的webpack2、react15、react-router4
+- 支持多个单页面应用同时开发
+- 不同入口页面css/js单独合并压缩
+- 支持webpack dll
+- 支持增量构建
+- 静态文件加戳
+- 支持反向代理
+- 支持对指定入口文件进行编译，打包
+- 支持多套环境配置文件切换
 ![alt tag](/gif/WX20170607-095219@2x.png)
 
