@@ -3,6 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const format_1 = require("../utils/format");
 const webpack_config_1 = require("../../webpack.config");
 const EConfig_1 = require("../settings/EConfig");
+const logs_1 = require("../utils/logs");
 const webpack = require('webpack');
 function webpackCompiler() {
     const webpackConfig = webpack_config_1.default(EConfig_1.default.getInstance());
@@ -13,12 +14,14 @@ function webpackCompiler() {
     const webpackCompiler = webpack(webpackConfig);
     let bundleStartTime;
     webpackCompiler.plugin('compile', () => {
-        console.info('打包中...');
+        logs_1.log('打包中...');
+        //console.info('打包中...');
         bundleStartTime = Date.now();
     });
     webpackCompiler.plugin('done', () => {
         const timeSpent = Date.now() - bundleStartTime;
-        console.info(`打包完成, 耗时 ${format_1.asSeconds(timeSpent)} s. ${new Date()}`);
+        logs_1.log(`打包完成, 耗时 ${format_1.asSeconds(timeSpent)} s. ${new Date()}`);
+        //console.info(`打包完成, 耗时 ${asSeconds(timeSpent)} s. ${new Date()}`);
     });
     return webpackCompiler;
 }

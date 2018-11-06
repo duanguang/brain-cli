@@ -11,6 +11,7 @@
     "start": "node bin/index.js ",
     "compile-dll": "webpack --config cfg/dll.js",
     "test": "node server.js",
+    "brain":"node bin/index.js",
     "dev": "node bin/index.js dev",
     "dev2":"node bin/index.js dev",
     "dev1":"node bin/index.js build",

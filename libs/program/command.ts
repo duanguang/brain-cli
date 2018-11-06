@@ -7,7 +7,7 @@ import {PRODUCTION, DEV,DIST, TEST,REPORT} from '../constants/constants';
 import { log } from '../utils/logs';
 export class Command{
     program:any;
-    commands = ['build','start','dev'];
+    commands = ['build','start','dev','dll'];
     env={'dev':'开发环境','dist':'预发布环境','prod':'生产环境','test':'测试环境'}
     constructor(){
         this.program=program;
@@ -63,6 +63,14 @@ export class Command{
             this.setProcessEnv(env);
             log(`当前编译环境为: ${process.env.NODE_ENV} [${this.env[env]}]`);
             programInit(env);
+          });
+    }
+    dll() {
+        this.program
+          .command('dll [env]')
+          .description('webpack dll build')
+          .action(env => {
+            
           });
     }
     build() {

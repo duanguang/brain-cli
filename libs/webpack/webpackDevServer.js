@@ -4,6 +4,7 @@ const EConfig_1 = require("../settings/EConfig");
 const webpackCompiler_1 = require("./webpackCompiler");
 const WebpackDevServer = require('webpack-dev-server');
 const webpack_config_1 = require("../../webpack.config");
+const logs_1 = require("../utils/logs");
 const eConfig = EConfig_1.default.getInstance();
 /**
  * 启动webpack服务器
@@ -16,7 +17,8 @@ function startWebpackDevServer() {
             if (err) {
                 reject(err);
             }
-            console.log(`监听本地 ${server}:${eConfig.defaultPort}`);
+            logs_1.log(`监听本地 ${server}:${eConfig.defaultPort}`);
+            //console.log(`监听本地 ${server}:${eConfig.defaultPort}`);
             resolve();
         });
     });

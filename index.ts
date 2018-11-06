@@ -1,7 +1,6 @@
 import * as program from 'commander';
 import start from './server';
 import * as UpdateNotifier from 'update-notifier';
-import scaffold from './libs/scaffold';
 import Package = UpdateNotifier.Package;
 const pkg: Package = require('./package.json');
 
@@ -19,23 +18,16 @@ const notifier = UpdateNotifier({
     }
 });
 
-program
-    .version(pkg.version)
-    .option('-i, --init', '初始化构建项目')
-    .option('-D, --dev', '运行Dev开发环境')
-    .option('-t, --tpl', '创建APP模板')
-    .parse(process.argv);
+// program
+//     .version(pkg.version)
+//     .option('-i, --init', '初始化构建项目')
+//     .option('-D, --dev', '运行Dev开发环境')
+//     .option('-t, --tpl', '创建APP模板')
+//     .parse(process.argv);
 
-if (process.argv.length <= 2) {
-    program.outputHelp();
-}
-else if (program.init) {
-    scaffold.init();
-}
-else if (program.tpl) {
-    scaffold.tpl();
-}
-else if (program.dev) {
-    //noinspection JSIgnoredPromiseFromCall
-    start();
-}
+// if (process.argv.length <= 2) {
+//     program.outputHelp();
+// }
+
+//noinspection JSIgnoredPromiseFromCall
+start();

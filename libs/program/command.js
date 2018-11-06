@@ -8,7 +8,7 @@ const constants_1 = require("../constants/constants");
 const logs_1 = require("../utils/logs");
 class Command {
     constructor() {
-        this.commands = ['build', 'start', 'dev'];
+        this.commands = ['build', 'start', 'dev', 'dll'];
         this.env = { 'dev': '开发环境', 'dist': '预发布环境', 'prod': '生产环境', 'test': '测试环境' };
         this.program = program;
     }
@@ -62,6 +62,13 @@ class Command {
             this.setProcessEnv(env);
             logs_1.log(`当前编译环境为: ${process.env.NODE_ENV} [${this.env[env]}]`);
             index_1.default(env);
+        });
+    }
+    dll() {
+        this.program
+            .command('dll [env]')
+            .description('webpack dll build')
+            .action(env => {
         });
     }
     build() {
