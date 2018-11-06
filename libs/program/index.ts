@@ -1,31 +1,21 @@
 import start from '../../server';
-import * as UpdateNotifier from 'update-notifier';
-import scaffold from '../scaffold';
 import {configFileList, default as EConfig} from '../settings/EConfig';
 import * as path from 'path';
 import getConfig from '../../webpack.config';
-import Package = UpdateNotifier.Package;
 import webpack = require('webpack');
-import ICommand = commander.ICommand;
 import commander = require('commander');
-
-export default function programInit(program: any) {
-    if (program.init) {
-        scaffold.init();
-    }
-    else if (program.tpl) {
-        scaffold.tpl();
-    }
-    else if (program.dev) {
+// import ICommand = commander.ICommand;
+export default function programInit(env: string) {
+    if (env==='dev') {
         /**
          * 在开发环境中, 允许直接配置config和ignoreConfig并更新指定常量区域
          */
-        program.config && (configFileList[0] = program.config);
-        program.ignoreConfig && (configFileList[1] = program.ignoreConfig);
+        // program.config && (configFileList[0] = program.config);
+        // program.ignoreConfig && (configFileList[1] = program.ignoreConfig);
         //noinspection JSIgnoredPromiseFromCall
         start();
     }
-    else if (program.dist||program.prod||program.test||program.report) {
+    else if (env==='dist'||env==='prod'||env==='test') {
         const eConfig = EConfig.getInstance();
         const webpackConfig = getConfig(eConfig);
         if (Array.isArray(webpackConfig.pendings)) {
