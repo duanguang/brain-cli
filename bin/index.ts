@@ -36,6 +36,7 @@ if (process.argv.length <= 2) {
     program.outputHelp();
 }
 else {
+    console.log(program)
     let NODE_ENV='开发环境';
     if(program.dev){
         process.env.environment=DEV;
