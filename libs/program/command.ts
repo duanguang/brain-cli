@@ -98,8 +98,7 @@ export class Command{
           .option('--apps [value]', 'webpack Build a specified app name')
           .description('webpack building')
           .action((env = 'prod', options) => {
-             env= options.S?'report':env
-             this.setProcessEnv(env);
+             this.setProcessEnv(options.S?'report':env);
              this.setApps(options);
              log(`当前编译环境为: ${process.env.NODE_ENV} [${this.env[env]}]`);
              programInit(env);
