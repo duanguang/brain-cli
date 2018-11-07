@@ -6,7 +6,8 @@ export const DEV = `dev`;
 export const PRODUCTION = `production`;
 export const TEST='test';
 export const REPORT='report';
-export const WEBPACK_DLL_MANIFEST_DIST = path.join(process.cwd(), 'node_modules/.cache', 'library-manifest');
+// export const WEBPACK_DLL_MANIFEST_DIST = path.join(process.cwd(), 'node_modules/.cache', 'library-manifest');
+export const WEBPACK_DLL_MANIFEST_DIST = path.join(process.cwd(), '.cache', 'library-manifest');
 import EConfig from '../settings/EConfig';
 
 export const WORKING_DIRECTORY = `src`;

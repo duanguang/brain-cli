@@ -8,7 +8,8 @@ exports.DEV = `dev`;
 exports.PRODUCTION = `production`;
 exports.TEST = 'test';
 exports.REPORT = 'report';
-exports.WEBPACK_DLL_MANIFEST_DIST = path.join(process.cwd(), 'node_modules/.cache', 'library-manifest');
+// export const WEBPACK_DLL_MANIFEST_DIST = path.join(process.cwd(), 'node_modules/.cache', 'library-manifest');
+exports.WEBPACK_DLL_MANIFEST_DIST = path.join(process.cwd(), '.cache', 'library-manifest');
 const EConfig_1 = require("../settings/EConfig");
 exports.WORKING_DIRECTORY = `src`;
 exports.HISTORY_REWRITE_FALL_BACK_REGEX_FUNC = (name) => {
