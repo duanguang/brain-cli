@@ -4,7 +4,8 @@ const program = require('commander');
 const chalk = require('chalk'); 
 import programInit from './index';
 import {PRODUCTION, DEV,DIST, TEST,REPORT} from '../constants/constants';
-import { log, warning } from '../utils/logs';
+import { log } from '../utils/logs';
+import webpackDllCompiler from '../webpack/webpackDllCompiler';
 export class Command{
     program:any;
     commands = ['build','start','dev','dll'];
@@ -55,10 +56,12 @@ export class Command{
     dev() {
         this.program
           .command('dev')
+          .option('--apps [value]', 'webpack Build a specified app name')
           .description('start webpack dev server for develoment mode')
           .action((options) => {
             let env='dev';
             this.setProcessEnv(env);
+            this.setApps(options);
             log(`当前编译环境为: ${process.env.NODE_ENV} [${this.env[env]}]`);
             programInit(env);
           });
@@ -66,20 +69,25 @@ export class Command{
     start() {
         this.program
           .command('start')
+          .option('--apps [value]', 'webpack Build a specified app name')
           .description('start webpack dev server for develoment mode')
           .action(options => {
             let env='dev';
             this.setProcessEnv(env);
+            this.setApps(options);
             log(`当前编译环境为: ${process.env.NODE_ENV} [${this.env[env]}]`);
             programInit(env);
           });
     }
     dll() {
         this.program
-          .command('dll [env]')
+          .command('dll')
           .description('webpack dll build')
-          .action(env => {
-            
+          .action(async (env) => {
+            /**
+               * 按需创建编译webpack dll manifest文件
+            */
+            await webpackDllCompiler();
           });
     }
     build() {
