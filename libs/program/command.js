@@ -49,7 +49,8 @@ class Command {
     }
     option() {
         this.program
-            .option('-V,--version', 'output the version number');
+            .option('-V,--version', 'output the version number')
+            .description(`${chalk.green('webpack building tool')}`);
     }
     setApps(options) {
         process.env.apps = '';
