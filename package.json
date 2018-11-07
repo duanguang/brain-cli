@@ -21,15 +21,18 @@
     "build:report": "node bin/index.js build -s",
     "bundle":"webpack bundleSize --profile --json --config='bin/index.js' --output-filename stats.json"
   },
-  "repository": "",
+  "homepage":"https://github.com/duanguang/brain-cli",
+  "repository":{
+    "type": "git",
+    "url": "git+https://github.com/duanguang/brain-cli"
+  },
   "keywords": [
-    "webpack",
     "brain",
     "cli",
     "webpack-cli",
-    "react",
     "brain-cli",
-    "pack"
+    "react-cli",
+    "react-webpack"
   ],
   "author": "duanguang She",
   "devDependencies": {
