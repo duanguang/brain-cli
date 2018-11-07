@@ -7,6 +7,7 @@ const webpack = require("webpack");
 const htmlWebpackPlugin_1 = require("../libs/webpack/plugins/htmlWebpackPlugin");
 const env_1 = require("../libs/utils/env");
 const LegionExtractStaticFilePlugin_1 = require("../libs/webpack/plugins/LegionExtractStaticFilePlugin");
+const getEntries_1 = require("../libs/webpack/entries/getEntries");
 const nodeModulesPath = path.resolve(process.cwd(), 'node_modules');
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const HtmlWebpackHarddiskPlugin = require('html-webpack-harddisk-plugin');
@@ -16,6 +17,7 @@ const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPl
 // const HappyPack = require('happypack'),
 //   os = require('os'),
 //   happyThreadPool = HappyPack.ThreadPool({ size: os.cpus().length });
+const entries = getEntries_1.getApps();
 function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPath, apps, server, babel, webpack: webpackConfig, htmlWebpackPlugin }) {
     const __DEV__ = env_1.isDev();
     publicPath += name + "/";
@@ -32,7 +34,7 @@ function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPa
         //'webpack/hot/dev-server'
     ];
     function getEntries() {
-        let entity = apps.reduce((prev, app) => {
+        let entity = entries().reduce((prev, app) => {
             // prev={
             //     'common/core':__DEV__?['react']:[
             //         'react','mobx-react','mobx','babel-polyfill','superagent',
@@ -259,11 +261,11 @@ function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPa
     }
     function getHtmlWebpackPlugins() {
         if (__DEV__) {
-            return htmlWebpackPlugin_1.default();
+            return htmlWebpackPlugin_1.default(null, entries);
         }
         else {
             // invariant(apps.length === 1, `在部署环境下仅支持单入口`);
-            return htmlWebpackPlugin_1.default(apps);
+            return htmlWebpackPlugin_1.default(null, entries);
         }
     }
     const config = {
@@ -339,7 +341,8 @@ function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPa
             new HtmlWebpackHarddiskPlugin(),
             new webpack.DefinePlugin({
                 "process.env.NODE_ENV": JSON.stringify(process.env.NODE_ENV || constants_1.DEV),
-                'process.env.environment': '\"' + process.env.environment + '\"'
+                'process.env.environment': '\"' + process.env.environment + '\"',
+                'process.env.apps': '\"' + process.env.apps + '\"'
             })
         ]
     };

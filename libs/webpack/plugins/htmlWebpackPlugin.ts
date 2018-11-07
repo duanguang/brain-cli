@@ -21,7 +21,7 @@ function htmlWebpackPluginInstance(templatePath: string, filename: string, chunk
 }
 
 export default function getHtmlWebpackPlugins(htmlWebpackPlugin:any,entries?): any[] {
-    return (entries || apps).map((app) => {
+    return (entries() || apps).map((app) => {
         const workingDirectory = process.cwd();
         const relativeTargetDirectory = `${app}`;
         const relativeTargetHtml = path.join(relativeTargetDirectory, '/index.html');

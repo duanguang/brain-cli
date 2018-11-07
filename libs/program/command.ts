@@ -4,7 +4,7 @@ const program = require('commander');
 const chalk = require('chalk'); 
 import programInit from './index';
 import {PRODUCTION, DEV,DIST, TEST,REPORT} from '../constants/constants';
-import { log } from '../utils/logs';
+import { log, warning } from '../utils/logs';
 export class Command{
     program:any;
     commands = ['build','start','dev','dll'];
@@ -43,6 +43,15 @@ export class Command{
         this.program
         .option('-V,--version','output the version number')
     }
+    setApps(options){
+      process.env.apps='';  
+      if(options&&options['apps']){
+        if(typeof options['apps']!=='boolean'){
+            // warning(`打包范围为[全部app]...`);
+            process.env.apps=options['apps'];
+        }
+      }
+    }
     dev() {
         this.program
           .command('dev')
@@ -77,13 +86,12 @@ export class Command{
         this.program
           .command('build [env]')
           .option('-s', 'webpack build size analyzer tool, support size: default analyzer')
+          .option('--apps [value]', 'webpack Build a specified app name')
           .description('webpack building')
           .action((env = 'prod', options) => {
-             if(options.S){
-                this.setProcessEnv('report');
-             }else{
-                this.setProcessEnv(env);
-             }
+             env= options.S?'report':env
+             this.setProcessEnv(env);
+             this.setApps(options);
              log(`当前编译环境为: ${process.env.NODE_ENV} [${this.env[env]}]`);
              programInit(env);
           });

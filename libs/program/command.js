@@ -42,6 +42,15 @@ class Command {
         this.program
             .option('-V,--version', 'output the version number');
     }
+    setApps(options) {
+        process.env.apps = '';
+        if (options && options['apps']) {
+            if (typeof options['apps'] !== 'boolean') {
+                // warning(`打包范围为[全部app]...`);
+                process.env.apps = options['apps'];
+            }
+        }
+    }
     dev() {
         this.program
             .command('dev')
@@ -75,14 +84,12 @@ class Command {
         this.program
             .command('build [env]')
             .option('-s', 'webpack build size analyzer tool, support size: default analyzer')
+            .option('--apps [value]', 'webpack Build a specified app name')
             .description('webpack building')
             .action((env = 'prod', options) => {
-            if (options.S) {
-                this.setProcessEnv('report');
-            }
-            else {
-                this.setProcessEnv(env);
-            }
+            env = options.S ? 'report' : env;
+            this.setProcessEnv(env);
+            this.setApps(options);
             logs_1.log(`当前编译环境为: ${process.env.NODE_ENV} [${this.env[env]}]`);
             index_1.default(env);
         });

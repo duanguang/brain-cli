@@ -21,7 +21,7 @@ function htmlWebpackPluginInstance(templatePath, filename, chunks) {
     });
 }
 function getHtmlWebpackPlugins(htmlWebpackPlugin, entries) {
-    return (entries || apps).map((app) => {
+    return (entries() || apps).map((app) => {
         const workingDirectory = process.cwd();
         const relativeTargetDirectory = `${app}`;
         const relativeTargetHtml = path.join(relativeTargetDirectory, '/index.html');
