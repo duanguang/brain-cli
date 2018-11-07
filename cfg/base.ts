@@ -381,7 +381,7 @@ export default function getBaseConfig({name, devServer, imageInLineSize, default
             noInfo: noInfo,
             proxy: proxy,
             inline: false,
-            progress: true,
+            //progress: true,
         };
 
         config.plugins.push(new webpack.NoEmitOnErrorsPlugin());

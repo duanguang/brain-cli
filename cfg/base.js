@@ -362,7 +362,6 @@ function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPa
             noInfo: noInfo,
             proxy: proxy,
             inline: false,
-            progress: true,
         };
         config.plugins.push(new webpack.NoEmitOnErrorsPlugin());
         config.plugins.push(new webpack.HotModuleReplacementPlugin());
