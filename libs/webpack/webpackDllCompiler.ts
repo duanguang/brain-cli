@@ -1,17 +1,20 @@
 import * as webpack from 'webpack';
 import WebpackDllManifest from '../settings/WebpackDllManifest';
+import { log } from '../utils/logs';
 const dllConfig = require('../../cfg/dll');
 
 export default function webpackDllCompiler(): Promise<any> {
     const requireCompile = WebpackDllManifest.getInstance().isCompileManifestDirty();
     return new Promise((resolve, reject) => {
         if (!dllConfig) {
-            console.info('ignore webpack dll manifest compile');
+            log(`ignore webpack dll manifest compile`);
+            //console.info('ignore webpack dll manifest compile');
             resolve();
             return;
         }
         if (requireCompile) {
-            console.info('create webpack dll manifest');
+            log(`create webpack dll manifest`);
+            //console.info('create webpack dll manifest');
             const compiler = webpack(dllConfig);
             compiler.run((err, stats) => {
                 if (err) {
@@ -22,7 +25,8 @@ export default function webpackDllCompiler(): Promise<any> {
             });
         }
         else {
-            console.info('skip webpack dll manifest');
+            log('skip webpack dll manifest')
+            //console.info('skip webpack dll manifest');
             resolve();
         }
     });

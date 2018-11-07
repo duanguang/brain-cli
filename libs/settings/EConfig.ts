@@ -2,6 +2,7 @@ import * as path from 'path';
 import {PROJECT_USER_CONFIG_FILE, PROJECT_USER_CONFIG_IGNORE_FILE} from '../constants/constants';
 import * as invariant from 'invariant';
 import {requireBabelify} from '../utils/requireBabelify';
+
 const deepAssign = require('deep-assign');
 const defaultEConfig = require(path.resolve(__dirname, `../../${PROJECT_USER_CONFIG_FILE}`));
 

@@ -1,6 +1,7 @@
 import {asSeconds} from '../utils/format';
 import getConfig from '../../webpack.config';
 import EConfig from '../settings/EConfig';
+import { log } from '../utils/logs';
 const webpack = require('webpack');
 
 export default function webpackCompiler() {
@@ -14,13 +15,15 @@ export default function webpackCompiler() {
     let bundleStartTime;
 
     webpackCompiler.plugin('compile', () => {
-        console.info('打包中...');
+        log('打包中...')
+        //console.info('打包中...');
         bundleStartTime = Date.now();
     });
 
     webpackCompiler.plugin('done', () => {
         const timeSpent = Date.now() - bundleStartTime;
-        console.info(`打包完成, 耗时 ${asSeconds(timeSpent)} s. ${new Date()}`);
+        log(`打包完成, 耗时 ${asSeconds(timeSpent)} s. ${new Date()}`)
+        //console.info(`打包完成, 耗时 ${asSeconds(timeSpent)} s. ${new Date()}`);
     });
     return webpackCompiler;
 }

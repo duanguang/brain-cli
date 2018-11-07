@@ -7,6 +7,7 @@ import {warning} from '../libs/utils/logs';
 import * as invariant from 'invariant';
 import {isDev} from '../libs/utils/env';
 import LegionExtractStaticFilePlugin from "../libs/webpack/plugins/LegionExtractStaticFilePlugin";
+import { getApps } from '../libs/webpack/entries/getEntries';
 const nodeModulesPath = path.resolve(process.cwd(), 'node_modules');
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const HtmlWebpackHarddiskPlugin = require('html-webpack-harddisk-plugin');
@@ -16,6 +17,7 @@ const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPl
 // const HappyPack = require('happypack'),
 //   os = require('os'),
 //   happyThreadPool = HappyPack.ThreadPool({ size: os.cpus().length });
+const entries=getApps();
 export default function getBaseConfig({name, devServer, imageInLineSize, defaultPort, publicPath, apps, server, babel, webpack: webpackConfig,htmlWebpackPlugin}: EConfig) {
     const __DEV__ = isDev();
 
@@ -33,7 +35,7 @@ export default function getBaseConfig({name, devServer, imageInLineSize, default
         //'webpack/hot/dev-server'
     ];
     function getEntries(): any[] {
-        let entity= apps.reduce((prev, app) => {
+        let entity= entries().reduce((prev, app) => {
             // prev={
             //     'common/core':__DEV__?['react']:[
             //         'react','mobx-react','mobx','babel-polyfill','superagent',
@@ -277,11 +279,11 @@ export default function getBaseConfig({name, devServer, imageInLineSize, default
 
     function getHtmlWebpackPlugins() {
         if (__DEV__) {
-            return htmlWebpackPlugins()
+            return htmlWebpackPlugins(null,entries)
         }
         else {
             // invariant(apps.length === 1, `在部署环境下仅支持单入口`);
-            return htmlWebpackPlugins(apps);
+            return htmlWebpackPlugins(null,entries);
         }
     }
     const config: any = {
@@ -357,7 +359,8 @@ export default function getBaseConfig({name, devServer, imageInLineSize, default
             new HtmlWebpackHarddiskPlugin(),
             new webpack.DefinePlugin({
                 "process.env.NODE_ENV": JSON.stringify(process.env.NODE_ENV || DEV),
-                'process.env.environment': '\"' + process.env.environment + '\"'
+                'process.env.environment': '\"' + process.env.environment + '\"',
+                'process.env.apps': '\"' + process.env.apps + '\"'
             })
         ]
     };

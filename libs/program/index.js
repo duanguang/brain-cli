@@ -1,27 +1,21 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const server_1 = require("../../server");
-const scaffold_1 = require("../scaffold");
 const EConfig_1 = require("../settings/EConfig");
 const webpack_config_1 = require("../../webpack.config");
 const webpack = require("webpack");
-function programInit(program) {
-    if (program.init) {
-        scaffold_1.default.init();
-    }
-    else if (program.tpl) {
-        scaffold_1.default.tpl();
-    }
-    else if (program.dev) {
+// import ICommand = commander.ICommand;
+function programInit(env) {
+    if (env === 'dev') {
         /**
          * 在开发环境中, 允许直接配置config和ignoreConfig并更新指定常量区域
          */
-        program.config && (EConfig_1.configFileList[0] = program.config);
-        program.ignoreConfig && (EConfig_1.configFileList[1] = program.ignoreConfig);
+        // program.config && (configFileList[0] = program.config);
+        // program.ignoreConfig && (configFileList[1] = program.ignoreConfig);
         //noinspection JSIgnoredPromiseFromCall
         server_1.default();
     }
-    else if (program.dist || program.prod || program.test || program.report) {
+    else if (env === 'dist' || env === 'prod' || env === 'test') {
         const eConfig = EConfig_1.default.getInstance();
         const webpackConfig = webpack_config_1.default(eConfig);
         if (Array.isArray(webpackConfig.pendings)) {
