@@ -1,0 +1,5 @@
+.w-icon { background-image: url(./sprites-generated.png); }
+.w-icon-logo-m { width: 62.5px; height: 20px; }
+.w-icon-logo-m .w-icon, .w-icon-logo-m.w-icon { width: 125px; height: 40px; background-position: 0px -50px; margin-top: -20px; margin-left: -62.5px; } 
+.w-icon-logo { width: 83.5px; height: 23px; }
+.w-icon-logo .w-icon, .w-icon-logo.w-icon { width: 167px; height: 46px; background-position: 0px 0px; margin-top: -23px; margin-left: -83.5px; } 
