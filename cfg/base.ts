@@ -14,6 +14,7 @@ const HtmlWebpackHarddiskPlugin = require('html-webpack-harddisk-plugin');
 const OptimizeCssAssetsPlugin = require('optimize-css-assets-webpack-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
+const SpritesmithPlugin = require('webpack-spritesmith');
 // const HappyPack = require('happypack'),
 //   os = require('os'),
 //   happyThreadPool = HappyPack.ThreadPool({ size: os.cpus().length });
@@ -196,7 +197,7 @@ export default function getBaseConfig({name, devServer, imageInLineSize, default
         if (__DEV__) {
             return [
                 {
-                    test: /\.(png|jpg|gif)$/,
+                    test: /\.(png|jpe?g|gif)$/,
                     loaders: [
                         `file-loader`
                     ]
@@ -205,7 +206,7 @@ export default function getBaseConfig({name, devServer, imageInLineSize, default
         }
         return [
             {
-                test: /\.(png|jpg|gif)$/,
+                test: /\.(png|jpe?g|gif)$/,
                 //loader: `url-loader?limit=${8192}&name=${path.posix.join('common', 'images/[hash:8].[name].[ext]')}`,
                 loaders: [
                     `file-loader?limit=${imageInLineSize}&name=common/images/[hash:8].[name].[ext]`,
@@ -286,6 +287,52 @@ export default function getBaseConfig({name, devServer, imageInLineSize, default
             return htmlWebpackPlugins(null,entries);
         }
     }
+    const templateFunction = function (data) {
+        const shared = '.w-icon { background-image: url(I); }'
+            .replace('I', data.sprites.length?data.sprites[0].image:'');
+        // 注意：此处默认图标使用的是二倍图
+        const perSprite = data.sprites.map(function (sprite:any) {
+          // background-size: SWpx SHpx;
+          return '.w-icon-N { width: SWpx; height: SHpx; }\n.w-icon-N .w-icon, .w-icon-N.w-icon { width: Wpx; height: Hpx; background-position: Xpx Ypx; margin-top: -SHpx; margin-left: -SWpx; } '
+            .replace(/N/g, sprite.name)
+            .replace(/SW/g, sprite.width / 2)
+            .replace(/SH/g, sprite.height / 2)
+            .replace(/W/g, sprite.width)
+            .replace(/H/g, sprite.height)
+            .replace(/X/g, sprite.offset_x)
+            .replace(/Y/g, sprite.offset_y);
+        }).join('\n');
+      
+        return shared + '\n' + perSprite;
+      };
+      const SpritesmithPlugins = apps.map((item)=>{
+          // 雪碧图设置
+          return new SpritesmithPlugin({
+            src: {
+                cwd: path.resolve(__dirname, `../src/${item}/assets/images/icons/`), // 图标根路径
+                glob: '**/*.png' // 匹配任意 png 图标
+            },
+            target: {
+                image: path.resolve(__dirname, `../src/${item}/assets/css/sprites-generated.png`), // 生成雪碧图目标路径与名称
+                // 设置生成CSS背景及其定位的文件或方式
+                css: [
+                    [path.resolve(__dirname, `../src/${item}/assets/css/sprites-generated.css`), {
+                    format: 'function_based_template'
+                    }]
+                ]
+            // css: path.resolve(__dirname, '../src/assets/spritesmith-generated/sprite.less')
+            },
+            customTemplates: {
+               'function_based_template': templateFunction,
+            },
+            apiOptions: {
+                cssImageRef: "./sprites-generated.png", // css文件中引用雪碧图的相对位置路径配置
+            },
+            spritesmithOptions: {
+                padding: 4,
+            }
+        })
+      })
     const config: any = {
         entry: getEntries(),
         //port: defaultPort,
@@ -311,6 +358,8 @@ export default function getBaseConfig({name, devServer, imageInLineSize, default
         },
         plugins: [
             ...getHtmlWebpackPlugins(),
+            // 雪碧图设置
+            ...SpritesmithPlugins,          
             // new webpack.optimize.CommonsChunkPlugin({
             //     name: CommonsChunkPlugin.name, 
             //     filename: 'common/js/core.js',
@@ -381,7 +430,7 @@ export default function getBaseConfig({name, devServer, imageInLineSize, default
             noInfo: noInfo,
             proxy: proxy,
             inline: false,
-            progress: true,
+            //progress: true,
         };
 
         config.plugins.push(new webpack.NoEmitOnErrorsPlugin());

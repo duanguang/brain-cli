@@ -1,4 +1,4 @@
-brain-cli
+# brain-cli
 
 ## 介绍(Introduction)
 在日常开发中，我们经常需要用到webpack作为打包工具，但每次新建一个项目，都需要去配置一次，虽然配置一次之后，后面都可以进行复制，
@@ -9,8 +9,8 @@ brain-cli
  npm install brain-cli -D 或者 yarn add brain-cli
 
 ## barin-cli 优势
-- 基于最新的webpack2、react15、react-router4
-- 支持多个单页面应用同时开发
+- 基于最新的webpack2、react15.x.x、react-router4
+- 支持多入口
 - 不同入口页面css/js单独合并压缩
 - 支持webpack dll
 - 支持增量构建
@@ -19,4 +19,26 @@ brain-cli
 - 支持对指定入口文件进行编译，打包
 - 支持多套环境配置文件切换
 ![alt tag](/gif/WX20170607-095219@2x.png)
+
+## 常用命令介绍
+
+##### 编译举例
+- brain-cli build dev 运行开发模式
+- brain-cli build prod 生产环境
+- brain-cli build test 测试环境
+- brain-cli build dist 预发布环境(一般很少用到,特殊情况可以使用)
+- brain-cli build -s 构建大小分析
+- brain-cli build dev --apps=app1,app2 (编译指定入口文件)
+- brain-cli build prod --apps=app1,app2 (编译指定入口文件)
+- brain-cli build test --apps=app1,app2 (编译指定入口文件)
+
+#### webpack dll build
+- brain-cli dll
+
+## License
+[MIT](LICENSE)
+
+
+
+
 

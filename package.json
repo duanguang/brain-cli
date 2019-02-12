@@ -1,7 +1,7 @@
 {
   "name": "brain-cli",
   "license": "MIT",
-  "version": "0.3.4",
+  "version": "0.3.6",
   "description": "A command line tool used to run  projects",
   "scripts": {
     "clean": "rimraf dist/*",
@@ -96,6 +96,7 @@
     "webpack": "^2.6.1",
     "webpack-dev-server": "^2.4.0",
     "webpack-bundle-analyzer":"2.9.2",
+    "webpack-spritesmith":"^1.0.0",
     "happypack":"^5.0.0"
   },
   "main": "index.js",
