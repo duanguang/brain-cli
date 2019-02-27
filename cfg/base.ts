@@ -270,14 +270,20 @@ export default function getBaseConfig({name, devServer, imageInLineSize, default
                 test: /\.(ts|tsx)$/,
                 include: [path.join(process.cwd(), './src')],
                 use: [
-                  {
-                    loader: require.resolve('ts-loader'),
-                    options: {
-                      // disable type checker - we will use it in fork plugin
-                      transpileOnly: true,
+                    {
+                        loader:'babel-loader',
+                        query: babel.query,
+                        
                     },
-                  },
+                    {
+                        loader: require.resolve('ts-loader'),
+                        options: {
+                        // disable type checker - we will use it in fork plugin
+                        transpileOnly: true,
+                        },
+                    },
                 ],
+                exclude: [nodeModulesPath]
               });
         }
         return loaders;

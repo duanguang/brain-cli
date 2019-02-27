@@ -256,6 +256,10 @@ function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPa
                 include: [path.join(process.cwd(), './src')],
                 use: [
                     {
+                        loader: 'babel-loader',
+                        query: babel.query,
+                    },
+                    {
                         loader: require.resolve('ts-loader'),
                         options: {
                             // disable type checker - we will use it in fork plugin
@@ -263,6 +267,7 @@ function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPa
                         },
                     },
                 ],
+                exclude: [nodeModulesPath]
             });
         }
         return loaders;
