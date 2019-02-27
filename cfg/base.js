@@ -19,7 +19,7 @@ const SpritesmithPlugin = require('webpack-spritesmith');
 //   os = require('os'),
 //   happyThreadPool = HappyPack.ThreadPool({ size: os.cpus().length });
 const entries = getEntries_1.getApps();
-function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPath, apps, server, babel, webpack: webpackConfig, htmlWebpackPlugin }) {
+function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPath, apps, server, babel, webpack: webpackConfig, htmlWebpackPlugin, projectType }) {
     const __DEV__ = env_1.isDev();
     publicPath += name + "/";
     const { disableReactHotLoader, commonsChunkPlugin } = webpackConfig;
@@ -250,6 +250,21 @@ function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPa
             ],
             exclude: [nodeModulesPath]
         });
+        if (projectType === 'ts') {
+            loaders.push({
+                test: /\.(ts|tsx)$/,
+                include: [path.join(process.cwd(), './src')],
+                use: [
+                    {
+                        loader: require.resolve('ts-loader'),
+                        options: {
+                            // disable type checker - we will use it in fork plugin
+                            transpileOnly: true,
+                        },
+                    },
+                ],
+            });
+        }
         return loaders;
     }
     function getFileResourcesLoaders() {
@@ -328,7 +343,7 @@ function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPa
         devtool: __DEV__ && 'cheap-module-source-map',
         resolve: {
             alias: {},
-            extensions: ['.web.js', '.js', '.json', 'ts', '.css', '.tsx', '.jsx'],
+            extensions: ['.web.js', '.js', '.json', '.ts', '.css', '.tsx', '.jsx'],
             //modulesDirectories: ['src', 'node_modules', path.join(__dirname, '../node_modules')],
             modules: [
                 'src', 'node_modules', path.join(__dirname, '../node_modules')

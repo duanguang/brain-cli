@@ -19,7 +19,7 @@ const SpritesmithPlugin = require('webpack-spritesmith');
 //   os = require('os'),
 //   happyThreadPool = HappyPack.ThreadPool({ size: os.cpus().length });
 const entries=getApps();
-export default function getBaseConfig({name, devServer, imageInLineSize, defaultPort, publicPath, apps, server, babel, webpack: webpackConfig,htmlWebpackPlugin}: EConfig) {
+export default function getBaseConfig({name, devServer, imageInLineSize, defaultPort, publicPath, apps, server, babel, webpack: webpackConfig,htmlWebpackPlugin, projectType}: EConfig) {
     const __DEV__ = isDev();
 
     publicPath += name + "/";
@@ -265,7 +265,21 @@ export default function getBaseConfig({name, devServer, imageInLineSize, default
                 exclude: [nodeModulesPath]
             }
         );
-        
+        if(projectType==='ts'){
+            loaders.push({
+                test: /\.(ts|tsx)$/,
+                include: [path.join(process.cwd(), './src')],
+                use: [
+                  {
+                    loader: require.resolve('ts-loader'),
+                    options: {
+                      // disable type checker - we will use it in fork plugin
+                      transpileOnly: true,
+                    },
+                  },
+                ],
+              });
+        }
         return loaders;
     }
 
@@ -347,7 +361,7 @@ export default function getBaseConfig({name, devServer, imageInLineSize, default
         devtool: __DEV__ && 'cheap-module-source-map',
         resolve: {
             alias: {},
-            extensions: ['.web.js','.js', '.json', 'ts','.css', '.tsx','.jsx'],//自动扩展文件后缀
+            extensions: ['.web.js','.js', '.json', '.ts','.css', '.tsx','.jsx'],//自动扩展文件后缀
             //modulesDirectories: ['src', 'node_modules', path.join(__dirname, '../node_modules')],
             modules: [
                 'src', 'node_modules', path.join(__dirname, '../node_modules')

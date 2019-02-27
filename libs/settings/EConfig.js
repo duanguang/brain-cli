@@ -11,14 +11,15 @@ const defaultEConfig = require(path.resolve(__dirname, `../../${constants_1.PROJ
  */
 exports.configFileList = [constants_1.PROJECT_USER_CONFIG_FILE, constants_1.PROJECT_USER_CONFIG_IGNORE_FILE];
 class EConfig {
+    constructor() {
+        this.projectType = 'js';
+        this.init();
+    }
     static getInstance() {
         if (!EConfig.instance) {
             EConfig.instance = new EConfig();
         }
         return EConfig.instance;
-    }
-    constructor() {
-        this.init();
     }
     init() {
         let finalConfig = this.getFinalConfig();
