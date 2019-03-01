@@ -2,10 +2,11 @@
  * @Author: duanguang 
  * @Date: 2018-05-11 10:49:10 
  * @Last Modified by: duanguang
- * @Last Modified time: 2018-11-07 17:51:49
+ * @Last Modified time: 2019-03-01 17:19:35
  */
 import React from "react";
 import styles from "./index.less";
+console.log(styles)
 import ID from '../../public/images/home/ID.png'
 export default class HomeManage extends React.Component {
   constructor(props) {

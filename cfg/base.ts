@@ -23,7 +23,7 @@ export default function getBaseConfig({name, devServer, imageInLineSize, default
     const __DEV__ = isDev();
 
     publicPath += name + "/";
-    const {disableReactHotLoader,commonsChunkPlugin} = webpackConfig;
+    const {disableReactHotLoader,commonsChunkPlugin,cssModules} = webpackConfig;
     const DisableReactHotLoader=disableReactHotLoader||false;//默认启用热加载
     let CommonsChunkPlugin={name:'common',value:['babel-polyfill']}
     if(commonsChunkPlugin&&commonsChunkPlugin instanceof Array&&commonsChunkPlugin.length>0){
@@ -85,7 +85,7 @@ export default function getBaseConfig({name, devServer, imageInLineSize, default
         }
         function generateLoaders(cssModule?,loader?:string, loaderOptions?){
             let style :any= [{ loader: 'css-loader' }];
-            if(cssModule){
+            if(cssModule&&cssModules.enable){
                 style[0]=Object.assign(style[0],{ options: cssModule})
             }
             if(loader){

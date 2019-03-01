@@ -14,6 +14,10 @@ export const configFileList = [PROJECT_USER_CONFIG_FILE, PROJECT_USER_CONFIG_IGN
      name:string,
      value:Array<string>
  }
+ 
+ interface ICssModules{
+    enable:boolean
+ }
 export default class EConfig {
     public name: string;
     public open: boolean;
@@ -39,7 +43,8 @@ export default class EConfig {
         },
         disableReactHotLoader: boolean,
         commonsChunkPlugin:ICommonsChunkPlugin,
-        disableHappyPack:boolean//是否禁用多线程
+        disableHappyPack:boolean,//是否禁用多线程,
+        cssModules:ICssModules
     };
 
     public babel: {

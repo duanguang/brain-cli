@@ -22,7 +22,7 @@ const entries = getEntries_1.getApps();
 function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPath, apps, server, babel, webpack: webpackConfig, htmlWebpackPlugin, projectType }) {
     const __DEV__ = env_1.isDev();
     publicPath += name + "/";
-    const { disableReactHotLoader, commonsChunkPlugin } = webpackConfig;
+    const { disableReactHotLoader, commonsChunkPlugin, cssModules } = webpackConfig;
     const DisableReactHotLoader = disableReactHotLoader || false; //默认启用热加载
     let CommonsChunkPlugin = { name: 'common', value: ['babel-polyfill'] };
     if (commonsChunkPlugin && commonsChunkPlugin instanceof Array && commonsChunkPlugin.length > 0) {
@@ -82,7 +82,7 @@ function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPa
         }
         function generateLoaders(cssModule, loader, loaderOptions) {
             let style = [{ loader: 'css-loader' }];
-            if (cssModule) {
+            if (cssModule && cssModules.enable) {
                 style[0] = Object.assign(style[0], { options: cssModule });
             }
             if (loader) {
