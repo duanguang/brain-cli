@@ -13,6 +13,17 @@ exports.configFileList = [constants_1.PROJECT_USER_CONFIG_FILE, constants_1.PROJ
 class EConfig {
     constructor() {
         this.projectType = 'js';
+        this.webpack = {
+            dllConfig: {
+                vendors: ['react', 'babel-polyfill',
+                    'react-dom', 'invariant']
+            },
+            disableReactHotLoader: false,
+            disableHappyPack: false,
+            cssModules: {
+                enable: false,
+            }
+        };
         this.init();
     }
     static getInstance() {

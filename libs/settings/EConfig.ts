@@ -42,9 +42,23 @@ export default class EConfig {
             vendors: string[]
         },
         disableReactHotLoader: boolean,
-        commonsChunkPlugin:ICommonsChunkPlugin,
+        commonsChunkPlugin?:ICommonsChunkPlugin,
         disableHappyPack:boolean,//是否禁用多线程,
         cssModules:ICssModules
+    } = {
+        dllConfig: {
+            vendors: ['react','babel-polyfill',
+            'react-dom','invariant']
+        },
+        disableReactHotLoader: false,
+        disableHappyPack:false,
+        cssModules: {
+            enable: false, // 默认为 false，如需使用 css modules 功能，则设为 true
+            // config: {
+            //   namingPattern: 'module', // 转换模式，取值为 global/module，下文详细说明
+            //   generateScopedName: '[name]__[local]___[hash:base64:5]'
+            // }
+        }
     };
 
     public babel: {
