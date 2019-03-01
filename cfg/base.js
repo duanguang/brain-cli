@@ -348,7 +348,7 @@ function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPa
         devtool: __DEV__ && 'cheap-module-source-map',
         resolve: {
             alias: {},
-            extensions: ['.web.js', '.js', '.json', '.ts', '.css', '.tsx', '.jsx'],
+            extensions: ['.web.js', '.js', '.json', '.ts', '.tsx', '.jsx'],
             //modulesDirectories: ['src', 'node_modules', path.join(__dirname, '../node_modules')],
             modules: [
                 'src', 'node_modules', path.join(__dirname, '../node_modules')

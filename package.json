@@ -15,6 +15,7 @@
     "dev": "node bin/index.js dev",
     "dll": "node bin/index.js dll",
     "build":"node bin/index.js build",
+    "build:app1":"node bin/index.js build --apps=app1",
     "build:dist": "node bin/index.js build dist",
     "build:prod": "node bin/index.js build prod",
     "build:test": "node bin/index.js build test",

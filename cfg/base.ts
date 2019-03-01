@@ -367,7 +367,7 @@ export default function getBaseConfig({name, devServer, imageInLineSize, default
         devtool: __DEV__ && 'cheap-module-source-map',
         resolve: {
             alias: {},
-            extensions: ['.web.js','.js', '.json', '.ts','.css', '.tsx','.jsx'],//自动扩展文件后缀
+            extensions: ['.web.js','.js', '.json', '.ts', '.tsx','.jsx'],//自动扩展文件后缀
             //modulesDirectories: ['src', 'node_modules', path.join(__dirname, '../node_modules')],
             modules: [
                 'src', 'node_modules', path.join(__dirname, '../node_modules')
