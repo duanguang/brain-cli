@@ -1,3 +1,5 @@
+const ProgressBarPlugin = require('progress-bar-webpack-plugin');
+const chalk = require('chalk');
 module.exports = {
     name: "test",
     open: true,
@@ -26,9 +28,11 @@ module.exports = {
              */
             browsers: [
                 "last 2 versions",
-                "Firefox ESR",
+                // "Firefox ESR",
+                "Firefox >= 15",
                 "> 1%",
-                "ie >= 8"
+                "ie >= 8",
+                "not ie<=8"
             ]
         }
     },
@@ -47,7 +51,11 @@ module.exports = {
             //   namingPattern: 'module', // 转换模式，取值为 global/module，下文详细说明
             //   generateScopedName: '[name]__[local]___[hash:base64:5]'
             // }
-        }     
+        },
+        plugins:[new ProgressBarPlugin({
+            summary:false,
+            format: `${chalk.green.bold('build [:bar]')}`  + chalk.green.bold(':percent') + ' (:elapsed seconds)',
+            summaryContent:''})]
         //commonsChunkPlugin:['react']
     },
     babel: {

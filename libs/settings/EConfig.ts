@@ -44,7 +44,8 @@ export default class EConfig {
         disableReactHotLoader: boolean,
         commonsChunkPlugin?:ICommonsChunkPlugin,
         disableHappyPack:boolean,//是否禁用多线程,
-        cssModules:ICssModules
+        cssModules:ICssModules,
+        plugins?:[] //插件
     } = {
         dllConfig: {
             vendors: ['react','babel-polyfill',
@@ -58,7 +59,8 @@ export default class EConfig {
             //   namingPattern: 'module', // 转换模式，取值为 global/module，下文详细说明
             //   generateScopedName: '[name]__[local]___[hash:base64:5]'
             // }
-        }
+        },
+        plugins:[]
     };
 
     public babel: {

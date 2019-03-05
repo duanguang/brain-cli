@@ -3,7 +3,7 @@ import EConfig from '../libs/settings/EConfig';
 import {HISTORY_REWRITE_FALL_BACK_REGEX_FUNC, DIST, WORKING_DIRECTORY, DEV} from '../libs/constants/constants';
 import * as webpack from 'webpack';
 import htmlWebpackPlugins from '../libs/webpack/plugins/htmlWebpackPlugin';
-import {warning} from '../libs/utils/logs';
+import { warning, log } from '../libs/utils/logs';
 import * as invariant from 'invariant';
 import {isDev} from '../libs/utils/env';
 import LegionExtractStaticFilePlugin from "../libs/webpack/plugins/LegionExtractStaticFilePlugin";
@@ -15,6 +15,9 @@ const OptimizeCssAssetsPlugin = require('optimize-css-assets-webpack-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 const SpritesmithPlugin = require('webpack-spritesmith');
+// const ProgressBarPlugin = require('progress-bar-webpack-plugin');
+// const chalk = require('chalk');
+
 // const HappyPack = require('happypack'),
 //   os = require('os'),
 //   happyThreadPool = HappyPack.ThreadPool({ size: os.cpus().length });
@@ -23,7 +26,7 @@ export default function getBaseConfig({name, devServer, imageInLineSize, default
     const __DEV__ = isDev();
 
     publicPath += name + "/";
-    const {disableReactHotLoader,commonsChunkPlugin,cssModules} = webpackConfig;
+    const {disableReactHotLoader,commonsChunkPlugin,cssModules,plugins} = webpackConfig;
     const DisableReactHotLoader=disableReactHotLoader||false;//默认启用热加载
     let CommonsChunkPlugin={name:'common',value:['babel-polyfill']}
     if(commonsChunkPlugin&&commonsChunkPlugin instanceof Array&&commonsChunkPlugin.length>0){
@@ -76,7 +79,7 @@ export default function getBaseConfig({name, devServer, imageInLineSize, default
             options: {
               ident: 'postcss',
               plugins: [
-                require('autoprefixer')({browsers})
+                require('autoprefixer')({browsers:browsers})
               ]
             }
         }
@@ -379,7 +382,8 @@ export default function getBaseConfig({name, devServer, imageInLineSize, default
         plugins: [
             ...getHtmlWebpackPlugins(),
             // 雪碧图设置
-            ...SpritesmithPlugins,          
+            ...SpritesmithPlugins,
+            ...plugins,   
             // new webpack.optimize.CommonsChunkPlugin({
             //     name: CommonsChunkPlugin.name, 
             //     filename: 'common/js/core.js',

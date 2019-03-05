@@ -22,7 +22,8 @@ class EConfig {
             disableHappyPack: false,
             cssModules: {
                 enable: false,
-            }
+            },
+            plugins: []
         };
         this.init();
     }
