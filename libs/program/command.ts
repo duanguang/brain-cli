@@ -35,6 +35,10 @@ export class Command{
             process.env.environment=REPORT;
             process.env.NODE_ENV=PRODUCTION;
         }
+        else{
+          process.env.environment=env;
+          process.env.NODE_ENV=PRODUCTION;
+        }
     }
     version() {
         const pkg = require(path.resolve(__dirname, '../../package.json'));      
@@ -100,8 +104,8 @@ export class Command{
           .action((env = 'prod', options) => {
              this.setProcessEnv(options.S?'report':env);
              this.setApps(options);
-             log(`当前编译环境为: ${process.env.NODE_ENV} [${this.env[env]}]`);
-             programInit(env);
+             log(`当前编译环境为: ${process.env.NODE_ENV} [${this.env[env]||env}]`);
+             programInit(process.env.NODE_ENV);
           });
     }
     command() {

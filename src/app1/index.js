@@ -4,7 +4,8 @@ import ReactDOM from 'react-dom';
 // import 'antd/dist/antd.css'
 import Test from './component/Test';
 import HomeManage from './component/home';
+import { Example } from './component/stateHooks';
 
 // Render the main component into the dom
 ReactDOM.render(
-    <HomeManage></HomeManage>, document.getElementById('app'));
+    <Example></Example>, document.getElementById('app'));

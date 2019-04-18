@@ -21,7 +21,7 @@ const SpritesmithPlugin = require('webpack-spritesmith');
 //   os = require('os'),
 //   happyThreadPool = HappyPack.ThreadPool({ size: os.cpus().length });
 const entries = getEntries_1.getApps();
-function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPath, apps, server, babel, webpack: webpackConfig, htmlWebpackPlugin, projectType }) {
+function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPath, apps, server, babel, webpack: webpackConfig, htmlWebpackPlugin, projectType, isTslint }) {
     const __DEV__ = env_1.isDev();
     publicPath += name + "/";
     const { disableReactHotLoader, commonsChunkPlugin, cssModules, plugins } = webpackConfig;
@@ -282,6 +282,19 @@ function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPa
             }
         ];
     }
+    function getTslintLoaders() {
+        if (isTslint) {
+            return [
+                {
+                    test: /\.ts|tsx$/,
+                    exclude: /node_modules/,
+                    enforce: 'pre',
+                    loader: 'tslint-loader'
+                }
+            ];
+        }
+        return [];
+    }
     function getHtmlWebpackPlugins() {
         if (__DEV__) {
             return htmlWebpackPlugin_1.default(null, entries);
@@ -470,7 +483,8 @@ function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPa
             ...getImageLoaders(),
             ...getJsonLoaders(),
             ...getFontLoaders(),
-            ...getFileResourcesLoaders()
+            ...getFileResourcesLoaders(),
+            ...getTslintLoaders()
         ],
     };
     return config;

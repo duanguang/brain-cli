@@ -26,6 +26,7 @@ export default class EConfig {
     public imageInLineSize: number;
     public publicPath: string;
     public projectType :string='js';
+    public isTslint:boolean = true
     public devServer: {
         noInfo: boolean,
         proxy: Object

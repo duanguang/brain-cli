@@ -22,7 +22,7 @@ const SpritesmithPlugin = require('webpack-spritesmith');
 //   os = require('os'),
 //   happyThreadPool = HappyPack.ThreadPool({ size: os.cpus().length });
 const entries=getApps();
-export default function getBaseConfig({name, devServer, imageInLineSize, defaultPort, publicPath, apps, server, babel, webpack: webpackConfig,htmlWebpackPlugin, projectType}: EConfig) {
+export default function getBaseConfig({name, devServer, imageInLineSize, defaultPort, publicPath, apps, server, babel, webpack: webpackConfig,htmlWebpackPlugin, projectType,isTslint}: EConfig) {
     const __DEV__ = isDev();
 
     publicPath += name + "/";
@@ -300,7 +300,19 @@ export default function getBaseConfig({name, devServer, imageInLineSize, default
             }
         ]
     }
-
+    function getTslintLoaders(){
+        if(isTslint){
+            return [
+                {
+                    test: /\.ts|tsx$/,
+                    exclude: /node_modules/,
+                    enforce: 'pre',
+                    loader: 'tslint-loader'
+                }
+            ]
+        }
+        return []
+    }
     function getHtmlWebpackPlugins() {
         if (__DEV__) {
             return htmlWebpackPlugins(null,entries)
@@ -496,7 +508,8 @@ export default function getBaseConfig({name, devServer, imageInLineSize, default
             ...getImageLoaders(),
             ...getJsonLoaders(),
             ...getFontLoaders(),
-            ...getFileResourcesLoaders()
+            ...getFileResourcesLoaders(),
+            ...getTslintLoaders()
         ],
         //noParse: []
     };

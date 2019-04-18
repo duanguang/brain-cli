@@ -15,7 +15,7 @@ function programInit(env) {
         //noinspection JSIgnoredPromiseFromCall
         server_1.default();
     }
-    else if (env === 'dist' || env === 'prod' || env === 'test') {
+    else if (env === 'production') {
         const eConfig = EConfig_1.default.getInstance();
         const webpackConfig = webpack_config_1.default(eConfig);
         if (Array.isArray(webpackConfig.pendings)) {

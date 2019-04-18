@@ -13,6 +13,7 @@ exports.configFileList = [constants_1.PROJECT_USER_CONFIG_FILE, constants_1.PROJ
 class EConfig {
     constructor() {
         this.projectType = 'js';
+        this.isTslint = true;
         this.webpack = {
             dllConfig: {
                 vendors: ['react', 'babel-polyfill',

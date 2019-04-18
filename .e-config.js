@@ -4,8 +4,10 @@ module.exports = {
     name: "test",
     open: true,
     defaultPort: 8001,
+    projectType:'ts',
     server: "0.0.0.0",
     imageInLineSize: 8192,
+    isTslint:true,
     publicPath: "/public/",
     devServer: {
         noInfo: true,
@@ -13,6 +15,15 @@ module.exports = {
             // '/cia-j': {
             //     target: 'http://192.168.1.181:8081',
             //         onProxyReq: (proxyReq, req, res) => {
+            //         }
+            // },
+            // '/main': {
+            //     target: 'https://uat-scm.hoolinks.com/',
+            //     //changeOrigin: true,
+            //     secure: false,
+            //         onProxyReq: (proxyReq, req, res) => {
+            //             proxyReq.setHeader('host', 'uat-scm.hoolinks.com')
+            //             proxyReq.setHeader('cookie', ' Hm_lvt_c255ba4153ae8ae8b787c209cc7518a8=1553052488,1553052893,1553053026,1553053105; SYSSOURCE=SCM; JSESSIONID=F46353CD405C32BF40B7CC6CC0B4C44D; SCP_JSESSIONID=8221664EFABD7C98FFB74DDC8CC12C85; Hm_lpvt_c255ba4153ae8ae8b787c209cc7518a8=1554866067; SESSION=d2104255-eee1-4299-9d8d-9369d83f0977')
             //         }
             // },
         }
@@ -83,5 +94,5 @@ module.exports = {
     htmlWebpackPlugin: {
         title: "webApp"/**/,
     },
-    apps: ['app2','app1']
+    apps: ['app3']
 };
