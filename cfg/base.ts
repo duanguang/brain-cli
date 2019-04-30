@@ -300,6 +300,15 @@ export default function getBaseConfig({name, devServer, imageInLineSize, default
             }
         ]
     }
+    function getTemplateJspLoaders(){
+        return [
+            {
+                test: /\.jsp$/,
+                use: 'raw-loader',
+                exclude: [nodeModulesPath]
+            }
+        ]
+    }
     function getTslintLoaders(){
         if(isTslint){
             return [
@@ -509,7 +518,8 @@ export default function getBaseConfig({name, devServer, imageInLineSize, default
             ...getJsonLoaders(),
             ...getFontLoaders(),
             ...getFileResourcesLoaders(),
-            ...getTslintLoaders()
+            ...getTslintLoaders(),
+            ...getTemplateJspLoaders(),
         ],
         //noParse: []
     };

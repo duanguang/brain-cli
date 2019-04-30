@@ -12,6 +12,7 @@
 - 基于最新的webpack2、react15.x.x、react-router4
 - 支持多入口
 - 不同入口页面css/js单独合并压缩
+- 支持生成ejs,jsp模板页面
 - 支持webpack dll
 - 支持增量构建
 - 静态文件加戳

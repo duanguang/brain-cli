@@ -94,5 +94,5 @@ module.exports = {
     htmlWebpackPlugin: {
         title: "webApp"/**/,
     },
-    apps: ['app3']
+    apps: ['app1','app2','app3']
 };

@@ -26,9 +26,15 @@ export default function getHtmlWebpackPlugins(htmlWebpackPlugin:any,entries?): a
         const relativeTargetDirectory = `${app}`;
         const relativeTargetHtml = path.join(relativeTargetDirectory, '/index.html');
         const projectTargetPath = path.resolve(workingDirectory, 'src/',relativeTargetHtml);
+        const relativeTargetJSP = path.join(relativeTargetDirectory, '/index.jsp');      
+        const projectTargetPathJSP = path.resolve(workingDirectory, 'src/',relativeTargetJSP);
         if (fs.existsSync(projectTargetPath)) {
             return htmlWebpackPluginInstance(projectTargetPath, relativeTargetHtml, [app,'manifest','common']);
-        } else {
+        }
+        else if(fs.existsSync(projectTargetPathJSP)) {
+            return htmlWebpackPluginInstance(projectTargetPathJSP, relativeTargetJSP, [app,'manifest','common']);
+        }
+        else {
             const baseTarget = path.resolve(__dirname, '../../../tpl/index.ejs');
             return htmlWebpackPluginInstance(baseTarget, relativeTargetHtml, [app,'manifest','common']);
         }

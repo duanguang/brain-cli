@@ -282,6 +282,15 @@ function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPa
             }
         ];
     }
+    function getTemplateJspLoaders() {
+        return [
+            {
+                test: /\.jsp$/,
+                use: 'raw-loader',
+                exclude: [nodeModulesPath]
+            }
+        ];
+    }
     function getTslintLoaders() {
         if (isTslint) {
             return [
@@ -484,7 +493,8 @@ function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPa
             ...getJsonLoaders(),
             ...getFontLoaders(),
             ...getFileResourcesLoaders(),
-            ...getTslintLoaders()
+            ...getTslintLoaders(),
+            ...getTemplateJspLoaders(),
         ],
     };
     return config;
