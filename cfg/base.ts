@@ -384,7 +384,7 @@ export default function getBaseConfig({name, devServer, imageInLineSize, default
         output: {
             path: path.join(process.cwd(), `${DIST}`),
             filename: `[name]/js/[name].[chunkhash:5].bundle.js`,
-            chunkFilename: 'bundle/[name]-[id].[chunkhash:5].bundle.js',
+            chunkFilename: 'common/js/[name]-[id].[chunkhash:5].bundle.js',
             //chunkFilename:path.posix.join('common', 'js/[name]-[id].[chunkhash:5].bundle.js'),
             publicPath: __DEV__?publicPath:"../"
         },
@@ -509,6 +509,13 @@ export default function getBaseConfig({name, devServer, imageInLineSize, default
             );
         }       
         config.plugins.push(new LegionExtractStaticFilePlugin());
+        config.plugins.push(new CopyWebpackPlugin([
+            {
+              from: path.resolve(__dirname, '../static'),
+              to: 'common',
+              ignore: ['.*']
+            }
+          ]))
     }
     config.module = {
         rules: [

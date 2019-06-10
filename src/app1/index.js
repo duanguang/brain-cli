@@ -8,4 +8,4 @@ import { Example } from './component/stateHooks';
 
 // Render the main component into the dom
 ReactDOM.render(
-    <Example></Example>, document.getElementById('app'));
+    <HomeManage></HomeManage>, document.getElementById('app'));

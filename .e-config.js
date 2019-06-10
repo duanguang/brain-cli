@@ -8,7 +8,7 @@ module.exports = {
     server: "0.0.0.0",
     imageInLineSize: 8192,
     isTslint:true,
-    publicPath: "/public/",
+    publicPath: "/static/",
     devServer: {
         noInfo: true,
         proxy: {
