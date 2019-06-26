@@ -9,7 +9,7 @@ export function getDllReferencePlugin() {
         // const vendorsHash = webpackDllManifest.getVendorsHash();
         const distPath = webpackDllManifest.distPath;
         // const manifest = require(path.join(distPath, vendorsHash + `.json`));
-        const manifest = require(path.join(distPath, 'vendor.dll' + `.json`));
+        const manifest = require(path.join(distPath,'vendor.dll' + `.json`));
         return new DllReferencePlugin({
             context: process.cwd(),
             manifest

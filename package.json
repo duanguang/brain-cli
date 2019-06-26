@@ -1,7 +1,7 @@
 {
   "name": "brain-cli",
   "license": "MIT",
-  "version": "0.3.14",
+  "version": "0.3.15",
   "description": "A command line tool used to run  projects",
   "scripts": {
     "clean": "rimraf dist/*",
@@ -15,7 +15,7 @@
     "dev": "node bin/index.js dev",
     "dll": "node bin/index.js dll",
     "build": "node bin/index.js build",
-    "build:app3": "node bin/index.js build --apps=app1",
+    "build:app3": "node bin/index.js build --apps=app1 --cdn=https://uat-scm.hoolinks.com/scm-static",
     "build:dist": "node bin/index.js build dist",
     "build:prod": "node bin/index.js build prod",
     "build:test": "node bin/index.js build test",

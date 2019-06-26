@@ -114,6 +114,7 @@ class Command {
             .option('--apps [value]', 'webpack Build a specified app name')
             .option('--apps [value]', 'webpack Build a specified app name')
             .option('--webpackJsonp [value]', 'webpack Generate a specified webpackJsonp name')
+            .option('--cdn [value]', 'The resource distribution server')
             .description('webpack building')
             .action((env = 'prod', options) => {
             this.setProcessEnv(options.S ? 'report' : env);
@@ -121,6 +122,9 @@ class Command {
             process.env.webpackJsonp = options['webpackJsonp']
                 ? options['webpackJsonp']
                 : 'webpackJsonpName';
+            process.env.cdnRelease = options['cdn']
+                ? options['cdn']
+                : '';
             logs_1.log(`当前编译环境为: ${process.env.NODE_ENV} [${this.env[env] || env}]`);
             index_1.default(process.env.NODE_ENV);
         });

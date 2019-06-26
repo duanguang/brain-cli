@@ -49,7 +49,7 @@ module.exports = {
   },
   webpack: {
     dllConfig: {
-      vendors: ['react', 'react-dom', 'invariant']
+        vendors: ['react','react-dom','invariant']
     },
     disableReactHotLoader: false,
     commonsChunkPlugin: ['react', 'react-dom', 'invariant'],

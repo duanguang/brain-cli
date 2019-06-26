@@ -369,7 +369,6 @@ function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPa
             }
         });
     });
-    console.log(process.env.webpackJsonp);
     const config = {
         entry: getEntries(),
         //port: defaultPort,
@@ -389,7 +388,7 @@ function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPa
             filename: `[name]/js/[name].[chunkhash:5].bundle.js`,
             chunkFilename: 'common/js/[name]-[id].[chunkhash:5].bundle.js',
             //chunkFilename:path.posix.join('common', 'js/[name]-[id].[chunkhash:5].bundle.js'),
-            publicPath: __DEV__ ? publicPath : '../'
+            publicPath: __DEV__ ? publicPath : process.env.cdnRelease || '../'
         },
         devtool: __DEV__ && 'cheap-module-source-map',
         resolve: {
@@ -458,7 +457,8 @@ function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPa
                 'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || constants_1.DEV),
                 'process.env.environment': '"' + process.env.environment + '"',
                 'process.env.apps': '"' + process.env.apps + '"',
-                'process.env.webpackJsonp': '"' + process.env.webpackJsonp + '"'
+                'process.env.webpackJsonp': '"' + process.env.webpackJsonp + '"',
+                'process.env.cdnRelease': '"' + process.env.cdnRelease + '"'
             })
         ]
     };

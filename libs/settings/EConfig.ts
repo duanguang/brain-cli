@@ -49,7 +49,7 @@ export default class EConfig {
         plugins?:[] //插件
     } = {
         dllConfig: {
-            vendors: ['react','babel-polyfill',
+            vendors: ['react',
             'react-dom','invariant']
         },
         disableReactHotLoader: false,

@@ -23,7 +23,7 @@ if (isVendorExist) {
              * 将会定义为 window.${output.library}
              * 在这次的例子中，将会定义为`window.vendor_library`
              */
-            library: '[name]_library'
+            library: '[name]_library',
         },
         plugins: [
             new webpack.DllPlugin({

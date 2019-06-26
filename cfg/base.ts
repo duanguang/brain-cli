@@ -417,7 +417,6 @@ export default function getBaseConfig({
       }
     });
   });
-  console.log(process.env.webpackJsonp);
   const config: any = {
     entry: getEntries(),
     //port: defaultPort,
@@ -437,7 +436,7 @@ export default function getBaseConfig({
       filename: `[name]/js/[name].[chunkhash:5].bundle.js`,
       chunkFilename: 'common/js/[name]-[id].[chunkhash:5].bundle.js',
       //chunkFilename:path.posix.join('common', 'js/[name]-[id].[chunkhash:5].bundle.js'),
-      publicPath: __DEV__ ? publicPath : '../'
+      publicPath: __DEV__ ? publicPath : process.env.cdnRelease||'../'
     },
     devtool: __DEV__ && 'cheap-module-source-map',
     resolve: {
@@ -509,7 +508,8 @@ export default function getBaseConfig({
         'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || DEV),
         'process.env.environment': '"' + process.env.environment + '"',
         'process.env.apps': '"' + process.env.apps + '"',
-        'process.env.webpackJsonp': '"' + process.env.webpackJsonp + '"'
+        'process.env.webpackJsonp': '"' + process.env.webpackJsonp + '"',
+        'process.env.cdnRelease': '"' + process.env.cdnRelease + '"'
       })
     ]
   };
@@ -565,7 +565,7 @@ export default function getBaseConfig({
         // new webpack.optimize.DedupePlugin()//webpack1用于优化重复模块
       );
     }
-    config.plugins.push(new LegionExtractStaticFilePlugin());
+      config.plugins.push(new LegionExtractStaticFilePlugin());
     config.plugins.push(
       new CopyWebpackPlugin([
         {

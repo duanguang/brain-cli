@@ -15,7 +15,8 @@ export default function getDistConfig(eConfig: EConfig) {
                 config.plugins.push(new AddAssetHtmlPlugin({
                     includeSourcemap: false, filepath,
                     outputPath: 'common/js',
-                    publicPath: path.posix.join('../', 'common/js'),
+                /* publicPath: path.posix.join('../', 'common/js'), */
+                   publicPath:process.env.cdnRelease?`${process.env.cdnRelease}/common/js`:path.posix.join('../', 'common/js'),
                 }));
                 const dllReferencePlugin = getDllReferencePlugin();
                 if (dllReferencePlugin) {

@@ -16,7 +16,7 @@ class EConfig {
         this.isTslint = true;
         this.webpack = {
             dllConfig: {
-                vendors: ['react', 'babel-polyfill',
+                vendors: ['react',
                     'react-dom', 'invariant']
             },
             disableReactHotLoader: false,
