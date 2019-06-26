@@ -18,7 +18,12 @@ const webpackDllCompiler_1 = require("../webpack/webpackDllCompiler");
 class Command {
     constructor() {
         this.commands = ['build', 'start', 'dev', 'dll'];
-        this.env = { 'dev': '开发环境', 'dist': '预发布环境', 'prod': '生产环境', 'test': '测试环境' };
+        this.env = {
+            dev: '开发环境',
+            dist: '预发布环境',
+            prod: '生产环境',
+            test: '测试环境'
+        };
         this.program = program;
     }
     setProcessEnv(env) {
@@ -70,7 +75,7 @@ class Command {
             .command('dev')
             .option('--apps [value]', 'webpack Build a specified app name')
             .description('start webpack dev server for develoment mode')
-            .action((options) => {
+            .action(options => {
             let env = 'dev';
             this.setProcessEnv(env);
             this.setApps(options);
@@ -97,8 +102,8 @@ class Command {
             .description('webpack dll build')
             .action((env) => __awaiter(this, void 0, void 0, function* () {
             /**
-               * 按需创建编译webpack dll manifest文件
-            */
+             * 按需创建编译webpack dll manifest文件
+             */
             yield webpackDllCompiler_1.default();
         }));
     }
@@ -107,10 +112,15 @@ class Command {
             .command('build [env]')
             .option('-s', 'webpack build size analyzer tool, support size: default analyzer')
             .option('--apps [value]', 'webpack Build a specified app name')
+            .option('--apps [value]', 'webpack Build a specified app name')
+            .option('--webpackJsonp [value]', 'webpack Generate a specified webpackJsonp name')
             .description('webpack building')
             .action((env = 'prod', options) => {
             this.setProcessEnv(options.S ? 'report' : env);
             this.setApps(options);
+            process.env.webpackJsonp = options['webpackJsonp']
+                ? options['webpackJsonp']
+                : 'webpackJsonpName';
             logs_1.log(`当前编译环境为: ${process.env.NODE_ENV} [${this.env[env] || env}]`);
             index_1.default(process.env.NODE_ENV);
         });

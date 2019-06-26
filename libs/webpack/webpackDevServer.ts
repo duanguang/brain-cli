@@ -9,16 +9,20 @@ const eConfig = EConfig.getInstance();
  * 启动webpack服务器
  */
 export default function startWebpackDevServer() {
-    return new Promise((resolve, reject) => {
-        const {server} = eConfig;
-        const config = webpackConfig(eConfig);
-        new WebpackDevServer(webpackCompiler(), config.devServer).listen(eConfig.defaultPort, server, (err) => {
-            if (err) {
-                reject(err);
-            }
-            log(`监听本地 ${server}:${eConfig.defaultPort}`)
-            //console.log(`监听本地 ${server}:${eConfig.defaultPort}`);
-            resolve();
-        });
-    });
+  return new Promise((resolve, reject) => {
+    const { server } = eConfig;
+    const config = webpackConfig(eConfig);
+    new WebpackDevServer(webpackCompiler(), config.devServer).listen(
+      eConfig.defaultPort,
+      server,
+      err => {
+        if (err) {
+          reject(err);
+        }
+        log(`监听本地 ${server}:${eConfig.defaultPort}`);
+        //console.log(`监听本地 ${server}:${eConfig.defaultPort}`);
+        resolve();
+      }
+    );
+  });
 }

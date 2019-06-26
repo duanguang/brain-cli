@@ -13,8 +13,10 @@ const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const HtmlWebpackHarddiskPlugin = require('html-webpack-harddisk-plugin');
 const OptimizeCssAssetsPlugin = require('optimize-css-assets-webpack-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
-const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
+const BundleAnalyzerPlugin = require('webpack-bundle-analyzer')
+    .BundleAnalyzerPlugin;
 const SpritesmithPlugin = require('webpack-spritesmith');
+const express = require('express');
 // const ProgressBarPlugin = require('progress-bar-webpack-plugin');
 // const chalk = require('chalk');
 // const HappyPack = require('happypack'),
@@ -23,12 +25,16 @@ const SpritesmithPlugin = require('webpack-spritesmith');
 const entries = getEntries_1.getApps();
 function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPath, apps, server, babel, webpack: webpackConfig, htmlWebpackPlugin, projectType, isTslint }) {
     const __DEV__ = env_1.isDev();
-    publicPath += name + "/";
+    publicPath += name + '/';
     const { disableReactHotLoader, commonsChunkPlugin, cssModules, plugins } = webpackConfig;
     const DisableReactHotLoader = disableReactHotLoader || false; //默认启用热加载
-    let CommonsChunkPlugin = { name: 'common', value: ['babel-polyfill'] };
-    if (commonsChunkPlugin && commonsChunkPlugin instanceof Array && commonsChunkPlugin.length > 0) {
-        CommonsChunkPlugin.value = [...new Set(commonsChunkPlugin.concat(CommonsChunkPlugin.value))];
+    let CommonsChunkPlugin = { name: 'common', value: ['invariant'] };
+    if (commonsChunkPlugin &&
+        commonsChunkPlugin instanceof Array &&
+        commonsChunkPlugin.length > 0) {
+        CommonsChunkPlugin.value = [
+            ...new Set(commonsChunkPlugin.concat(CommonsChunkPlugin.value))
+        ];
     }
     const { noInfo, proxy } = devServer;
     const webpackDevEntries = [
@@ -74,9 +80,7 @@ function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPa
             loader: 'postcss-loader',
             options: {
                 ident: 'postcss',
-                plugins: [
-                    require('autoprefixer')({ browsers: browsers })
-                ]
+                plugins: [require('autoprefixer')({ browsers: browsers })]
             }
         };
         if (px2rem) {
@@ -99,14 +103,17 @@ function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPa
             }
             return ExtractTextPlugin.extract({
                 fallback: 'style-loader',
-                use: style,
+                use: style
             });
         }
         if (!__DEV__) {
             // ExtractTextPlugin.extract = f => `style-loader!` + f;
             config.plugins.push(
             //new ExtractTextPlugin('[name]/styles/[name].css')
-            new ExtractTextPlugin({ filename: '[name]/styles/[name].[contenthash:8].bundle.css', allChunks: true }));
+            new ExtractTextPlugin({
+                filename: '[name]/styles/[name].[contenthash:8].bundle.css',
+                allChunks: true
+            }));
             config.plugins.push(new OptimizeCssAssetsPlugin({
                 assetNameRegExp: /\.optimize\.css$/g,
                 cssProcessor: require('cssnano'),
@@ -191,9 +198,7 @@ function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPa
             return [
                 {
                     test: /\.(png|jpe?g|gif)$/,
-                    loaders: [
-                        `file-loader`
-                    ]
+                    loaders: [`file-loader`]
                 }
             ];
         }
@@ -202,7 +207,9 @@ function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPa
                 test: /\.(png|jpe?g|gif)$/,
                 //loader: `url-loader?limit=${8192}&name=${path.posix.join('common', 'images/[hash:8].[name].[ext]')}`,
                 loaders: [
-                    `file-loader?limit=${imageInLineSize}&name=common/images/[hash:8].[name].[ext]`,
+                    `file-loader?limit=${imageInLineSize}&name=common/images/[hash:8].[name].[ext]`
+                    //optimizationLevel似乎没什么用
+                    //`image-webpack?{optipng:{optimizationLevel:7}, pngquant:{quality: "65-90", speed: 4}, mozjpeg: {quality: 65}}`
                 ]
             }
         ];
@@ -228,11 +235,11 @@ function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPa
                     // loader: 'react-hot',
                     loader: 'react-hot-loader!babel-loader',
                     include: [path.join(process.cwd(), './src')],
-                    exclude: [nodeModulesPath],
+                    exclude: [nodeModulesPath] //优化构建效率
                 });
             }
             else {
-                babel.query.plugins.push("babel-plugin-legion-hmr");
+                babel.query.plugins.push('babel-plugin-legion-hmr');
             }
         }
         // loaders.push(
@@ -259,15 +266,15 @@ function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPa
                 use: [
                     {
                         loader: 'babel-loader',
-                        query: babel.query,
+                        query: babel.query
                     },
                     {
                         loader: require.resolve('ts-loader'),
                         options: {
                             // disable type checker - we will use it in fork plugin
-                            transpileOnly: true,
-                        },
-                    },
+                            transpileOnly: true
+                        }
+                    }
                 ],
                 exclude: [nodeModulesPath]
             });
@@ -314,10 +321,10 @@ function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPa
         }
     }
     const templateFunction = function (data) {
-        const shared = '.w-icon { background-image: url(I); }'
-            .replace('I', data.sprites.length ? data.sprites[0].image : '');
+        const shared = '.w-icon { background-image: url(I); }'.replace('I', data.sprites.length ? data.sprites[0].image : '');
         // 注意：此处默认图标使用的是二倍图
-        const perSprite = data.sprites.map(function (sprite) {
+        const perSprite = data.sprites
+            .map(function (sprite) {
             // background-size: SWpx SHpx;
             return '.w-icon-N { width: SWpx; height: SHpx; }\n.w-icon-N .w-icon, .w-icon-N.w-icon { width: Wpx; height: Hpx; background-position: Xpx Ypx; margin-top: -SHpx; margin-left: -SWpx; } '
                 .replace(/N/g, sprite.name)
@@ -327,10 +334,11 @@ function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPa
                 .replace(/H/g, sprite.height)
                 .replace(/X/g, sprite.offset_x)
                 .replace(/Y/g, sprite.offset_y);
-        }).join('\n');
+        })
+            .join('\n');
         return shared + '\n' + perSprite;
     };
-    const SpritesmithPlugins = apps.map((item) => {
+    const SpritesmithPlugins = apps.map(item => {
         // 雪碧图设置
         return new SpritesmithPlugin({
             src: {
@@ -341,42 +349,54 @@ function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPa
                 image: path.resolve(__dirname, `../src/${item}/assets/css/sprites-generated.png`),
                 // 设置生成CSS背景及其定位的文件或方式
                 css: [
-                    [path.resolve(__dirname, `../src/${item}/assets/css/sprites-generated.css`), {
+                    [
+                        path.resolve(__dirname, `../src/${item}/assets/css/sprites-generated.css`),
+                        {
                             format: 'function_based_template'
-                        }]
+                        }
+                    ]
                 ]
                 // css: path.resolve(__dirname, '../src/assets/spritesmith-generated/sprite.less')
             },
             customTemplates: {
-                'function_based_template': templateFunction,
+                function_based_template: templateFunction
             },
             apiOptions: {
-                cssImageRef: "./sprites-generated.png",
+                cssImageRef: './sprites-generated.png' // css文件中引用雪碧图的相对位置路径配置
             },
             spritesmithOptions: {
-                padding: 4,
+                padding: 4
             }
         });
     });
+    console.log(process.env.webpackJsonp);
     const config = {
         entry: getEntries(),
         //port: defaultPort,
         //additionalPaths: [],
         output: {
+            /**遇到问题： 对于同一个页面功能由不同的同事开发， 都用到了 webpack 以及 CommonsChunkPlugin，最后把打包出来的代码，整合到一起的时候，冲突了。
+             * 问题表现：各自用 webpack 打包代码没有问题，但是加载到页面上时，代码报错且错误难以定位。
+             * 解决方法：在 webpack 的配置选项里使用 output.jsonpFunction。
+             * output.jsonpFunction string 仅用在输出目标为 web，且使用 jsonp 的方式按需加载代码块时。
+      一个命名的 JSONP 函数用于异步加载代码块或者把多个初始化代码块合并到一起时使用（如 CommonsChunkPlugin, AggressiveSplittingPlugin）。
+      当同一个页面上有多个 webpack 实例（源于不同的编译），需要修改这个函数名。
+      如果使用了 output.library 选项，那么这个 library 的命名会自动附加上。
+      事实上 webpack 并不在全局命名空间下运行，但是 CommonsChunkPlugin 这样的插件会使用异步 JSONP 的方法按需加载代码块。插件会注册一个全局的函数叫 window.webpackJsonp，所以同一个页面上运行多个源自不同 webpack 打包出来的代码时，可能会引起冲突。
+             */
+            jsonpFunction: process.env.webpackJsonp || `webpackJsonpName`,
             path: path.join(process.cwd(), `${constants_1.DIST}`),
             filename: `[name]/js/[name].[chunkhash:5].bundle.js`,
             chunkFilename: 'common/js/[name]-[id].[chunkhash:5].bundle.js',
             //chunkFilename:path.posix.join('common', 'js/[name]-[id].[chunkhash:5].bundle.js'),
-            publicPath: __DEV__ ? publicPath : "../"
+            publicPath: __DEV__ ? publicPath : '../'
         },
         devtool: __DEV__ && 'cheap-module-source-map',
         resolve: {
             alias: {},
             extensions: ['.web.js', '.js', '.json', '.ts', '.tsx', '.jsx'],
             //modulesDirectories: ['src', 'node_modules', path.join(__dirname, '../node_modules')],
-            modules: [
-                'src', 'node_modules', path.join(__dirname, '../node_modules')
-            ]
+            modules: ['src', 'node_modules', path.join(__dirname, '../node_modules')]
         },
         module: {
             loaders: []
@@ -387,7 +407,7 @@ function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPa
             ...SpritesmithPlugins,
             ...plugins,
             // new webpack.optimize.CommonsChunkPlugin({
-            //     name: CommonsChunkPlugin.name, 
+            //     name: CommonsChunkPlugin.name,
             //     filename: 'common/js/core.js',
             // }),
             new webpack.optimize.CommonsChunkPlugin({
@@ -401,14 +421,16 @@ function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPa
                     //       path.join(__dirname, '../node_modules')
                     //     ) === 0
                     //   )
-                    return module.context && module.context.indexOf('node_modules') !== -1;
+                    return (module.context && module.context.indexOf('node_modules') !== -1);
                 },
-                filename: 'common/js/[name].[chunkhash:5].core.js',
+                filename: 'common/js/[name].[chunkhash:5].core.js'
             }),
             new webpack.optimize.CommonsChunkPlugin({
                 name: 'manifest',
                 chunks: ['common'],
-                filename: process.env.NODE_ENV !== 'dev' ? 'common/js/manifest.[chunkhash:5].js' : 'common/js/manifest.js',
+                filename: process.env.NODE_ENV !== 'dev'
+                    ? 'common/js/manifest.[chunkhash:5].js'
+                    : 'common/js/manifest.js'
             }),
             // new HappyPack({
             //     id: 'jsHappy',
@@ -433,9 +455,10 @@ function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPa
             // }),
             new HtmlWebpackHarddiskPlugin(),
             new webpack.DefinePlugin({
-                "process.env.NODE_ENV": JSON.stringify(process.env.NODE_ENV || constants_1.DEV),
-                'process.env.environment': '\"' + process.env.environment + '\"',
-                'process.env.apps': '\"' + process.env.apps + '\"'
+                'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || constants_1.DEV),
+                'process.env.environment': '"' + process.env.environment + '"',
+                'process.env.apps': '"' + process.env.apps + '"',
+                'process.env.webpackJsonp': '"' + process.env.webpackJsonp + '"'
             })
         ]
     };
@@ -455,6 +478,10 @@ function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPa
             noInfo: noInfo,
             proxy: proxy,
             inline: false,
+            before: function (app) {
+                app.use(path.posix.join(`/static`), express.static('./static')); // 代理静态资源
+            }
+            //progress: true,
         };
         config.plugins.push(new webpack.NoEmitOnErrorsPlugin());
         config.plugins.push(new webpack.HotModuleReplacementPlugin());
@@ -476,7 +503,7 @@ function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPa
                 drop_debugger: true,
                 drop_console: true
             },
-            comments: false,
+            comments: false // 删除所有的注释
         }));
         if (process.env.environment === 'report') {
             config.plugins.push(new BundleAnalyzerPlugin()
@@ -501,8 +528,9 @@ function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPa
             ...getFontLoaders(),
             ...getFileResourcesLoaders(),
             ...getTslintLoaders(),
-            ...getTemplateJspLoaders(),
-        ],
+            ...getTemplateJspLoaders()
+        ]
+        //noParse: []
     };
     return config;
 }
