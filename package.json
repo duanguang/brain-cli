@@ -15,7 +15,7 @@
     "dev": "node bin/index.js dev",
     "dll": "node bin/index.js dll",
     "build": "node bin/index.js build",
-    "build:app3": "node bin/index.js build --apps=app1 --cdn=https://uat-scm.hoolinks.com/scm-static",
+    "build:app3": "node bin/index.js build --apps=app2 --cdn=http://127.0.0.1:8080",
     "build:dist": "node bin/index.js build dist",
     "build:prod": "node bin/index.js build prod",
     "build:test": "node bin/index.js build test",

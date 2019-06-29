@@ -25,9 +25,9 @@ const express = require('express');
 // const ProgressBarPlugin = require('progress-bar-webpack-plugin');
 // const chalk = require('chalk');
 
-// const HappyPack = require('happypack'),
-//   os = require('os'),
-//   happyThreadPool = HappyPack.ThreadPool({ size: os.cpus().length });
+const HappyPack = require('happypack'),
+  os = require('os'),
+  happyThreadPool = HappyPack.ThreadPool({ size: os.cpus().length });
 const entries = getApps();
 export default function getBaseConfig({
   name,
@@ -270,7 +270,7 @@ export default function getBaseConfig({
         //     warning(`skip react-hot-loader`);
         // }
         loaders.push({
-          test: /\.(jsx|js)?$/,
+          test: /\.(jsx|js|tsx)?$/,
           // loader: 'react-hot',
           loader: 'react-hot-loader!babel-loader',
           include: [path.join(process.cwd(), './src')],
@@ -384,21 +384,16 @@ export default function getBaseConfig({
     // 雪碧图设置
     return new SpritesmithPlugin({
       src: {
-        cwd: path.resolve(__dirname, `../src/${item}/assets/images/icons/`), // 图标根路径
+        cwd: path.resolve(process.cwd(), `./src/${item}/assets/images/icons/`), // 图标根路径
         glob: '**/*.png' // 匹配任意 png 图标
       },
       target: {
-        image: path.resolve(
-          __dirname,
-          `../src/${item}/assets/css/sprites-generated.png`
+        image: path.resolve(process.cwd(), `./src/${item}/assets/css/sprites-generated.png`
         ), // 生成雪碧图目标路径与名称
         // 设置生成CSS背景及其定位的文件或方式
         css: [
           [
-            path.resolve(
-              __dirname,
-              `../src/${item}/assets/css/sprites-generated.css`
-            ),
+            path.resolve(process.cwd(),`./src/${item}/assets/css/sprites-generated.css`),
             {
               format: 'function_based_template'
             }
@@ -443,7 +438,7 @@ export default function getBaseConfig({
       alias: {},
       extensions: ['.web.js', '.js', '.json', '.ts', '.tsx', '.jsx'], //自动扩展文件后缀
       //modulesDirectories: ['src', 'node_modules', path.join(__dirname, '../node_modules')],
-      modules: ['src', 'node_modules', path.join(__dirname, '../node_modules')]
+      modules: ['src', 'node_modules', path.join(process.cwd(), `src`),path.join(process.cwd(), `node_modules`)]
     },
     module: {
       loaders: []
@@ -566,15 +561,15 @@ export default function getBaseConfig({
       );
     }
       config.plugins.push(new LegionExtractStaticFilePlugin());
-    config.plugins.push(
-      new CopyWebpackPlugin([
-        {
-          from: path.resolve(__dirname, '../static'),
-          to: 'common',
-          ignore: ['.*']
-        }
-      ])
-    );
+      config.plugins.push(
+        new CopyWebpackPlugin([
+            {
+                from: path.join(process.cwd(), `static`),
+                to: 'common',
+                ignore: ['.*']
+            }
+        ])
+      );     
   }
   config.module = {
     rules: [

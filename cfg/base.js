@@ -19,9 +19,7 @@ const SpritesmithPlugin = require('webpack-spritesmith');
 const express = require('express');
 // const ProgressBarPlugin = require('progress-bar-webpack-plugin');
 // const chalk = require('chalk');
-// const HappyPack = require('happypack'),
-//   os = require('os'),
-//   happyThreadPool = HappyPack.ThreadPool({ size: os.cpus().length });
+const HappyPack = require('happypack'), os = require('os'), happyThreadPool = HappyPack.ThreadPool({ size: os.cpus().length });
 const entries = getEntries_1.getApps();
 function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPath, apps, server, babel, webpack: webpackConfig, htmlWebpackPlugin, projectType, isTslint }) {
     const __DEV__ = env_1.isDev();
@@ -231,7 +229,7 @@ function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPa
                 //     warning(`skip react-hot-loader`);
                 // }
                 loaders.push({
-                    test: /\.(jsx|js)?$/,
+                    test: /\.(jsx|js|tsx)?$/,
                     // loader: 'react-hot',
                     loader: 'react-hot-loader!babel-loader',
                     include: [path.join(process.cwd(), './src')],
@@ -342,15 +340,15 @@ function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPa
         // 雪碧图设置
         return new SpritesmithPlugin({
             src: {
-                cwd: path.resolve(__dirname, `../src/${item}/assets/images/icons/`),
+                cwd: path.resolve(process.cwd(), `./src/${item}/assets/images/icons/`),
                 glob: '**/*.png' // 匹配任意 png 图标
             },
             target: {
-                image: path.resolve(__dirname, `../src/${item}/assets/css/sprites-generated.png`),
+                image: path.resolve(process.cwd(), `./src/${item}/assets/css/sprites-generated.png`),
                 // 设置生成CSS背景及其定位的文件或方式
                 css: [
                     [
-                        path.resolve(__dirname, `../src/${item}/assets/css/sprites-generated.css`),
+                        path.resolve(process.cwd(), `./src/${item}/assets/css/sprites-generated.css`),
                         {
                             format: 'function_based_template'
                         }
@@ -395,7 +393,7 @@ function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPa
             alias: {},
             extensions: ['.web.js', '.js', '.json', '.ts', '.tsx', '.jsx'],
             //modulesDirectories: ['src', 'node_modules', path.join(__dirname, '../node_modules')],
-            modules: ['src', 'node_modules', path.join(__dirname, '../node_modules')]
+            modules: ['src', 'node_modules', path.join(process.cwd(), `src`), path.join(process.cwd(), `node_modules`)]
         },
         module: {
             loaders: []
@@ -513,7 +511,7 @@ function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPa
         config.plugins.push(new LegionExtractStaticFilePlugin_1.default());
         config.plugins.push(new CopyWebpackPlugin([
             {
-                from: path.resolve(__dirname, '../static'),
+                from: path.join(process.cwd(), `static`),
                 to: 'common',
                 ignore: ['.*']
             }
