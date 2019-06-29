@@ -229,7 +229,7 @@ function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPa
                 //     warning(`skip react-hot-loader`);
                 // }
                 loaders.push({
-                    test: /\.(jsx|js|tsx)?$/,
+                    test: /\.(jsx|js)?$/,
                     // loader: 'react-hot',
                     loader: 'react-hot-loader!babel-loader',
                     include: [path.join(process.cwd(), './src')],
@@ -240,40 +240,36 @@ function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPa
                 babel.query.plugins.push('babel-plugin-legion-hmr');
             }
         }
-        // loaders.push(
-        //     {
-        //       test: /\.js|jsx$/,
-        //       loader: 'HappyPack/loader?id=jsHappy',
-        //       exclude: /node_modules/
-        //     }
-        // )
         loaders.push({
             test: /\.(jsx|js)?$/,
-            loader: `babel-loader`,
-            query: babel.query,
+            /* loader: `babel-loader`,
+            query: babel.query, */
             include: [
                 path.join(process.cwd(), 'node_modules/basics-widget'),
                 path.join(process.cwd(), './src')
             ],
+            loader: 'HappyPack/loader?id=js',
             exclude: [nodeModulesPath]
         });
         if (projectType === 'ts') {
             loaders.push({
                 test: /\.(ts|tsx)$/,
                 include: [path.join(process.cwd(), './src')],
-                use: [
-                    {
-                        loader: 'babel-loader',
-                        query: babel.query
-                    },
-                    {
-                        loader: require.resolve('ts-loader'),
-                        options: {
-                            // disable type checker - we will use it in fork plugin
-                            transpileOnly: true
-                        }
+                /* use: [
+                  {
+                    loader: 'babel-loader',
+                    query: babel.query
+                  },
+                  {
+                    loader: require.resolve('ts-loader'),
+                    options: {
+                      // disable type checker - we will use it in fork plugin
+                        transpileOnly: true,
+                        happyPackMode: true
                     }
-                ],
+                  }
+                ], */
+                loader: 'happypack/loader?id=ts',
                 exclude: [nodeModulesPath]
             });
         }
@@ -303,6 +299,7 @@ function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPa
                     test: /\.ts|tsx$/,
                     exclude: /node_modules/,
                     enforce: 'pre',
+                    /* loader: 'HappyPack/loader?id=tslint', */
                     loader: 'tslint-loader'
                 }
             ];
@@ -429,27 +426,47 @@ function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPa
                     ? 'common/js/manifest.[chunkhash:5].js'
                     : 'common/js/manifest.js'
             }),
-            // new HappyPack({
-            //     id: 'jsHappy',
-            //     cache: true,
-            //     threadPool: happyThreadPool,
-            //     loaders: [{
-            //       path: 'babel',
-            //       query: {
-            //         cacheDirectory: '.webpack_cache',
-            //         presets: [
-            //           'es2015',
-            //           'react'
-            //         ]
-            //       }
-            //     }]
-            //   }),
+            new HappyPack({
+                id: 'js',
+                threads: os.cpus().length - 1,
+                /* threadPool: happyThreadPool, */
+                use: [
+                    {
+                        loader: `babel-loader`,
+                        query: babel.query,
+                    }
+                ]
+            }),
             //如果有单独提取css文件的话
             // new HappyPack({
             //    id: 'lessHappy',
             //    loaders: ['style','css','less']
             //     // loaders: [ 'style-loader', 'css-loader', 'less-loader' ]
             // }),
+            /* new HappyPack({
+              id: 'tslint',
+              threads:os.cpus().length-1,
+              use: [ 'tslint-loader' ],
+            }) */
+            new HappyPack({
+                id: 'ts',
+                threads: os.cpus().length - 1,
+                /* threadPool: happyThreadPool, */
+                use: [
+                    {
+                        loader: 'babel-loader',
+                        query: babel.query
+                    },
+                    {
+                        loader: require.resolve('ts-loader'),
+                        options: {
+                            // disable type checker - we will use it in fork plugin
+                            transpileOnly: true,
+                            happyPackMode: true
+                        }
+                    }
+                ],
+            }),
             new HtmlWebpackHarddiskPlugin(),
             new webpack.DefinePlugin({
                 'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || constants_1.DEV),
@@ -483,13 +500,6 @@ function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPa
         };
         config.plugins.push(new webpack.NoEmitOnErrorsPlugin());
         config.plugins.push(new webpack.HotModuleReplacementPlugin());
-        // config.plugins.push(new CopyWebpackPlugin([
-        //     {
-        //       from: path.resolve(__dirname, '../common'),
-        //       to: 'common',
-        //       ignore: ['.*']
-        //     }
-        //   ]))
     }
     else {
         config.plugins.push(new webpack.optimize.UglifyJsPlugin({
@@ -502,7 +512,29 @@ function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPa
                 drop_console: true
             },
             comments: false // 删除所有的注释
-        }));
+        })
+        /* new ParallelUglifyPlugin({
+          cacheDir: '.uglifyCache/', // Optional absolute path to use as a cache. If not provided, caching will not be used.
+          workerCount:os.cpus().length-1, // Optional int. Number of workers to run uglify. Defaults to num of cpus - 1 or asset count (whichever is smaller)
+          uglifyJS: {
+              output: {
+                  // 是否输出可读性较强的代码，即会保留空格和制表符，默认为输出，为了达到更好的压缩效果，可以设置为false
+                       beautify: false,
+               //是否保留代码中的注释，默认为保留，为了达到更好的压缩效果，可以设置为false
+                       comments: false
+                   },
+                   compress: {
+                   //是否在UglifyJS删除没有用到的代码时输出警告信息，默认为输出
+                       warnings: false,
+                   //是否删除代码中所有的console语句，默认为不删除，开启后，会删除所有的console语句
+                       drop_console: true,
+                       drop_debugger: true, // 删除所有的 `console` 语句// 还可以兼容ie浏览器
+                   //是否内嵌虽然已经定义了，但是只用到一次的变量，比如将 var x = 1; y = x, 转换成 y = 1, 默认为否
+                       collapse_vars: false,
+              }
+          },
+        }), */
+        );
         if (process.env.environment === 'report') {
             config.plugins.push(new BundleAnalyzerPlugin()
             // new webpack.optimize.DedupePlugin()//webpack1用于优化重复模块

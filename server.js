@@ -32,7 +32,7 @@ function autoOpenBrowser(open, ip, port, targetApp) {
 /**
  * 程序入口点开始方法
  */
-function start() {
+function start(cmd) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             /**
@@ -42,7 +42,7 @@ function start() {
             /**
              * 开启webpack dev server
              */
-            yield webpackDevServer_1.default();
+            yield webpackDevServer_1.default(cmd);
             /**
              * 获取配置文件
              */

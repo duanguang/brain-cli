@@ -5,13 +5,15 @@ const webpack_config_1 = require("../../webpack.config");
 const EConfig_1 = require("../settings/EConfig");
 const logs_1 = require("../utils/logs");
 const webpack = require('webpack');
-function webpackCompiler() {
+const SpeedMeasurePlugin = require("speed-measure-webpack-plugin");
+const smp = new SpeedMeasurePlugin();
+function webpackCompiler(cmd) {
     const webpackConfig = webpack_config_1.default(EConfig_1.default.getInstance());
-    // if (Array.isArray(webpackConfig.pendings)) {
-    //     webpackConfig.pendings.forEach(pending => pending());
-    // }
+    if (Array.isArray(webpackConfig.pendings)) {
+        webpackConfig.pendings.forEach(pending => pending());
+    }
     delete webpackConfig.pendings;
-    const webpackCompiler = webpack(webpackConfig);
+    const webpackCompiler = webpack((cmd && cmd.smp === 'true') ? smp.wrap(webpackConfig) : webpackConfig);
     let bundleStartTime;
     webpackCompiler.plugin('compile', () => {
         logs_1.log('打包中...');

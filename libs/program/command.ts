@@ -60,14 +60,18 @@ export class Command {
   dev() {
     this.program
       .command('dev')
-      .option('--apps [value]', 'webpack Build a specified app name')
+      .option('--apps [value]','webpack Build a specified app name')
+      .option(
+        '--smp [value]',
+        'Whether to enable  Compile time statistics module'
+      )
       .description('start webpack dev server for develoment mode')
       .action(options => {
         let env = 'dev';
         this.setProcessEnv(env);
         this.setApps(options);
         log(`当前编译环境为: ${process.env.NODE_ENV} [${this.env[env]}]`);
-        programInit(env);
+        programInit(env,{smp:options['smp']});
       });
   }
   start() {
@@ -111,6 +115,10 @@ export class Command {
         '--cdn [value]',
         'The resource distribution server'
       )
+      .option(
+        '--smp [value]',
+        'Whether to enable  Compile time statistics module'
+      )
       .description('webpack building')
       .action((env = 'prod', options) => {
         this.setProcessEnv(options.S ? 'report' : env);
@@ -121,11 +129,11 @@ export class Command {
         
         process.env.cdnRelease = options['cdn']
         ? options['cdn']
-        : '';
+          : '';
         log(
           `当前编译环境为: ${process.env.NODE_ENV} [${this.env[env] || env}]`
         );
-        programInit(process.env.NODE_ENV);
+        programInit(process.env.NODE_ENV,options);
       });
   }
   command() {

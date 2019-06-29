@@ -9,11 +9,11 @@ const eConfig = EConfig_1.default.getInstance();
 /**
  * 启动webpack服务器
  */
-function startWebpackDevServer() {
+function startWebpackDevServer(cmd) {
     return new Promise((resolve, reject) => {
         const { server } = eConfig;
         const config = webpack_config_1.default(eConfig);
-        new WebpackDevServer(webpackCompiler_1.default(), config.devServer).listen(eConfig.defaultPort, server, err => {
+        new WebpackDevServer(webpackCompiler_1.default(cmd), config.devServer).listen(eConfig.defaultPort, server, err => {
             if (err) {
                 reject(err);
             }

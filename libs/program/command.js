@@ -74,13 +74,14 @@ class Command {
         this.program
             .command('dev')
             .option('--apps [value]', 'webpack Build a specified app name')
+            .option('--smp [value]', 'Whether to enable  Compile time statistics module')
             .description('start webpack dev server for develoment mode')
             .action(options => {
             let env = 'dev';
             this.setProcessEnv(env);
             this.setApps(options);
             logs_1.log(`当前编译环境为: ${process.env.NODE_ENV} [${this.env[env]}]`);
-            index_1.default(env);
+            index_1.default(env, { smp: options['smp'] });
         });
     }
     start() {
@@ -115,6 +116,7 @@ class Command {
             .option('--apps [value]', 'webpack Build a specified app name')
             .option('--webpackJsonp [value]', 'webpack Generate a specified webpackJsonp name')
             .option('--cdn [value]', 'The resource distribution server')
+            .option('--smp [value]', 'Whether to enable  Compile time statistics module')
             .description('webpack building')
             .action((env = 'prod', options) => {
             this.setProcessEnv(options.S ? 'report' : env);
@@ -126,7 +128,7 @@ class Command {
                 ? options['cdn']
                 : '';
             logs_1.log(`当前编译环境为: ${process.env.NODE_ENV} [${this.env[env] || env}]`);
-            index_1.default(process.env.NODE_ENV);
+            index_1.default(process.env.NODE_ENV, options);
         });
     }
     command() {

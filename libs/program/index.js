@@ -4,8 +4,10 @@ const server_1 = require("../../server");
 const EConfig_1 = require("../settings/EConfig");
 const webpack_config_1 = require("../../webpack.config");
 const webpack = require("webpack");
+const SpeedMeasurePlugin = require("speed-measure-webpack-plugin");
+const smp = new SpeedMeasurePlugin();
 // import ICommand = commander.ICommand;
-function programInit(env) {
+function programInit(env, cmd) {
     if (env === 'dev') {
         /**
          * 在开发环境中, 允许直接配置config和ignoreConfig并更新指定常量区域
@@ -13,7 +15,7 @@ function programInit(env) {
         // program.config && (configFileList[0] = program.config);
         // program.ignoreConfig && (configFileList[1] = program.ignoreConfig);
         //noinspection JSIgnoredPromiseFromCall
-        server_1.default();
+        server_1.default(cmd);
     }
     else if (env === 'production') {
         const eConfig = EConfig_1.default.getInstance();
@@ -22,7 +24,7 @@ function programInit(env) {
             webpackConfig.pendings.forEach(pending => pending());
         }
         delete webpackConfig.pendings;
-        webpack(webpackConfig, function (err, stats) {
+        webpack((cmd && cmd['smp'] === 'true') ? smp.wrap(webpackConfig) : webpackConfig, function (err, stats) {
             if (err)
                 throw err;
             process.stdout.write(stats.toString({

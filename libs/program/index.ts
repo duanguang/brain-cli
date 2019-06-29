@@ -4,8 +4,10 @@ import * as path from 'path';
 import getConfig from '../../webpack.config';
 import webpack = require('webpack');
 import commander = require('commander');
+const SpeedMeasurePlugin = require("speed-measure-webpack-plugin");
+const smp = new SpeedMeasurePlugin();
 // import ICommand = commander.ICommand;
-export default function programInit(env: string) {
+export default function programInit(env: string,cmd?:{smp:'true'|'false'}) {
     if (env==='dev') {
         /**
          * 在开发环境中, 允许直接配置config和ignoreConfig并更新指定常量区域
@@ -13,7 +15,7 @@ export default function programInit(env: string) {
         // program.config && (configFileList[0] = program.config);
         // program.ignoreConfig && (configFileList[1] = program.ignoreConfig);
         //noinspection JSIgnoredPromiseFromCall
-        start();
+        start(cmd);
     }
     else if (env==='production') {
         const eConfig = EConfig.getInstance();
@@ -22,7 +24,7 @@ export default function programInit(env: string) {
             webpackConfig.pendings.forEach(pending => pending());
         }
         delete webpackConfig.pendings;
-        webpack(webpackConfig, function (err, stats) {
+        webpack((cmd&&cmd['smp']==='true')?smp.wrap(webpackConfig):webpackConfig, function (err, stats) {
             if (err) throw err;
             process.stdout.write(stats.toString({
                     colors: true,

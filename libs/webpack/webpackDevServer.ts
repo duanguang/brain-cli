@@ -8,11 +8,11 @@ const eConfig = EConfig.getInstance();
 /**
  * 启动webpack服务器
  */
-export default function startWebpackDevServer() {
+export default function startWebpackDevServer(cmd?:{smp:'true'|'false'}) {
   return new Promise((resolve, reject) => {
     const { server } = eConfig;
     const config = webpackConfig(eConfig);
-    new WebpackDevServer(webpackCompiler(), config.devServer).listen(
+    new WebpackDevServer(webpackCompiler(cmd), config.devServer).listen(
       eConfig.defaultPort,
       server,
       err => {
