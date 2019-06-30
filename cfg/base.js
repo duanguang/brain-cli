@@ -154,10 +154,10 @@ function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPa
                 //             {loader:`css-loader`},'less-loader',postcss_loader
                 //         ]
                 //       }),
-                include: [path.resolve(nodeModulesPath, 'antd')]
+                include: [path.resolve(nodeModulesPath, 'antd'), nodeModulesPath]
             },
             {
-                test: /\.css$/,
+                test: new RegExp(`^(?!.*\\.modules).*\\.css`),
                 use: generateLoaders(null, null, postcss_loader),
                 // use:ExtractTextPlugin.extract(
                 //     {
@@ -169,8 +169,14 @@ function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPa
                 exclude: [nodeModulesPath]
             },
             {
-                test: /\.less/,
-                use: generateLoaders(CSS_MODULE_OPTION, 'less-loader', postcss_loader),
+                /* test: /\.css$/, */
+                test: new RegExp(`^(.*\\.modules).*\\.css`),
+                use: generateLoaders(CSS_MODULE_OPTION, null, postcss_loader),
+                exclude: [nodeModulesPath]
+            },
+            {
+                test: new RegExp(`^(?!.*\\.modules).*\\.less`),
+                use: generateLoaders(null, 'less-loader', postcss_loader),
                 // use:ExtractTextPlugin.extract(
                 //     {
                 //         fallback: 'style-loader',
@@ -179,6 +185,12 @@ function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPa
                 //         ]
                 //       }
                 // ),
+                exclude: [nodeModulesPath]
+            },
+            {
+                /* test: /\.less/, */
+                test: new RegExp(`^(.*\\.modules).*\\.less`),
+                use: generateLoaders(CSS_MODULE_OPTION, 'less-loader', postcss_loader),
                 exclude: [nodeModulesPath]
             },
         ];

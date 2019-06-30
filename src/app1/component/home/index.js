@@ -2,13 +2,14 @@
  * @Author: duanguang 
  * @Date: 2018-05-11 10:49:10 
  * @Last Modified by: duanguang
- * @Last Modified time: 2019-06-30 16:14:32
+ * @Last Modified time: 2019-06-30 21:15:17
  */
 import React from "react";
-import styles from "./index.less";
-import './style.css';
+import styles from "./index.modules.less";
+import   './style.css';
+import styleCss from './style.modules.css'
 import test from '../../assets/css/test.less'
-console.log(test,styles)
+console.log(test,styleCss)
 import ID from '../../public/images/home/ID.png'
 export default class HomeManage extends React.Component {
   constructor(props) {
@@ -38,10 +39,13 @@ export default class HomeManage extends React.Component {
           <section className={styles.content}>
             <div className={styles.title}>我们不仅仅是设计师{process.env.environment}</div>
             <div className={styles.slogan}>
-              <p className='size'>
+              <p className='style'>
                 棒谷用户体验中心创立于2018年6月28日，为全球首家跨境电商用户体验中心，
               </p>
-              <p className={test.test}>我们愿景是成为全球TOP级别客户满意的公司</p>
+              <p className={`${styleCss.modules}`}>
+                棒谷用户体验中心创立于2018年6月28日，为全球首家跨境电商用户体验中心，
+              </p>
+              <p className={'test'}>我们愿景是成为全球TOP级别客户满意的公司</p>
             </div>
             <div className={styles.design}>
               <div className={styles.cate}>
@@ -52,7 +56,7 @@ export default class HomeManage extends React.Component {
                       <p className={styles["intro-title"]}>交互设计</p>
                       <p className={styles.small}>Interaction Design</p>
                     </div>
-                    <span>解析产品需求，以人为本分析用户场景</span>
+                    <span className='size1'>解析产品需求，以人为本分析用户场景</span>
                     <span>在可用性和易用性中寻找设计平衡</span>
                   </div>
                 </div>
