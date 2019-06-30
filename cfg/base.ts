@@ -123,7 +123,7 @@ export default function getBaseConfig({
         style[0] = Object.assign(style[0], { options: cssModule });
       }
       if (loader) {
-        style.push(loader);
+          style.push(loader);
       }
       if (loaderOptions) {
         style.push(loaderOptions);
@@ -155,7 +155,6 @@ export default function getBaseConfig({
         })
       );
     }
-
     return [
       {
         test: /\.css$/,
@@ -218,7 +217,7 @@ export default function getBaseConfig({
         //       }
         // ),
         exclude: [nodeModulesPath]
-      }
+      },
     ];
   }
   function getJsonLoaders() {

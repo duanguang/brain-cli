@@ -65,13 +65,17 @@ export class Command {
         '--smp [value]',
         'Whether to enable  Compile time statistics module'
       )
+      .option(
+        '--cssModules [value]',
+        'Whether to enable cssModules'
+      )
       .description('start webpack dev server for develoment mode')
       .action(options => {
         let env = 'dev';
         this.setProcessEnv(env);
         this.setApps(options);
         log(`当前编译环境为: ${process.env.NODE_ENV} [${this.env[env]}]`);
-        programInit(env,{smp:options['smp']});
+        programInit(env,{smp:options['smp'],cssModules:options['cssModules']});
       });
   }
   start() {
@@ -106,7 +110,6 @@ export class Command {
         'webpack build size analyzer tool, support size: default analyzer'
       )
       .option('--apps [value]', 'webpack Build a specified app name')
-      .option('--apps [value]', 'webpack Build a specified app name')
       .option(
         '--webpackJsonp [value]',
         'webpack Generate a specified webpackJsonp name'
@@ -118,6 +121,10 @@ export class Command {
       .option(
         '--smp [value]',
         'Whether to enable  Compile time statistics module'
+      )
+      .option(
+        '--cssModules [value]',
+        'Whether to enable cssModules'
       )
       .description('webpack building')
       .action((env = 'prod', options) => {

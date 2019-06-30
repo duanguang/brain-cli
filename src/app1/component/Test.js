@@ -1,4 +1,5 @@
 import React from 'react';
+import '../assets/css/test.less'
 // import 'index.css'
 export default class Test extends React.Component{
     constructor(props) {
@@ -18,7 +19,7 @@ export default class Test extends React.Component{
      render(){
         return(
             <div className="bg">2111322
-                <p onClick={this.handleClick.bind(this)}>
+                <p className='test' onClick={this.handleClick.bind(this)}>
                     You  this. Click to toggle.state:{this.state.count}
                 </p>
             </div>

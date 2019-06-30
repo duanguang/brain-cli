@@ -75,13 +75,14 @@ class Command {
             .command('dev')
             .option('--apps [value]', 'webpack Build a specified app name')
             .option('--smp [value]', 'Whether to enable  Compile time statistics module')
+            .option('--cssModules [value]', 'Whether to enable cssModules')
             .description('start webpack dev server for develoment mode')
             .action(options => {
             let env = 'dev';
             this.setProcessEnv(env);
             this.setApps(options);
             logs_1.log(`当前编译环境为: ${process.env.NODE_ENV} [${this.env[env]}]`);
-            index_1.default(env, { smp: options['smp'] });
+            index_1.default(env, { smp: options['smp'], cssModules: options['cssModules'] });
         });
     }
     start() {
@@ -113,10 +114,10 @@ class Command {
             .command('build [env]')
             .option('-s', 'webpack build size analyzer tool, support size: default analyzer')
             .option('--apps [value]', 'webpack Build a specified app name')
-            .option('--apps [value]', 'webpack Build a specified app name')
             .option('--webpackJsonp [value]', 'webpack Generate a specified webpackJsonp name')
             .option('--cdn [value]', 'The resource distribution server')
             .option('--smp [value]', 'Whether to enable  Compile time statistics module')
+            .option('--cssModules [value]', 'Whether to enable cssModules')
             .description('webpack building')
             .action((env = 'prod', options) => {
             this.setProcessEnv(options.S ? 'report' : env);

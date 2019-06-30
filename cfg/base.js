@@ -180,7 +180,7 @@ function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPa
                 //       }
                 // ),
                 exclude: [nodeModulesPath]
-            }
+            },
         ];
     }
     function getJsonLoaders() {

@@ -19,6 +19,14 @@ function programInit(env, cmd) {
     }
     else if (env === 'production') {
         const eConfig = EConfig_1.default.getInstance();
+        if (cmd.cssModules !== undefined) {
+            if (cmd.cssModules === 'true') {
+                eConfig.webpack.cssModules.enable = true;
+            }
+            if (cmd.cssModules === 'false') {
+                eConfig.webpack.cssModules.enable = false;
+            }
+        }
         const webpackConfig = webpack_config_1.default(eConfig);
         if (Array.isArray(webpackConfig.pendings)) {
             webpackConfig.pendings.forEach(pending => pending());

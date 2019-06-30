@@ -24,7 +24,7 @@ function autoOpenBrowser(open: boolean, ip: string, port: number, targetApp: str
 /**
  * 程序入口点开始方法
  */
-export default async function start(cmd?:{smp:'true'|'false'}) {
+export default async function start(cmd?:{smp:'true'|'false',cssModules:'true'|'false'}) {
     try {
         /**
          * 按需创建编译webpack dll manifest文件

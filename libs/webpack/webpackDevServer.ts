@@ -8,9 +8,17 @@ const eConfig = EConfig.getInstance();
 /**
  * 启动webpack服务器
  */
-export default function startWebpackDevServer(cmd?:{smp:'true'|'false'}) {
+export default function startWebpackDevServer(cmd?:{smp:'true'|'false',cssModules:'true'|'false'}) {
   return new Promise((resolve, reject) => {
     const { server } = eConfig;
+    if (cmd.cssModules !== undefined) {
+      if (cmd.cssModules === 'true') {
+        eConfig.webpack.cssModules.enable = true
+      }
+      if (cmd.cssModules === 'false') {
+        eConfig.webpack.cssModules.enable = false
+      }
+    }
     const config = webpackConfig(eConfig);
     new WebpackDevServer(webpackCompiler(cmd), config.devServer).listen(
       eConfig.defaultPort,
