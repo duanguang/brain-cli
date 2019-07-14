@@ -298,7 +298,7 @@ export default function getBaseConfig({
             path.join(process.cwd(), 'node_modules/basics-widget'),
             path.join(process.cwd(), './src')
         ],
-        loader: 'HappyPack/loader?id=js',
+        loader: 'happypack/loader?id=js',
         exclude: [nodeModulesPath]
     });
     if (projectType === 'ts') {
@@ -350,7 +350,7 @@ export default function getBaseConfig({
           test: /\.ts|tsx$/,
           exclude: /node_modules/,
           enforce: 'pre',
-          /* loader: 'HappyPack/loader?id=tslint', */
+          /* loader: 'happypack/loader?id=tslint', */
           loader: 'tslint-loader'
         }
       ];
