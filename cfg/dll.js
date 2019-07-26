@@ -9,7 +9,7 @@ const webpackDllManifest = WebpackDllManifest_1.default.getInstance();
 const distPath = webpackDllManifest.distPath;
 const isVendorExist = vendors && vendors.length;
 if (isVendorExist) {
-    // const distFileName = webpackDllManifest.getVendorsHash();
+    const distFileName = webpackDllManifest.getVendorsHash();
     module.exports = {
         entry: {
             vendors
@@ -17,13 +17,13 @@ if (isVendorExist) {
         output: {
             path: distPath,
             // filename: `${distFileName}.js`,
-            filename: `vendor.dll.js`,
+            filename: `vendor.dll.${distFileName}.js`,
             /**
              * output.library
              * 将会定义为 window.${output.library}
              * 在这次的例子中，将会定义为`window.vendor_library`
              */
-            library: '[name]_library',
+            library: '[name]_[hash]_library',
         },
         plugins: [
             new webpack.DllPlugin({
@@ -39,7 +39,7 @@ if (isVendorExist) {
                  * dll bundle 输出到那个全局变量上
                  * 和 output.library 一样即可。
                  */
-                name: '[name]_library'
+                name: '[name]_[hash]_library'
             }),
             new webpack.optimize.UglifyJsPlugin({
                 compress: {

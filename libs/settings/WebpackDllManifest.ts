@@ -60,7 +60,7 @@ export default class WebpackDllManifest {
         } catch (e) {
             return true;
         }
-    }
+    }re
 
     public resolveManifestPath() {
         /**
@@ -68,7 +68,7 @@ export default class WebpackDllManifest {
          */
         try {
             // return require.resolve(path.resolve(this.distPath, this.getVendorsHash() + `.js`))
-            return require.resolve(path.resolve(this.distPath, 'vendor.dll' + `.js`))
+            return require.resolve(path.resolve(this.distPath, `vendor.dll.${this.getVendorsHash()}` + `.js`))
         } catch (e) {
             return null;
         }
