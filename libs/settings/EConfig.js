@@ -17,7 +17,7 @@ class EConfig {
         this.webpack = {
             dllConfig: {
                 vendors: ['react',
-                    'react-dom', 'invariant']
+                    'react-dom', 'invariant'],
             },
             disableReactHotLoader: false,
             disableHappyPack: false,

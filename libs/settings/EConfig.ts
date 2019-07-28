@@ -50,7 +50,7 @@ export default class EConfig {
     } = {
         dllConfig: {
             vendors: ['react',
-            'react-dom','invariant']
+            'react-dom','invariant'],
         },
         disableReactHotLoader: false,
         disableHappyPack:false,
