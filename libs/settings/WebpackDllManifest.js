@@ -28,18 +28,23 @@ class WebpackDllManifest {
                  */
                 return prev + vendorName + vendorVersion;
             }, ``);
-            this.hashValue = hash_1.shortHash(identifier);
+            this.hashValue = hash_1.shortHashMd5(identifier);
         }
         return this.hashValue;
     }
     static getVendorVersion(vendorName, baseDir = process.cwd()) {
         const packageJson = node_1.emulateNodeRecursiveLookup(baseDir, `node_modules/${vendorName}/package.json`);
+        let vendorVersion = '';
         if (!packageJson) {
-            throw new Error(`vendor[${vendorName}] package not found`);
+            console.warn(`vendor[${vendorName}] package not found`);
+            // throw new Error(`vendor[${vendorName}] package not found`);
         }
-        const vendorVersion = packageJson.version;
+        else {
+            vendorVersion = packageJson.version;
+        }
         if (!vendorVersion) {
-            throw new Error(`vendor[${vendorName}] version is empty`);
+            console.warn(`vendor[${vendorName}] version is empty`);
+            //throw new Error(`vendor[${vendorName}] version is empty`);
         }
         return vendorVersion;
     }

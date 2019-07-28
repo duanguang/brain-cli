@@ -25,7 +25,7 @@ if (isVendorExist) {
              * 将会定义为 window.${output.library}
              * 在这次的例子中，将会定义为`window.vendor_library`
              */
-           library: '[name]_[hash]_library',
+           library: `[name]_${distFileName}_library`,
            /* library: '[name]_library', */
         },
         plugins: [
@@ -42,7 +42,7 @@ if (isVendorExist) {
                  * dll bundle 输出到那个全局变量上
                  * 和 output.library 一样即可。
                  */
-                name: '[name]_[hash]_library'
+                name: `[name]_${distFileName}_library`
             }),
             new webpack.optimize.UglifyJsPlugin({
                 compress: {

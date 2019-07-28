@@ -1,5 +1,5 @@
 import EConfig from './EConfig';
-import {shortHash} from '../utils/hash';
+import {shortHash,shortHashMd5} from '../utils/hash';
 import * as fs from 'fs';
 import {WEBPACK_DLL_MANIFEST_DIST} from '../constants/constants';
 import * as path from 'path';
@@ -37,19 +37,24 @@ export default class WebpackDllManifest {
                  */
                 return prev + vendorName + vendorVersion;
             }, ``);
-            this.hashValue = shortHash(identifier);
+            this.hashValue = shortHashMd5(identifier);
         }
         return this.hashValue;
     }
 
     private static getVendorVersion(vendorName: string, baseDir = process.cwd()) {
-        const packageJson = emulateNodeRecursiveLookup(baseDir, `node_modules/${vendorName}/package.json`);
+        const packageJson = emulateNodeRecursiveLookup(baseDir,`node_modules/${vendorName}/package.json`);
+        let vendorVersion =''
         if (!packageJson) {
-            throw new Error(`vendor[${vendorName}] package not found`);
+            console.warn(`vendor[${vendorName}] package not found`)
+            // throw new Error(`vendor[${vendorName}] package not found`);
         }
-        const vendorVersion = packageJson.version;
+        else {
+            vendorVersion = packageJson.version;
+        }
         if (!vendorVersion) {
-            throw new Error(`vendor[${vendorName}] version is empty`);
+            console.warn(`vendor[${vendorName}] version is empty`)
+            //throw new Error(`vendor[${vendorName}] version is empty`);
         }
         return vendorVersion;
     }
