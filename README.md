@@ -34,9 +34,110 @@
 - brain-cli build prod --apps=app1,app2 (编译指定入口文件)
 - brain-cli build test --apps=app1,app2 (编译指定入口文件)
 
+## .e-config
+```js
+const ProgressBarPlugin = require('progress-bar-webpack-plugin');
+const chalk = require('chalk');
+module.exports = {
+  name: 'test',
+  open: true,
+  defaultPort: 8001,
+  projectType: 'ts',
+  server: '0.0.0.0',
+  imageInLineSize: 8192,
+  isTslint: true,
+  publicPath: '/public/',
+  devServer: {
+    noInfo: true,
+    proxy: {
+      // '/cia-j': {
+      //     target: 'http://192.168.1.181:8081',
+      //         onProxyReq: (proxyReq, req, res) => {
+      //         }
+      // },
+      // '/main': {
+      //     target: 'https://xxx.com/',
+      //     //changeOrigin: true,
+      //     secure: false,
+      //         onProxyReq: (proxyReq, req, res) => {
+      //             proxyReq.setHeader('host', 'xxx.com')
+      //             proxyReq.setHeader('cookie', ' a=1111')
+      //         }
+      // },
+    }
+  },
+  postcss: {
+    // px2rem:{
+    //     rootValue: 75,
+    //     unitPrecision: 3,
+    // },
+    autoprefixer: {
+      /**
+       * 参考dora配置
+       */
+      browsers: [
+        'last 2 versions',
+        // "Firefox ESR",
+        'Firefox >= 15',
+        '> 1%',
+        'ie >= 8',
+        'not ie<=8'
+      ]
+    }
+  },
+  webpack: {
+    dllConfig: {
+       vendors: ['react','react-dom','invariant'],
+       /* vendors: {cdn:'https://hoolinks.com',FrameList:['react','react-dom','invariant']}, */
+    /* framework:['react','react-dom'] */ // 支持自定义dll 包
+      /* framework:{cdn:'https://hoolinks1.com',FrameList:['react','react-dom']} */
+    },
+    disableReactHotLoader: false,
+    commonsChunkPlugin: ['react', 'react-dom', 'invariant'],
+    disableHappyPack: false,
+    cssModules: {
+      enable: true // 默认为 false，如需使用 css modules 功能，则设为 true
+    },
+    plugins: [
+      new ProgressBarPlugin({
+        summary: false,
+        format:
+          `${chalk.green.bold('build [:bar]')}` +
+          chalk.green.bold(':percent') +
+          ' (:elapsed seconds)',
+        summaryContent: ''
+      })
+    ]
+  },
+  babel: {
+    query: {
+      presets: ['es2015', 'stage-2', 'react'],
+      cacheDirectory: true,
+      plugins: [
+        'add-module-exports',
+        'transform-runtime',
+        'transform-decorators-legacy'
+        // [
+        //     "import",
+        //     [
+        //         {libraryName: "@kad/e-antd"},
+        //         {libraryName: "antd", style: true}
+        //     ]
+        // ]
+      ]
+    }
+  },
+  htmlWebpackPlugin: {
+    title: 'webApp' /**/
+  },
+  apps: ['app1', 'app2', 'app3']
+};
+```
 #### webpack dll build
 - brain-cli dll
 
+## changeLog
+- v0.3.21 新增dll 文件支持指定资源发布路径，默认没有指定情况下，去相对或者模块cdn参数值
 ## License
 [MIT](LICENSE)
 
