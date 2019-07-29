@@ -40,7 +40,7 @@ export default class EConfig {
 
     public webpack: {
         dllConfig: {
-            vendors: string[]
+            vendors: string[] | { cdn?: string;FrameList:string[]}
         },
         disableReactHotLoader: boolean,
         commonsChunkPlugin?:ICommonsChunkPlugin,
@@ -49,8 +49,7 @@ export default class EConfig {
         plugins?:[] //插件
     } = {
         dllConfig: {
-            vendors: ['react',
-            'react-dom','invariant'],
+            vendors: ['react','react-dom','invariant'],
         },
         disableReactHotLoader: false,
         disableHappyPack:false,
@@ -96,6 +95,9 @@ export default class EConfig {
     private init() {
         let finalConfig = this.getFinalConfig();
         EConfig.validateConfig(finalConfig);
+        if (finalConfig.webpack.dllConfig && finalConfig.webpack.dllConfig.vendors && !Array.isArray(finalConfig.webpack.dllConfig.vendors)) {
+            delete this.webpack.dllConfig.vendors
+        }
         deepAssign(this, finalConfig);
     }
 

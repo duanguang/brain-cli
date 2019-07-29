@@ -107,6 +107,7 @@ class Command {
              * 按需创建编译webpack dll manifest文件
              */
             yield webpackDllCompiler_1.default();
+            yield webpackDllCompiler_1.webpackDllPluginsCompiler();
         }));
     }
     build() {

@@ -5,7 +5,7 @@ const chalk = require('chalk');
 import programInit from './index';
 import { PRODUCTION, DEV, DIST, TEST, REPORT } from '../constants/constants';
 import { log } from '../utils/logs';
-import webpackDllCompiler from '../webpack/webpackDllCompiler';
+import webpackDllCompiler, { webpackDllPluginsCompiler } from '../webpack/webpackDllCompiler';
 export class Command {
   program: any;
   commands = ['build', 'start', 'dev', 'dll'];
@@ -100,6 +100,7 @@ export class Command {
          * 按需创建编译webpack dll manifest文件
          */
         await webpackDllCompiler();
+        await webpackDllPluginsCompiler()
       });
   }
   build() {

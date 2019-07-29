@@ -16,8 +16,7 @@ class EConfig {
         this.isTslint = true;
         this.webpack = {
             dllConfig: {
-                vendors: ['react',
-                    'react-dom', 'invariant'],
+                vendors: ['react', 'react-dom', 'invariant'],
             },
             disableReactHotLoader: false,
             disableHappyPack: false,
@@ -37,6 +36,9 @@ class EConfig {
     init() {
         let finalConfig = this.getFinalConfig();
         EConfig.validateConfig(finalConfig);
+        if (finalConfig.webpack.dllConfig && finalConfig.webpack.dllConfig.vendors && !Array.isArray(finalConfig.webpack.dllConfig.vendors)) {
+            delete this.webpack.dllConfig.vendors;
+        }
         deepAssign(this, finalConfig);
     }
     getFinalConfig() {

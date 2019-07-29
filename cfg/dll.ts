@@ -7,14 +7,13 @@ const {webpack:{dllConfig:{vendors}}} = EConfig.getInstance();
 const webpackDllManifest = WebpackDllManifest.getInstance();
 const distPath = webpackDllManifest.distPath;
 
-
-const isVendorExist = vendors && vendors.length;
-
+const vendorsFrame = (typeof vendors==='object'&&!Array.isArray(vendors))?vendors.FrameList:Array.isArray(vendors)?vendors:[]
+const isVendorExist = vendorsFrame && vendorsFrame.length;
 if (isVendorExist) {
     const distFileName = webpackDllManifest.getVendorsHash();
     module.exports = {
         entry: {
-            vendors
+            vendors:vendorsFrame
         },
         output: {
             path: distPath,
