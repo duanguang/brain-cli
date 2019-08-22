@@ -37,7 +37,7 @@ function webpackDllCompiler() {
         }
         if (requireCompile) {
             logs_1.log(`create webpack dll manifest [vendors]`);
-            //console.info('create webpack dll manifest');
+            // console.info('create webpack dll manifest');
             const compiler = webpack(dllConfig);
             compiler.run((err, stats) => {
                 if (err) {
@@ -49,7 +49,7 @@ function webpackDllCompiler() {
         }
         else {
             logs_1.log('skip webpack dll manifest [vendors]');
-            //console.info('skip webpack dll manifest');
+            // console.info('skip webpack dll manifest');
             resolve();
         }
     });

@@ -282,9 +282,16 @@ export default function getBaseConfig({
         loaders.push({
           test: /\.(jsx|js)?$/,
           // loader: 'react-hot',
-          loader: 'react-hot-loader!babel-loader',
+          loader: 'babel-loader',
           include: [path.join(process.cwd(), './src')],
-          exclude: [nodeModulesPath] //优化构建效率
+          exclude: [nodeModulesPath], //优化构建效率
+          options: {
+            // This is a feature of `babel-loader` for webpack (not Babel itself).
+            // It enables caching results in ./node_modules/.cache/babel-loader/
+            // directory for faster rebuilds.
+            cacheDirectory: true,
+            plugins: ['react-hot-loader/babel'],
+          },
         });
       } else {
         babel.query.plugins.push('babel-plugin-legion-hmr');

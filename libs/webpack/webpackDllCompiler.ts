@@ -16,7 +16,7 @@ export default function webpackDllCompiler(): Promise<any> {
         }
         if (requireCompile) {
             log(`create webpack dll manifest [vendors]`);
-            //console.info('create webpack dll manifest');
+            // console.info('create webpack dll manifest');
             const compiler = webpack(dllConfig);
             compiler.run((err, stats) => {
                 if (err) {
@@ -28,7 +28,7 @@ export default function webpackDllCompiler(): Promise<any> {
         }
         else {
             log('skip webpack dll manifest [vendors]')
-            //console.info('skip webpack dll manifest');
+            // console.info('skip webpack dll manifest');
             resolve();
         }
     });
