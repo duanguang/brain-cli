@@ -17,7 +17,17 @@ export const configFileList = [PROJECT_USER_CONFIG_FILE, PROJECT_USER_CONFIG_IGN
  
  interface ICssModules{
     enable:boolean
- }
+}
+interface extendConfig{
+    isDev: boolean,
+    loaderType: 'HotLoader' | 'JsLoader' | 'TsLoader' | 'StyleLoader',
+    projectType: 'ts' | 'js',
+    transform?: {
+       readonly cssModule: Object,
+       readonly LoaderOptions: Object,
+       execution:(cssModule,loader,LoaderOptions)=>any
+    }
+}
 export default class EConfig {
     public name: string;
     public open: boolean;
@@ -25,7 +35,7 @@ export default class EConfig {
     public server: string;
     public imageInLineSize: number;
     public publicPath: string;
-    public projectType :string='js';
+    public projectType :'ts'|'js'='js';
     public isTslint:boolean = true
     public devServer: {
         noInfo: boolean,
@@ -45,7 +55,13 @@ export default class EConfig {
         disableReactHotLoader: boolean,
         commonsChunkPlugin?:ICommonsChunkPlugin,
         disableHappyPack:boolean,//是否禁用多线程,
-        cssModules:ICssModules,
+        cssModules: ICssModules,
+
+        /**
+         *
+         * 扩展loader加载器
+         */
+        extend?:(loaders:any[], config:extendConfig)=>void,
         plugins?:[] //插件
     } = {
         dllConfig: {

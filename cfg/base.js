@@ -119,19 +119,7 @@ function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPa
                 canPrint: true
             }));
         }
-        return [
-            {
-                test: /\.css$/,
-                use: generateLoaders(),
-                // use: ExtractTextPlugin.extract(
-                //     {
-                //         fallback: 'style-loader',
-                //         use: [
-                //           { loader: 'css-loader' },
-                //         ]
-                //       }),
-                include: [nodeModulesPath]
-            },
+        const loaders = [
             {
                 test: /\.less/,
                 use: generateLoaders(CSS_MODULE_OPTION, 'less-loader', postcss_loader),
@@ -154,7 +142,7 @@ function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPa
                 //             {loader:`css-loader`},'less-loader',postcss_loader
                 //         ]
                 //       }),
-                include: [path.resolve(nodeModulesPath, 'antd'), nodeModulesPath]
+                include: [path.resolve(nodeModulesPath, 'antd')]
             },
             {
                 test: new RegExp(`^(?!.*\\.modules).*\\.css`),
@@ -194,6 +182,17 @@ function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPa
                 exclude: [nodeModulesPath]
             },
         ];
+        if (webpackConfig.extend && typeof webpackConfig.extend === 'function') {
+            // @ts-ignore
+            webpackConfig.extend && webpackConfig.extend(loaders, {
+                isDev: __DEV__, loaderType: 'StyleLoader', projectType, transform: {
+                    cssModule: CSS_MODULE_OPTION,
+                    LoaderOptions: postcss_loader,
+                    execution: generateLoaders
+                }
+            });
+        }
+        return loaders;
     }
     function getJsonLoaders() {
         return [
@@ -247,6 +246,15 @@ function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPa
                     include: [path.join(process.cwd(), './src')],
                     exclude: [nodeModulesPath] //优化构建效率
                 });
+                /* loaders.push({
+                            test: /\.(jsx|js)?$/,
+                            // loader: 'react-hot',
+                            loader: 'react-hot-loader!babel-loader',
+                            include: [path.join(process.cwd(), 'node_modules/hoolinks-legion-design')]
+                }); */
+                if (webpackConfig.extend && typeof webpackConfig.extend === 'function') {
+                    webpackConfig.extend && webpackConfig.extend(loaders, { isDev: __DEV__, loaderType: 'HotLoader', projectType });
+                }
             }
             else {
                 babel.query.plugins.push('babel-plugin-legion-hmr');
@@ -263,6 +271,16 @@ function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPa
             loader: 'happypack/loader?id=js',
             exclude: [nodeModulesPath]
         });
+        /* loaders.push({
+          test: /\.(jsx|js)?$/,
+          include: [
+              path.join(process.cwd(), 'node_modules/hoolinks-legion-design'),
+          ],
+          loader: 'happypack/loader?id=js',
+        }); */
+        if (webpackConfig.extend && typeof webpackConfig.extend === 'function') {
+            webpackConfig.extend && webpackConfig.extend(loaders, { isDev: __DEV__, loaderType: 'JsLoader', projectType });
+        }
         if (projectType === 'ts') {
             loaders.push({
                 test: /\.(ts|tsx)$/,
@@ -284,6 +302,14 @@ function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPa
                 loader: 'happypack/loader?id=ts',
                 exclude: [nodeModulesPath]
             });
+            if (webpackConfig.extend && typeof webpackConfig.extend === 'function') {
+                webpackConfig.extend && webpackConfig.extend(loaders, { isDev: __DEV__, loaderType: 'TsLoader', projectType });
+            }
+            /* loaders.push({
+              test: /\.(ts|tsx)$/,
+              include: [path.join(process.cwd(), 'node_modules/hoolinks-legion-design')],
+              loader: 'happypack/loader?id=ts',
+            }); */
         }
         return loaders;
     }
