@@ -53,10 +53,22 @@ export default class EConfig {
             vendors: string[] | { cdn?: string;FrameList:string[]}
         },
         disableReactHotLoader: boolean,
-        commonsChunkPlugin?:ICommonsChunkPlugin,
+        commonsChunkPlugin?: ICommonsChunkPlugin,
+        
+        /**
+         * 是否启用多线程 false 启用 true 禁用
+         * 控制ts-loader 编译是否开启多线程
+         * @type {boolean}
+         */
         disableHappyPack:boolean,//是否禁用多线程,
         cssModules: ICssModules,
-
+        /**
+         * ts 处理插件
+         */
+        tsCompilePlugin: {
+            loader: 'ts-loader' | 'awesome-typescript-loader',
+            option?:any
+        },
         /**
          *
          * 扩展loader加载器
@@ -68,6 +80,11 @@ export default class EConfig {
             vendors: ['react','react-dom','invariant'],
         },
         disableReactHotLoader: false,
+        /**
+         * 是否启用多线程 false 启用 true 禁用
+         * 控制ts-loader 编译是否开启多线程
+         * @type {boolean}
+         */
         disableHappyPack:false,
         cssModules: {
             enable: false, // 默认为 false，如需使用 css modules 功能，则设为 true
@@ -75,6 +92,13 @@ export default class EConfig {
             //   namingPattern: 'module', // 转换模式，取值为 global/module，下文详细说明
             //   generateScopedName: '[name]__[local]___[hash:base64:5]'
             // }
+            },
+        /** 
+         *  ts 处理插件 主要有'ts-loader'|'awesome-typescript-loader' 
+         * 默认 'ts-loader'
+        */
+        tsCompilePlugin: {
+            loader:'ts-loader'
         },
         plugins:[]
     };

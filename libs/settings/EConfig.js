@@ -19,9 +19,21 @@ class EConfig {
                 vendors: ['react', 'react-dom', 'invariant'],
             },
             disableReactHotLoader: false,
+            /**
+             * 是否启用多线程 false 启用 true 禁用
+             * 控制ts-loader 编译是否开启多线程
+             * @type {boolean}
+             */
             disableHappyPack: false,
             cssModules: {
                 enable: false,
+            },
+            /**
+             *  ts 处理插件 主要有'ts-loader'|'awesome-typescript-loader'
+             * 默认 'ts-loader'
+            */
+            tsCompilePlugin: {
+                loader: 'ts-loader'
             },
             plugins: []
         };
