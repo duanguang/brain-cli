@@ -66,7 +66,7 @@ export default class EConfig {
          * ts 处理插件
          */
         tsCompilePlugin: {
-            loader: 'ts-loader' | 'awesome-typescript-loader',
+            loader: 'ts-loader',
             option?:any
         },
         /**

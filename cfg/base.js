@@ -242,16 +242,6 @@ function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPa
                 }, tsCompilePlugin.option || {})
             };
         }
-        else if (tsCompilePlugin.loader === 'awesome-typescript-loader') {
-            return {
-                loader: require.resolve('awesome-typescript-loader'),
-                options: Object.assign({
-                    // disable type checker - we will use it in fork plugin
-                    transpileOnly: true,
-                    happyPackMode: true
-                }, tsCompilePlugin.option || {})
-            };
-        }
     }
     function getJSXLoaders() {
         const loaders = [];
