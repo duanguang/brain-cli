@@ -15,6 +15,7 @@ if (isVendorExist) {
         entry: {
             vendors:vendorsFrame
         },
+        mode: 'production',
         output: {
             path: distPath,
             // filename: `${distFileName}.js`,
@@ -43,7 +44,7 @@ if (isVendorExist) {
                  */
                 name: `[name]_${distFileName}_library`
             }),
-            new webpack.optimize.UglifyJsPlugin({
+            /* new webpack.optimize.UglifyJsPlugin({
                 compress: {
                   warnings: false,
                   drop_console:true,
@@ -54,7 +55,7 @@ if (isVendorExist) {
                   comments: false,
                 },
                 sourceMap: false
-              })
+              }) */
         ]
     };
 }

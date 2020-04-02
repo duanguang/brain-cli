@@ -74,12 +74,25 @@ module.exports = {
   },
   babel: {
     query: {
-      presets: ['es2015', 'stage-2', 'react'],
+      presets: [
+        [
+        "@babel/preset-env",
+        {
+         /*  targets: {
+            esmodules: true,
+          }, */
+          "useBuiltIns": "usage",
+          "corejs": "3",
+        }
+      ],
+     /*  "@babel/preset-env", */
+    "@babel/preset-react"],
+    
       cacheDirectory: true,
       plugins: [
         'add-module-exports',
-        'transform-runtime',
-        'transform-decorators-legacy'
+        '@babel/plugin-transform-runtime',
+        ["@babel/plugin-proposal-decorators", { "legacy": true }],
         // [
         //     "import",
         //     [
@@ -93,5 +106,5 @@ module.exports = {
   htmlWebpackPlugin: {
     title: 'webApp' /**/
   },
-  apps: ['app1', 'app2', 'app3']
+  apps: ['app1','app2']
 };

@@ -64,9 +64,10 @@ export default function getBaseConfig({
   }
   const { noInfo, proxy } = devServer;
   const webpackDevEntries = [
-    `webpack-dev-server/client?http://${server}:${defaultPort}`,
-    `webpack/hot/only-dev-server`
-    //'webpack/hot/dev-server'
+    /* 'react-hot-loader/patch',  */
+   /*  `webpack-dev-server/client?http://localhost:${defaultPort}`,
+    `webpack/hot/only-dev-server` */
+    /* 'webpack/hot/dev-server' */
   ];
   function getEntries(): any[] {
     let entity = entries().reduce(
@@ -78,7 +79,8 @@ export default function getBaseConfig({
         //         'react-dom','history','invariant','warning','hoist-non-react-statics'
         //     ]
         // }
-        prev[app] = `./src/${app}/index`;
+        
+        prev[app]=`./src/${app}/index`
         // prev[app] = [
         //     'babel-polyfill',
         //     `./src/${app}/index`
@@ -89,15 +91,14 @@ export default function getBaseConfig({
       {} as any
     );
     let chunk = {};
-    chunk[CommonsChunkPlugin.name] = CommonsChunkPlugin.value;
+    /* chunk[CommonsChunkPlugin.name] = CommonsChunkPlugin.value; */
     entity = Object.assign(entity, chunk);
     if (__DEV__) {
       // entity[app].unshift(...webpackDevEntries);
-      entity[CommonsChunkPlugin.name].unshift(...webpackDevEntries);
+      /* entity[CommonsChunkPlugin.name].unshift(...webpackDevEntries); */
     }
     return entity;
   }
-
   function getCssLoaders() {
     const CSS_MODULE_QUERY = `?modules&importLoaders=1&localIdentName=[local]-[hash:base64:6]`;
     const CSS_MODULE_OPTION = {
@@ -442,8 +443,8 @@ export default function getBaseConfig({
        */
       jsonpFunction: process.env.webpackJsonp || `webpackJsonpName`,
       path: path.join(process.cwd(), `${DIST}`),
-      filename: `[name]/js/[name].[chunkhash:5].bundle.js`,
-      chunkFilename: 'common/js/[name]-[id].[chunkhash:5].bundle.js',
+      filename:__DEV__?`[name]/js/[name].js`: `[name]/js/[name].[chunkhash:5].bundle.js`,
+      chunkFilename: 'common/js/[name].[chunkhash:5].bundle.js',
       //chunkFilename:path.posix.join('common', 'js/[name]-[id].[chunkhash:5].bundle.js'),
       publicPath: __DEV__ ? publicPath : process.env.cdnRelease||'../'
     },
@@ -457,6 +458,21 @@ export default function getBaseConfig({
     module: {
       loaders: []
     },
+    mode : __DEV__? 'development' : 'production',
+    optimization:{
+      runtimeChunk: false,
+      splitChunks: {
+          cacheGroups: {
+            common: {
+            test: /[\\/]node_modules[\\/]/,
+                  name: 'common',
+                  chunks: "initial",
+                  minChunks: 2,
+                  priority: 10   
+              },
+          }
+      }
+    },
     plugins: [
       ...getHtmlWebpackPlugins(),
       // 雪碧图设置
@@ -466,7 +482,7 @@ export default function getBaseConfig({
       //     name: CommonsChunkPlugin.name,
       //     filename: 'common/js/core.js',
       // }),
-      new webpack.optimize.CommonsChunkPlugin({
+      /* new webpack.optimize.CommonsChunkPlugin({
         name: CommonsChunkPlugin.name,
         minChunks: function(module) {
           // 该配置假定你引入的 vendor 存在于 node_modules 目录中
@@ -482,15 +498,15 @@ export default function getBaseConfig({
           );
         },
         filename: 'common/js/[name].[chunkhash:5].core.js'
-      }),
-      new webpack.optimize.CommonsChunkPlugin({
+      }), */
+      /* new webpack.optimize.CommonsChunkPlugin({
         name: 'manifest',
         chunks: ['common'],
         filename:
           process.env.NODE_ENV !== 'dev'
             ? 'common/js/manifest.[chunkhash:5].js'
             : 'common/js/manifest.js'
-      }),
+      }), */
       
       new HappyPack({
         id: 'js',
@@ -533,7 +549,7 @@ export default function getBaseConfig({
                 }
             ],
        }),
-      new HtmlWebpackHarddiskPlugin(),
+      /* new HtmlWebpackHarddiskPlugin(), */
       new webpack.DefinePlugin({
         'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || DEV),
         'process.env.environment': '"' + process.env.environment + '"',
@@ -545,7 +561,7 @@ export default function getBaseConfig({
   };
   if (__DEV__) {
     config.devServer = {
-      stats: { colors: true },
+      stats: 'errors-only',
       contentBase: [`./${WORKING_DIRECTORY}/`],
       historyApiFallback: {
         rewrites: apps.map((app: string) => ({
@@ -558,18 +574,17 @@ export default function getBaseConfig({
       publicPath: publicPath,
       noInfo: noInfo,
       proxy: proxy,
-      inline: false,
       before: function(app) {
         app.use(path.posix.join(`/static`), express.static('./static')); // 代理静态资源
       }
       //progress: true,
     };
 
-    config.plugins.push(new webpack.NoEmitOnErrorsPlugin());
-    config.plugins.push(new webpack.HotModuleReplacementPlugin());
+   /*  config.plugins.push(new webpack.NamedModulesPlugin())
+    config.plugins.push(new webpack.HotModuleReplacementPlugin()) */
   } else {
     config.plugins.push(
-      new webpack.optimize.UglifyJsPlugin({
+     /*  new webpack.optimize.UglifyJsPlugin({
         // mangle: false,
         // 最紧凑的输出
         //beautify: false,
@@ -579,7 +594,7 @@ export default function getBaseConfig({
           drop_console: true
         },
         comments: false // 删除所有的注释
-      })
+      }) */
       /* new ParallelUglifyPlugin({
         cacheDir: '.uglifyCache/', // Optional absolute path to use as a cache. If not provided, caching will not be used.
         workerCount:os.cpus().length-1, // Optional int. Number of workers to run uglify. Defaults to num of cpus - 1 or asset count (whichever is smaller)

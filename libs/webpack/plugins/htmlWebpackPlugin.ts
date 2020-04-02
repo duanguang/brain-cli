@@ -29,14 +29,14 @@ export default function getHtmlWebpackPlugins(htmlWebpackPlugin:any,entries?): a
         const relativeTargetJSP = path.join(relativeTargetDirectory, '/index.jsp');      
         const projectTargetPathJSP = path.resolve(workingDirectory, 'src/',relativeTargetJSP);
         if (fs.existsSync(projectTargetPath)) {
-            return htmlWebpackPluginInstance(projectTargetPath, relativeTargetHtml, [app,'manifest','common']);
+            return htmlWebpackPluginInstance(projectTargetPath, relativeTargetHtml, [app,'common']);
         }
         else if(fs.existsSync(projectTargetPathJSP)) {
-            return htmlWebpackPluginInstance(projectTargetPathJSP, relativeTargetJSP, [app,'manifest','common']);
+            return htmlWebpackPluginInstance(projectTargetPathJSP, relativeTargetJSP, [app,'common']);
         }
         else {
             const baseTarget = path.resolve(__dirname, '../../../tpl/index.ejs');
-            return htmlWebpackPluginInstance(baseTarget, relativeTargetHtml, [app,'manifest','common']);
+            return htmlWebpackPluginInstance(baseTarget, relativeTargetHtml, [app,'common']);
         }
     });
 }

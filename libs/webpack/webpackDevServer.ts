@@ -1,6 +1,6 @@
 import EConfig from '../settings/EConfig';
 import webpackCompiler from './webpackCompiler';
-const WebpackDevServer = require('webpack-dev-server');
+const webpackDevServer = require('webpack-dev-server');
 import webpackConfig from '../../webpack.config';
 import { log } from '../utils/logs';
 const eConfig = EConfig.getInstance();
@@ -20,7 +20,8 @@ export default function startWebpackDevServer(cmd?:{smp:'true'|'false',cssModule
       }
     }
     const config = webpackConfig(eConfig);
-    new WebpackDevServer(webpackCompiler(cmd), config.devServer).listen(
+    webpackDevServer.addDevServerEntrypoints(config, config.devServer);
+    new webpackDevServer(webpackCompiler(cmd), config.devServer).listen(
       eConfig.defaultPort,
       server,
       err => {

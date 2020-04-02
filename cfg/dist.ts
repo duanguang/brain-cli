@@ -25,13 +25,12 @@ export default function getDistConfig(eConfig: EConfig) {
                 if (cdn || process.env.cdnRelease) {
                     publicPath = `${cdn||process.env.cdnRelease}/common/js`
                 }
-                config.plugins.push(new AddAssetHtmlPlugin({
+                /* config.plugins.push(new AddAssetHtmlPlugin({
                     includeSourcemap: false, filepath,
                     outputPath: 'common/js',
-                /* publicPath: path.posix.join('../', 'common/js'), */
-                /* publicPath:process.env.cdnRelease?`${process.env.cdnRelease}/common/js`:path.posix.join('../', 'common/js'), */
+                
                     publicPath,
-                }));
+                })); */
                 const dllReferencePlugin = getDllReferencePlugin();
                 if (dllReferencePlugin) {
                     config.plugins.push(dllReferencePlugin)
