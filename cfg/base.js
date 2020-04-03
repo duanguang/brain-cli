@@ -9,7 +9,7 @@ const env_1 = require("../libs/utils/env");
 const LegionExtractStaticFilePlugin_1 = require("../libs/webpack/plugins/LegionExtractStaticFilePlugin");
 const getEntries_1 = require("../libs/webpack/entries/getEntries");
 const nodeModulesPath = path.resolve(process.cwd(), 'node_modules');
-const ExtractTextPlugin = require('extract-text-webpack-plugin');
+/* const ExtractTextPlugin = require('extract-text-webpack-plugin'); */
 const HtmlWebpackHarddiskPlugin = require('html-webpack-harddisk-plugin');
 const OptimizeCssAssetsPlugin = require('optimize-css-assets-webpack-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
@@ -17,6 +17,8 @@ const BundleAnalyzerPlugin = require('webpack-bundle-analyzer')
     .BundleAnalyzerPlugin;
 const SpritesmithPlugin = require('webpack-spritesmith');
 const express = require('express');
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+const UglifyJSPlugin = require('uglifyjs-webpack-plugin');
 // const ProgressBarPlugin = require('progress-bar-webpack-plugin');
 // const chalk = require('chalk');
 const HappyPack = require('happypack'), os = require('os'), happyThreadPool = HappyPack.ThreadPool({ size: os.cpus().length });
@@ -60,10 +62,6 @@ function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPa
         let chunk = {};
         /* chunk[CommonsChunkPlugin.name] = CommonsChunkPlugin.value; */
         entity = Object.assign(entity, chunk);
-        if (__DEV__) {
-            // entity[app].unshift(...webpackDevEntries);
-            /* entity[CommonsChunkPlugin.name].unshift(...webpackDevEntries); */
-        }
         return entity;
     }
     function getCssLoaders() {
@@ -86,7 +84,7 @@ function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPa
             postcss_loader.options.plugins.push(require('px2rem')(px2rem));
         }
         function generateLoaders(cssModule, loader, loaderOptions) {
-            let style = [{ loader: 'css-loader' }];
+            let style = [{ loader: 'css-loader', options: { importLoaders: 1 } }];
             if (cssModule && cssModules.enable) {
                 style[0] = Object.assign(style[0], { options: cssModule });
             }
@@ -96,23 +94,18 @@ function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPa
             if (loaderOptions) {
                 style.push(loaderOptions);
             }
-            if (__DEV__) {
-                let styles = ['style-loader', ...style];
-                return styles;
-            }
-            return ExtractTextPlugin.extract({
-                fallback: 'style-loader',
-                use: style
-            });
+            let styles = [{
+                    loader: MiniCssExtractPlugin.loader, options: {
+                        hmr: __DEV__ ? true : false,
+                    }
+                }, ...style];
+            return styles;
         }
+        config.plugins.push(new MiniCssExtractPlugin({
+            filename: __DEV__ ? '[name]/styles/[name].bundle.css' : '[name]/styles/[name].[contenthash:8].bundle.css' // [name] 占位符，为 entry 入口属性，默认 main
+        }));
         if (!__DEV__) {
             // ExtractTextPlugin.extract = f => `style-loader!` + f;
-            config.plugins.push(
-            //new ExtractTextPlugin('[name]/styles/[name].css')
-            new ExtractTextPlugin({
-                filename: '[name]/styles/[name].[contenthash:8].bundle.css',
-                allChunks: true
-            }));
             config.plugins.push(new OptimizeCssAssetsPlugin({
                 assetNameRegExp: /\.optimize\.css$/g,
                 cssProcessor: require('cssnano'),
@@ -124,49 +117,21 @@ function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPa
             {
                 test: /\.css$/,
                 use: generateLoaders(),
-                // use: ExtractTextPlugin.extract(
-                //     {
-                //         fallback: 'style-loader',
-                //         use: [
-                //           { loader: 'css-loader' },
-                //         ]
-                //       }),
                 include: [nodeModulesPath]
             },
             {
                 test: /\.less/,
                 use: generateLoaders(CSS_MODULE_OPTION, 'less-loader', postcss_loader),
-                // use:ExtractTextPlugin.extract(
-                //     {
-                //         fallback: 'style-loader',
-                //         use: [
-                //             {loader:`css-loader`,options:CSS_MODULE_OPTION},'less-loader',postcss_loader
-                //         ]
-                //       }),
                 include: [path.resolve(nodeModulesPath, 'basics-widget')]
             },
             {
                 test: /\.less/,
                 use: generateLoaders(null, 'less-loader'),
-                // use:ExtractTextPlugin.extract(
-                //     {
-                //         fallback: 'style-loader',
-                //         use: [
-                //             {loader:`css-loader`},'less-loader',postcss_loader
-                //         ]
-                //       }),
                 include: [path.resolve(nodeModulesPath, 'antd'), nodeModulesPath]
             },
             {
                 test: new RegExp(`^(?!.*\\.modules).*\\.css`),
                 use: generateLoaders(null, null, postcss_loader),
-                // use:ExtractTextPlugin.extract(
-                //     {
-                //         fallback: 'style-loader',
-                //         use: [
-                //             {loader:`css-loader`,options:CSS_MODULE_OPTION},postcss_loader
-                //         ]
-                //       }),
                 exclude: [nodeModulesPath]
             },
             {
@@ -178,14 +143,6 @@ function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPa
             {
                 test: new RegExp(`^(?!.*\\.modules).*\\.less`),
                 use: generateLoaders(null, 'less-loader', postcss_loader),
-                // use:ExtractTextPlugin.extract(
-                //     {
-                //         fallback: 'style-loader',
-                //         use: [
-                //             {loader:`css-loader`,options:CSS_MODULE_OPTION},'less-loader',postcss_loader
-                //         ]
-                //       }
-                // ),
                 exclude: [nodeModulesPath]
             },
             {
@@ -237,10 +194,6 @@ function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPa
         const loaders = [];
         if (__DEV__) {
             if (!DisableReactHotLoader) {
-                // if (!__DEV__) {
-                //     warning(`please turn off the disableReactHotLoader option. it's not supposed to be on in production stage`);
-                //     warning(`skip react-hot-loader`);
-                // }
                 loaders.push({
                     test: /\.(jsx|js)?$/,
                     // loader: 'react-hot',
@@ -423,47 +376,29 @@ function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPa
                     common: {
                         test: /[\\/]node_modules[\\/]/,
                         name: 'common',
-                        chunks: "initial",
-                        minChunks: 2,
+                        chunks: "all",
+                        minChunks: 1,
                         priority: 10
                     },
                 }
-            }
+            },
+            minimizer: __DEV__ ? [] : [
+                new UglifyJSPlugin({
+                    parallel: true,
+                    uglifyOptions: {
+                        compress: {
+                            drop_debugger: true,
+                            drop_console: true
+                        }
+                    },
+                }),
+            ],
         },
         plugins: [
             ...getHtmlWebpackPlugins(),
             // 雪碧图设置
             ...SpritesmithPlugins,
             ...plugins,
-            // new webpack.optimize.CommonsChunkPlugin({
-            //     name: CommonsChunkPlugin.name,
-            //     filename: 'common/js/core.js',
-            // }),
-            /* new webpack.optimize.CommonsChunkPlugin({
-              name: CommonsChunkPlugin.name,
-              minChunks: function(module) {
-                // 该配置假定你引入的 vendor 存在于 node_modules 目录中
-                // return (
-                //     module.resource &&
-                //     /\.js$/.test(module.resource) &&
-                //     module.resource.indexOf(
-                //       path.join(__dirname, '../node_modules')
-                //     ) === 0
-                //   )
-                return (
-                  module.context && module.context.indexOf('node_modules') !== -1
-                );
-              },
-              filename: 'common/js/[name].[chunkhash:5].core.js'
-            }), */
-            /* new webpack.optimize.CommonsChunkPlugin({
-              name: 'manifest',
-              chunks: ['common'],
-              filename:
-                process.env.NODE_ENV !== 'dev'
-                  ? 'common/js/manifest.[chunkhash:5].js'
-                  : 'common/js/manifest.js'
-            }), */
             new HappyPack({
                 id: 'js',
                 threads: os.cpus().length - 1,
@@ -475,17 +410,6 @@ function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPa
                     }
                 ]
             }),
-            //如果有单独提取css文件的话
-            // new HappyPack({
-            //    id: 'lessHappy',
-            //    loaders: ['style','css','less']
-            //     // loaders: [ 'style-loader', 'css-loader', 'less-loader' ]
-            // }),
-            /* new HappyPack({
-              id: 'tslint',
-              threads:os.cpus().length-1,
-              use: [ 'tslint-loader' ],
-            }) */
             new HappyPack({
                 id: 'ts',
                 threads: os.cpus().length - 1,
@@ -535,10 +459,11 @@ function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPa
             }
             //progress: true,
         };
-        /*  config.plugins.push(new webpack.NamedModulesPlugin())
-         config.plugins.push(new webpack.HotModuleReplacementPlugin()) */
+        /*  config.plugins.push(new webpack.HotModuleReplacementPlugin()) */
     }
     else {
+        /* config.plugins.push(new webpack.NamedModulesPlugin())
+        config.plugins.push(new webpack.optimize.ModuleConcatenationPlugin()) */
         config.plugins.push(
         /*  new webpack.optimize.UglifyJsPlugin({
            // mangle: false,
@@ -551,27 +476,6 @@ function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPa
            },
            comments: false // 删除所有的注释
          }) */
-        /* new ParallelUglifyPlugin({
-          cacheDir: '.uglifyCache/', // Optional absolute path to use as a cache. If not provided, caching will not be used.
-          workerCount:os.cpus().length-1, // Optional int. Number of workers to run uglify. Defaults to num of cpus - 1 or asset count (whichever is smaller)
-          uglifyJS: {
-              output: {
-                  // 是否输出可读性较强的代码，即会保留空格和制表符，默认为输出，为了达到更好的压缩效果，可以设置为false
-                       beautify: false,
-               //是否保留代码中的注释，默认为保留，为了达到更好的压缩效果，可以设置为false
-                       comments: false
-                   },
-                   compress: {
-                   //是否在UglifyJS删除没有用到的代码时输出警告信息，默认为输出
-                       warnings: false,
-                   //是否删除代码中所有的console语句，默认为不删除，开启后，会删除所有的console语句
-                       drop_console: true,
-                       drop_debugger: true, // 删除所有的 `console` 语句// 还可以兼容ie浏览器
-                   //是否内嵌虽然已经定义了，但是只用到一次的变量，比如将 var x = 1; y = x, 转换成 y = 1, 默认为否
-                       collapse_vars: false,
-              }
-          },
-        }), */
         );
         if (process.env.environment === 'report') {
             config.plugins.push(new BundleAnalyzerPlugin()

@@ -44,18 +44,7 @@ if (isVendorExist) {
                  */
                 name: `[name]_${distFileName}_library`
             }),
-            /* new webpack.optimize.UglifyJsPlugin({
-                compress: {
-                  warnings: false,
-                  drop_console:true,
-                  drop_debugger:true
-                },
-                output:{
-                  // 去掉注释内容
-                  comments: false,
-                },
-                sourceMap: false
-              }) */
+            
         ]
     };
 }
