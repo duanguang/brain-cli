@@ -91,7 +91,7 @@ export default class WebpackDllManifest {
         } catch (e) {
             return true;
         }
-    }re
+    }
 
     public resolveManifestPath(entityName:string = 'vendor',vendorHash = this.getVendorsHash()) {
         /**
