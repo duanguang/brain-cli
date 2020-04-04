@@ -14,6 +14,7 @@ export default function getDistConfig(eConfig: EConfig) {
         () => {
             //TODO:暂时放在这里
             const filepath = WebpackDllManifest.getInstance().resolveManifestPath();
+            const AssetHtmlPlugin = []
             if (filepath) {
                 let publicPath = path.posix.join('../','common/js')
                 let cdn = ''
@@ -25,12 +26,18 @@ export default function getDistConfig(eConfig: EConfig) {
                 if (cdn || process.env.cdnRelease) {
                     publicPath = `${cdn||process.env.cdnRelease}/common/js`
                 }
-                config.plugins.push(new AddAssetHtmlPlugin({
+                AssetHtmlPlugin.push({
                     includeSourcemap: false, filepath,
                     outputPath: 'common/js',
                 
                     publicPath,
-                }));
+                })
+                /* config.plugins.push(new AddAssetHtmlPlugin({
+                    includeSourcemap: false, filepath,
+                    outputPath: 'common/js',
+                
+                    publicPath,
+                })); */
                 const dllReferencePlugin = getDllReferencePlugin();
                 if (dllReferencePlugin) {
                     config.plugins.push(dllReferencePlugin)
@@ -55,18 +62,24 @@ export default function getDistConfig(eConfig: EConfig) {
                 }
                 const filepath = WebpackDllManifest.getInstance().resolveManifestPath(key,WebpackDllManifest.getInstance().getDllPluginsHash(vendorsDll));
                 if (filepath) {
-                    config.plugins.push(new AddAssetHtmlPlugin({
+                    /* config.plugins.push(new AddAssetHtmlPlugin({
                         includeSourcemap: false,filepath,
                         outputPath: 'common/js',
                         publicPath
-                        /* publicPath:process.env.cdnRelease?`${process.env.cdnRelease}/common/js`:path.posix.join('../', 'common/js'), */
-                    }));
+                    })); */
+                    AssetHtmlPlugin.push({
+                        includeSourcemap: false, filepath,
+                        outputPath: 'common/js',
+                    
+                        publicPath,
+                    })
                     const dllReference = getDllReferencePlugin(key);
                     if (dllReference) {
                         config.plugins.push(dllReference)
                     }
                 }
             })
+            config.plugins.push(new AddAssetHtmlPlugin(AssetHtmlPlugin));
         }
     ];
     return config;
