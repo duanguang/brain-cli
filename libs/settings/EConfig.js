@@ -19,6 +19,7 @@ class EConfig {
                 vendors: ['react', 'react-dom', 'invariant'],
             },
             disableReactHotLoader: false,
+            commonsChunkPlugin: ['common'],
             disableHappyPack: false,
             cssModules: {
                 enable: false,

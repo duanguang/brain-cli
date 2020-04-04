@@ -55,7 +55,7 @@ module.exports = {
       /* framework:{cdn:'https://hoolinks1.com',FrameList:['react','react-dom']} */
     },
     disableReactHotLoader: false,
-    commonsChunkPlugin: ['react', 'react-dom', 'invariant'],
+    commonsChunkPlugin: ['common','vendor'],
     disableHappyPack: false,
     cssModules: {
       enable: true // 默认为 false，如需使用 css modules 功能，则设为 true
@@ -69,8 +69,22 @@ module.exports = {
           ' (:elapsed seconds)',
         summaryContent: ''
       })
-    ]
-    //commonsChunkPlugin:['react']
+    ],
+    /* optimization: {
+      splitChunks: {
+        cacheGroups: {
+          vendor: {
+            chunks: "initial",
+            minChunks: 1,
+            name: "vendor",
+            priority: 7,
+            test: /object-hash|lodash/,
+            //maxInitialRequests: 5, // The default limit is too small to showcase the effect
+            minSize: 0 // This is example is too small to create commons chunks
+          }
+        }
+      },
+    }, */
   },
   babel: {
     query: {

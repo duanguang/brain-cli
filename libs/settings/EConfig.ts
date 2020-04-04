@@ -2,7 +2,7 @@ import * as path from 'path';
 import {PROJECT_USER_CONFIG_FILE, PROJECT_USER_CONFIG_IGNORE_FILE} from '../constants/constants';
 import * as invariant from 'invariant';
 import {requireBabelify} from '../utils/requireBabelify';
-
+import { OptimizationOptions} from 'webpack/declarations/WebpackOptions'
 const deepAssign = require('deep-assign');
 const defaultEConfig = require(path.resolve(__dirname, `../../${PROJECT_USER_CONFIG_FILE}`));
 
@@ -10,13 +10,53 @@ const defaultEConfig = require(path.resolve(__dirname, `../../${PROJECT_USER_CON
  * 可选配置列表, 优先级从低到高由左到右
  */
 export const configFileList = [PROJECT_USER_CONFIG_FILE, PROJECT_USER_CONFIG_IGNORE_FILE];
- interface ICommonsChunkPlugin{
-     name:string,
-     value:Array<string>
- }
  
  interface ICssModules{
     enable:boolean
+}
+interface IDllConfig{
+    vendors: string[] | { cdn?: string;FrameList:string[]}
+}
+interface IWebpack{
+    dllConfig: IDllConfig;
+
+    /**
+     * 是否开启热加载
+     *
+     * @type {boolean}
+     * @memberof IWebpack
+     */
+    disableReactHotLoader: boolean;
+
+    commonsChunkPlugin?:string[],
+    /**
+     * 是否禁用多线程
+     *
+     * @type {boolean}
+     * @memberof IWebpack
+     */
+    disableHappyPack: boolean;
+
+    cssModules: ICssModules;
+
+    /**
+     * 插件信息
+     *
+     * @type {[]}
+     * @memberof IWebpack
+     */
+    plugins?: [];
+    output?: {
+        libraryTarget?: 'var' | 'window' | 'this' | 'umd'
+    };
+
+    /**
+     * webpack 4 代码模块优化配置
+     *
+     * @type {OptimizationOptions}
+     * @memberof IWebpack
+     */
+    optimization?: OptimizationOptions;
  }
 export default class EConfig {
     public name: string;
@@ -38,20 +78,12 @@ export default class EConfig {
         px2rem:{}
     };
 
-    public webpack: {
-        dllConfig: {
-            vendors: string[] | { cdn?: string;FrameList:string[]}
-        },
-        disableReactHotLoader: boolean,
-        commonsChunkPlugin?:ICommonsChunkPlugin,
-        disableHappyPack:boolean,//是否禁用多线程,
-        cssModules:ICssModules,
-        plugins?:[] //插件
-    } = {
+    public webpack: IWebpack = {
         dllConfig: {
             vendors: ['react','react-dom','invariant'],
         },
         disableReactHotLoader: false,
+        commonsChunkPlugin:['common'],
         disableHappyPack:false,
         cssModules: {
             enable: false, // 默认为 false，如需使用 css modules 功能，则设为 true

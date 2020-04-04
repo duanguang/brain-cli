@@ -13,6 +13,7 @@ import * as invariant from 'invariant';
 import { isDev } from '../libs/utils/env';
 import LegionExtractStaticFilePlugin from '../libs/webpack/plugins/LegionExtractStaticFilePlugin';
 import { getApps } from '../libs/webpack/entries/getEntries';
+import { merge } from '../libs/utils/objects';
 const nodeModulesPath = path.resolve(process.cwd(), 'node_modules');
 /* const ExtractTextPlugin = require('extract-text-webpack-plugin'); */
 const HtmlWebpackHarddiskPlugin = require('html-webpack-harddisk-plugin');
@@ -24,6 +25,31 @@ const SpritesmithPlugin = require('webpack-spritesmith');
 const express = require('express');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const UglifyJSPlugin = require('uglifyjs-webpack-plugin');
+const Optimization = {
+  runtimeChunk: false,
+  splitChunks: {
+      cacheGroups: {
+        common: {
+        test: /[\\/]node_modules[\\/]/,
+              name: 'common',
+              chunks: "initial",
+              minChunks: 1,
+              priority: 6  
+          },
+      }
+  },
+  minimizer:isDev()?[]: [
+    new UglifyJSPlugin({
+      parallel: true,
+      uglifyOptions: {
+        compress: {
+          drop_debugger: true,
+          drop_console: true
+        }
+      },
+    }),
+  ],
+}
 // const ProgressBarPlugin = require('progress-bar-webpack-plugin');
 // const chalk = require('chalk');
 const HappyPack = require('happypack'),
@@ -53,6 +79,7 @@ export default function getBaseConfig({
     cssModules,
     plugins
   } = webpackConfig;
+  const NewOptimization = merge(Optimization,webpackConfig.optimization)
   const DisableReactHotLoader = disableReactHotLoader || false; //默认启用热加载
   let CommonsChunkPlugin = { name: 'common', value: ['invariant'] };
   if (
@@ -61,7 +88,7 @@ export default function getBaseConfig({
     commonsChunkPlugin.length > 0
   ) {
     CommonsChunkPlugin.value = [
-      ...new Set(commonsChunkPlugin.concat(CommonsChunkPlugin.value))
+      ...new Set(commonsChunkPlugin.concat(['common']))
     ];
   }
   const { noInfo, proxy } = devServer;
@@ -411,31 +438,7 @@ export default function getBaseConfig({
       loaders: []
     },
     mode : __DEV__? 'development' : 'production',
-    optimization:{
-      runtimeChunk: false,
-      splitChunks: {
-          cacheGroups: {
-            common: {
-            test: /[\\/]node_modules[\\/]/,
-                  name: 'common',
-                  chunks: "all",
-                  minChunks: 1,
-                  priority: 10   
-              },
-          }
-      },
-      minimizer:__DEV__?[]: [
-        new UglifyJSPlugin({
-          parallel: true,
-          uglifyOptions: {
-            compress: {
-              drop_debugger: true,
-              drop_console: true
-            }
-          },
-        }),
-      ],
-    },
+    optimization:NewOptimization,
     plugins: [
       ...getHtmlWebpackPlugins(),
       // 雪碧图设置

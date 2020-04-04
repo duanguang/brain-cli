@@ -3,8 +3,9 @@ import webpackCompiler from './webpackCompiler';
 const webpackDevServer = require('webpack-dev-server');
 import webpackConfig from '../../webpack.config';
 import { log } from '../utils/logs';
+import { URL_PREFIX } from '../constants/constants';
 const eConfig = EConfig.getInstance();
-
+const {name: projectName,apps} = eConfig;
 /**
  * 启动webpack服务器
  */
@@ -29,6 +30,7 @@ export default function startWebpackDevServer(cmd?:{smp:'true'|'false',cssModule
           reject(err);
         }
         log(`监听本地 ${server}:${eConfig.defaultPort}`);
+        log(`server: http://localhost:${eConfig.defaultPort}/${URL_PREFIX}/${projectName}/${apps.length?apps[0]:''}`);
         //console.log(`监听本地 ${server}:${eConfig.defaultPort}`);
         resolve();
       }

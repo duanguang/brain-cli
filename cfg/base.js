@@ -8,6 +8,7 @@ const htmlWebpackPlugin_1 = require("../libs/webpack/plugins/htmlWebpackPlugin")
 const env_1 = require("../libs/utils/env");
 const LegionExtractStaticFilePlugin_1 = require("../libs/webpack/plugins/LegionExtractStaticFilePlugin");
 const getEntries_1 = require("../libs/webpack/entries/getEntries");
+const objects_1 = require("../libs/utils/objects");
 const nodeModulesPath = path.resolve(process.cwd(), 'node_modules');
 /* const ExtractTextPlugin = require('extract-text-webpack-plugin'); */
 const HtmlWebpackHarddiskPlugin = require('html-webpack-harddisk-plugin');
@@ -19,6 +20,31 @@ const SpritesmithPlugin = require('webpack-spritesmith');
 const express = require('express');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const UglifyJSPlugin = require('uglifyjs-webpack-plugin');
+const Optimization = {
+    runtimeChunk: false,
+    splitChunks: {
+        cacheGroups: {
+            common: {
+                test: /[\\/]node_modules[\\/]/,
+                name: 'common',
+                chunks: "initial",
+                minChunks: 1,
+                priority: 6
+            },
+        }
+    },
+    minimizer: env_1.isDev() ? [] : [
+        new UglifyJSPlugin({
+            parallel: true,
+            uglifyOptions: {
+                compress: {
+                    drop_debugger: true,
+                    drop_console: true
+                }
+            },
+        }),
+    ],
+};
 // const ProgressBarPlugin = require('progress-bar-webpack-plugin');
 // const chalk = require('chalk');
 const HappyPack = require('happypack'), os = require('os'), happyThreadPool = HappyPack.ThreadPool({ size: os.cpus().length });
@@ -27,13 +53,14 @@ function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPa
     const __DEV__ = env_1.isDev();
     publicPath += name + '/';
     const { disableReactHotLoader, commonsChunkPlugin, cssModules, plugins } = webpackConfig;
+    const NewOptimization = objects_1.merge(Optimization, webpackConfig.optimization);
     const DisableReactHotLoader = disableReactHotLoader || false; //默认启用热加载
     let CommonsChunkPlugin = { name: 'common', value: ['invariant'] };
     if (commonsChunkPlugin &&
         commonsChunkPlugin instanceof Array &&
         commonsChunkPlugin.length > 0) {
         CommonsChunkPlugin.value = [
-            ...new Set(commonsChunkPlugin.concat(CommonsChunkPlugin.value))
+            ...new Set(commonsChunkPlugin.concat(['common']))
         ];
     }
     const { noInfo, proxy } = devServer;
@@ -369,31 +396,7 @@ function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPa
             loaders: []
         },
         mode: __DEV__ ? 'development' : 'production',
-        optimization: {
-            runtimeChunk: false,
-            splitChunks: {
-                cacheGroups: {
-                    common: {
-                        test: /[\\/]node_modules[\\/]/,
-                        name: 'common',
-                        chunks: "all",
-                        minChunks: 1,
-                        priority: 10
-                    },
-                }
-            },
-            minimizer: __DEV__ ? [] : [
-                new UglifyJSPlugin({
-                    parallel: true,
-                    uglifyOptions: {
-                        compress: {
-                            drop_debugger: true,
-                            drop_console: true
-                        }
-                    },
-                }),
-            ],
-        },
+        optimization: NewOptimization,
         plugins: [
             ...getHtmlWebpackPlugins(),
             // 雪碧图设置
