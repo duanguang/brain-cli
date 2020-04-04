@@ -114,6 +114,7 @@ module.exports = {
         //         {libraryName: "antd", style: true}
         //     ]
         // ]
+        ['import', { libraryName: 'antd', style: true }],
       ]
     }
   },
