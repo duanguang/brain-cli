@@ -153,7 +153,7 @@ function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPa
             },
             {
                 test: /\.less/,
-                use: generateLoaders(null, 'less-loader'),
+                use: generateLoaders(null, { loader: 'less-loader', options: { javascriptEnabled: true } }),
                 include: [path.resolve(nodeModulesPath, 'antd'), nodeModulesPath]
             },
             {
@@ -169,13 +169,13 @@ function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPa
             },
             {
                 test: new RegExp(`^(?!.*\\.modules).*\\.less`),
-                use: generateLoaders(null, 'less-loader', postcss_loader),
+                use: generateLoaders(null, { loader: 'less-loader', options: { javascriptEnabled: true } }, postcss_loader),
                 exclude: [nodeModulesPath]
             },
             {
                 /* test: /\.less/, */
                 test: new RegExp(`^(.*\\.modules).*\\.less`),
-                use: generateLoaders(CSS_MODULE_OPTION, 'less-loader', postcss_loader),
+                use: generateLoaders(CSS_MODULE_OPTION, { loader: 'less-loader', options: { javascriptEnabled: true } }, postcss_loader),
                 exclude: [nodeModulesPath]
             },
         ];

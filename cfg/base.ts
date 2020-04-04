@@ -143,7 +143,7 @@ export default function getBaseConfig({
     if (px2rem) {
       postcss_loader.options.plugins.push(require('px2rem')(px2rem));
     }
-    function generateLoaders(cssModule?, loader?: string, loaderOptions?) {
+    function generateLoaders(cssModule?,loader?: string | { loader: string;options:any}, loaderOptions?) {
       let style: any = [{ loader: 'css-loader' ,options: { importLoaders: 1 } }];
       if (cssModule && cssModules.enable) {
         style[0] = Object.assign(style[0],{ options: cssModule });
@@ -189,7 +189,7 @@ export default function getBaseConfig({
       },
       {
         test: /\.less/,
-        use: generateLoaders(null, 'less-loader'),
+        use: generateLoaders(null, {loader:'less-loader',options:{ javascriptEnabled: true }}),
         include: [path.resolve(nodeModulesPath, 'antd'),nodeModulesPath]
       },
       {
@@ -205,13 +205,13 @@ export default function getBaseConfig({
       },
       {
         test: new RegExp(`^(?!.*\\.modules).*\\.less`),
-        use: generateLoaders(null, 'less-loader', postcss_loader),
+        use: generateLoaders(null, {loader:'less-loader',options:{ javascriptEnabled: true }}, postcss_loader),
         exclude: [nodeModulesPath]
       },
       {
       /* test: /\.less/, */
         test: new RegExp(`^(.*\\.modules).*\\.less`),
-        use: generateLoaders(CSS_MODULE_OPTION, 'less-loader', postcss_loader),
+        use: generateLoaders(CSS_MODULE_OPTION, {loader:'less-loader',options:{ javascriptEnabled: true }}, postcss_loader),
         exclude: [nodeModulesPath]
       },
     ];
