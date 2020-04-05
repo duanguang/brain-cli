@@ -17,6 +17,16 @@ export const configFileList = [PROJECT_USER_CONFIG_FILE, PROJECT_USER_CONFIG_IGN
 interface IDllConfig{
     vendors: string[] | { cdn?: string;FrameList:string[]}
 }
+interface extendConfig{
+    isDev: boolean,
+    loaderType: 'HotLoader' | 'JsLoader' | 'TsLoader' | 'StyleLoader',
+    projectType: 'ts' | 'js',
+    transform?: {
+       readonly cssModule: Object,
+       readonly LoaderOptions: Object,
+       execution:(cssModule,loader,LoaderOptions)=>any
+    }
+}
 interface IWebpack{
     dllConfig: IDllConfig;
 
@@ -57,6 +67,18 @@ interface IWebpack{
      * @memberof IWebpack
      */
     optimization?: OptimizationOptions;
+    /**
+         * ts 处理插件
+        */
+    tsCompilePlugin: {
+        loader: 'ts-loader',
+        option?:any
+    },
+        /**
+         *
+         * 扩展loader加载器
+         */
+    extend?:(loaders:any[], config:extendConfig)=>void,
  }
 export default class EConfig {
     public name: string;
@@ -91,6 +113,13 @@ export default class EConfig {
             //   namingPattern: 'module', // 转换模式，取值为 global/module，下文详细说明
             //   generateScopedName: '[name]__[local]___[hash:base64:5]'
             // }
+        },
+         /** 
+         *  ts 处理插件 主要有'ts-loader'|'awesome-typescript-loader' 
+         * 默认 'ts-loader'
+        */
+        tsCompilePlugin: {
+            loader:'ts-loader'
         },
         plugins:[]
     };

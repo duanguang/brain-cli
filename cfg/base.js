@@ -52,17 +52,9 @@ const entries = getEntries_1.getApps();
 function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPath, apps, server, babel, webpack: webpackConfig, htmlWebpackPlugin, projectType, isTslint }) {
     const __DEV__ = env_1.isDev();
     publicPath += name + '/';
-    const { disableReactHotLoader, commonsChunkPlugin, cssModules, plugins } = webpackConfig;
+    const { disableReactHotLoader, commonsChunkPlugin, cssModules, plugins, disableHappyPack, tsCompilePlugin } = webpackConfig;
     const NewOptimization = objects_1.merge(Optimization, webpackConfig.optimization);
     const DisableReactHotLoader = disableReactHotLoader || false; //默认启用热加载
-    let CommonsChunkPlugin = { name: 'common', value: ['invariant'] };
-    if (commonsChunkPlugin &&
-        commonsChunkPlugin instanceof Array &&
-        commonsChunkPlugin.length > 0) {
-        CommonsChunkPlugin.value = [
-            ...new Set(commonsChunkPlugin.concat(['common']))
-        ];
-    }
     const { noInfo, proxy } = devServer;
     const webpackDevEntries = [
     /* 'react-hot-loader/patch',  */
@@ -140,7 +132,7 @@ function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPa
                 canPrint: true
             }));
         }
-        return [
+        const loaders = [
             {
                 test: /\.css$/,
                 use: generateLoaders(),
@@ -179,6 +171,18 @@ function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPa
                 exclude: [nodeModulesPath]
             },
         ];
+        if (webpackConfig.extend && typeof webpackConfig.extend === 'function') {
+            // @ts-ignore
+            webpackConfig.extend && webpackConfig.extend(loaders, {
+                // @ts-ignore
+                isDev: __DEV__, loaderType: 'StyleLoader', projectType, transform: {
+                    cssModule: CSS_MODULE_OPTION,
+                    LoaderOptions: postcss_loader,
+                    execution: generateLoaders
+                }
+            });
+        }
+        return loaders;
     }
     function getJsonLoaders() {
         return [
@@ -217,6 +221,18 @@ function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPa
             }
         ];
     }
+    function getTsLoaders() {
+        if (tsCompilePlugin.loader === 'ts-loader') {
+            return {
+                loader: require.resolve('ts-loader'),
+                options: Object.assign({
+                    // disable type checker - we will use it in fork plugin
+                    transpileOnly: true,
+                    happyPackMode: true
+                }, tsCompilePlugin.option || {})
+            };
+        }
+    }
     function getJSXLoaders() {
         const loaders = [];
         if (__DEV__) {
@@ -235,6 +251,9 @@ function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPa
                         plugins: ['react-hot-loader/babel'],
                     },
                 });
+                if (webpackConfig.extend && typeof webpackConfig.extend === 'function') {
+                    webpackConfig.extend && webpackConfig.extend(loaders, { isDev: __DEV__, loaderType: 'HotLoader', projectType });
+                }
             }
             else {
                 babel.query.plugins.push('babel-plugin-legion-hmr');
@@ -251,27 +270,61 @@ function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPa
             loader: 'happypack/loader?id=js',
             exclude: [nodeModulesPath]
         });
+        if (webpackConfig.extend && typeof webpackConfig.extend === 'function') {
+            webpackConfig.extend && webpackConfig.extend(loaders, { isDev: __DEV__, loaderType: 'JsLoader', projectType });
+        }
         if (projectType === 'ts') {
-            loaders.push({
-                test: /\.(ts|tsx)$/,
-                include: [path.join(process.cwd(), './src')],
-                /* use: [
-                  {
-                    loader: 'babel-loader',
-                    query: babel.query
-                  },
-                  {
-                    loader: require.resolve('ts-loader'),
-                    options: {
-                      // disable type checker - we will use it in fork plugin
-                        transpileOnly: true,
-                        happyPackMode: true
-                    }
-                  }
-                ], */
-                loader: 'happypack/loader?id=ts',
-                exclude: [nodeModulesPath]
-            });
+            if (tsCompilePlugin && tsCompilePlugin.option && tsCompilePlugin.option.getCustomTransformers) { // 解决多线程下ts-loader 编译插件无法被执行问题
+                loaders.push({
+                    test: /\.(ts|tsx)$/,
+                    include: [path.join(process.cwd(), './src')],
+                    use: [
+                        {
+                            loader: 'babel-loader',
+                            query: babel.query
+                        },
+                        getTsLoaders(),
+                    ],
+                    exclude: [nodeModulesPath]
+                });
+                console.log({
+                    test: /\.(ts|tsx)$/,
+                    include: [path.join(process.cwd(), './src')],
+                    use: [
+                        {
+                            loader: 'babel-loader',
+                            query: babel.query
+                        },
+                        getTsLoaders(),
+                    ],
+                    exclude: [nodeModulesPath]
+                });
+            }
+            else {
+                loaders.push({
+                    test: /\.(ts|tsx)$/,
+                    include: [path.join(process.cwd(), './src')],
+                    /* use: [
+                      {
+                        loader: 'babel-loader',
+                        query: babel.query
+                      },
+                      {
+                        loader: require.resolve('ts-loader'),
+                        options: {
+                          // disable type checker - we will use it in fork plugin
+                            transpileOnly: true,
+                            happyPackMode: true
+                        }
+                      }
+                    ], */
+                    loader: 'happypack/loader?id=ts',
+                    exclude: [nodeModulesPath]
+                });
+            }
+            if (webpackConfig.extend && typeof webpackConfig.extend === 'function') {
+                webpackConfig.extend && webpackConfig.extend(loaders, { isDev: __DEV__, loaderType: 'TsLoader', projectType });
+            }
         }
         return loaders;
     }

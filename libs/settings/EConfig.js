@@ -24,6 +24,13 @@ class EConfig {
             cssModules: {
                 enable: false,
             },
+            /**
+            *  ts 处理插件 主要有'ts-loader'|'awesome-typescript-loader'
+            * 默认 'ts-loader'
+           */
+            tsCompilePlugin: {
+                loader: 'ts-loader'
+            },
             plugins: []
         };
         this.init();
