@@ -121,6 +121,7 @@ function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPa
             return styles;
         }
         config.plugins.push(new MiniCssExtractPlugin({
+            ignoreOrder: true,
             filename: __DEV__ ? '[name]/styles/[name].bundle.css' : '[name]/styles/[name].[contenthash:8].bundle.css' // [name] 占位符，为 entry 入口属性，默认 main
         }));
         if (!__DEV__) {
@@ -276,18 +277,6 @@ function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPa
         if (projectType === 'ts') {
             if (tsCompilePlugin && tsCompilePlugin.option && tsCompilePlugin.option.getCustomTransformers) { // 解决多线程下ts-loader 编译插件无法被执行问题
                 loaders.push({
-                    test: /\.(ts|tsx)$/,
-                    include: [path.join(process.cwd(), './src')],
-                    use: [
-                        {
-                            loader: 'babel-loader',
-                            query: babel.query
-                        },
-                        getTsLoaders(),
-                    ],
-                    exclude: [nodeModulesPath]
-                });
-                console.log({
                     test: /\.(ts|tsx)$/,
                     include: [path.join(process.cwd(), './src')],
                     use: [
@@ -497,6 +486,11 @@ function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPa
     };
     if (__DEV__) {
         config.devServer = {
+            /* stats: {
+                      colors: true,
+                      children: false,
+                      warningsFilter: /export .* was not found in/
+            }, */
             stats: 'errors-only',
             contentBase: [`./${constants_1.WORKING_DIRECTORY}/`],
             historyApiFallback: {

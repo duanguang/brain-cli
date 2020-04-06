@@ -154,6 +154,7 @@ export default function getBaseConfig({
     }
     config.plugins.push(
       new MiniCssExtractPlugin({	
+        ignoreOrder: true, // 修复min-css 处理antd less 时css 顺序报错
         filename:__DEV__? '[name]/styles/[name].bundle.css':'[name]/styles/[name].[contenthash:8].bundle.css'    // [name] 占位符，为 entry 入口属性，默认 main
       })
     );
@@ -325,18 +326,6 @@ export default function getBaseConfig({
           ],
           exclude: [nodeModulesPath]
         });
-        console.log({
-          test: /\.(ts|tsx)$/,
-          include: [path.join(process.cwd(), './src')],
-          use: [
-            {
-              loader: 'babel-loader',
-              query: babel.query
-            },
-            getTsLoaders(),
-          ],
-          exclude: [nodeModulesPath]
-        })
       } 
       else {
         loaders.push({
@@ -540,6 +529,11 @@ export default function getBaseConfig({
   };
   if (__DEV__) {
     config.devServer = {
+      /* stats: {
+                colors: true,
+                children: false,
+                warningsFilter: /export .* was not found in/
+      }, */
       stats: 'errors-only',
       contentBase: [`./${WORKING_DIRECTORY}/`],
       historyApiFallback: {
