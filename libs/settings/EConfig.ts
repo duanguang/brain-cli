@@ -78,8 +78,27 @@ interface IWebpack{
          *
          * 扩展loader加载器
          */
-    extend?:(loaders:any[], config:extendConfig)=>void,
- }
+    extend?: (loaders: any[],config: extendConfig) => void,
+    
+    cssLoaders: {
+
+        /**
+         * 
+         * 样式处理包含文件夹
+         * @type {string[]}
+         */
+        include: string[],
+
+        /**
+         * 排除文件夹信息
+         *
+         * @type {string[]}
+         */
+        exclude: string[],
+        
+    }
+}
+const nodeModulesPath = path.resolve(process.cwd(), 'node_modules');
 export default class EConfig {
     public name: string;
     public open: boolean;
@@ -121,7 +140,11 @@ export default class EConfig {
         tsCompilePlugin: {
             loader:'ts-loader'
         },
-        plugins:[]
+        plugins: [],
+        cssLoaders: {
+            exclude:[nodeModulesPath],
+            include:[path.join(process.cwd(), './src')]
+        },
     };
 
     public babel: {

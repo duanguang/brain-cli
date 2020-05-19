@@ -10,6 +10,7 @@ const defaultEConfig = require(path.resolve(__dirname, `../../${constants_1.PROJ
  * 可选配置列表, 优先级从低到高由左到右
  */
 exports.configFileList = [constants_1.PROJECT_USER_CONFIG_FILE, constants_1.PROJECT_USER_CONFIG_IGNORE_FILE];
+const nodeModulesPath = path.resolve(process.cwd(), 'node_modules');
 class EConfig {
     constructor() {
         this.projectType = 'js';
@@ -31,7 +32,11 @@ class EConfig {
             tsCompilePlugin: {
                 loader: 'ts-loader'
             },
-            plugins: []
+            plugins: [],
+            cssLoaders: {
+                exclude: [nodeModulesPath],
+                include: [path.join(process.cwd(), './src')]
+            },
         };
         this.init();
     }

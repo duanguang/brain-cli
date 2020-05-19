@@ -52,7 +52,7 @@ const entries = getEntries_1.getApps();
 function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPath, apps, server, babel, webpack: webpackConfig, htmlWebpackPlugin, projectType, isTslint }) {
     const __DEV__ = env_1.isDev();
     publicPath += name + '/';
-    const { disableReactHotLoader, commonsChunkPlugin, cssModules, plugins, disableHappyPack, tsCompilePlugin } = webpackConfig;
+    const { disableReactHotLoader, commonsChunkPlugin, cssModules, plugins, disableHappyPack, tsCompilePlugin, cssLoaders, } = webpackConfig;
     const NewOptimization = objects_1.merge(Optimization, webpackConfig.optimization);
     const DisableReactHotLoader = disableReactHotLoader || false; //默认启用热加载
     const { noInfo, proxy } = devServer;
@@ -133,6 +133,18 @@ function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPa
                 canPrint: true
             }));
         }
+        let include = [];
+        let exclude = [];
+        if (cssLoaders) {
+            if (Array.isArray(cssLoaders.include)) {
+                const set = new Set([...cssLoaders.include, path.join(process.cwd(), './src')]);
+                include = [...set];
+            }
+            if (Array.isArray(cssLoaders.exclude)) {
+                const set = new Set([...cssLoaders.exclude, nodeModulesPath]);
+                exclude = [...set];
+            }
+        }
         const loaders = [
             {
                 test: /\.css$/,
@@ -152,24 +164,28 @@ function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPa
             {
                 test: new RegExp(`^(?!.*\\.modules).*\\.css`),
                 use: generateLoaders(null, null, postcss_loader),
-                exclude: [nodeModulesPath]
+                exclude: exclude,
+                include: include,
             },
             {
                 /* test: /\.css$/, */
                 test: new RegExp(`^(.*\\.modules).*\\.css`),
                 use: generateLoaders(CSS_MODULE_OPTION, null, postcss_loader),
-                exclude: [nodeModulesPath]
+                exclude: exclude,
+                include: include,
             },
             {
                 test: new RegExp(`^(?!.*\\.modules).*\\.less`),
                 use: generateLoaders(null, { loader: 'less-loader', options: { javascriptEnabled: true } }, postcss_loader),
-                exclude: [nodeModulesPath]
+                exclude: exclude,
+                include: include,
             },
             {
                 /* test: /\.less/, */
                 test: new RegExp(`^(.*\\.modules).*\\.less`),
                 use: generateLoaders(CSS_MODULE_OPTION, { loader: 'less-loader', options: { javascriptEnabled: true } }, postcss_loader),
-                exclude: [nodeModulesPath]
+                exclude: exclude,
+                include: include,
             },
         ];
         if (webpackConfig.extend && typeof webpackConfig.extend === 'function') {
@@ -189,6 +205,7 @@ function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPa
         return [
             {
                 test: /\.json$/,
+                type: 'javascript/auto',
                 loader: 'json-loader'
             }
         ];

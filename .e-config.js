@@ -1,5 +1,6 @@
 const ProgressBarPlugin = require('progress-bar-webpack-plugin');
 const chalk = require('chalk');
+const  path = require('path');
 module.exports = {
   name: 'test',
   open: true,
@@ -59,6 +60,9 @@ module.exports = {
     disableHappyPack: false,
     cssModules: {
       enable: true // 默认为 false，如需使用 css modules 功能，则设为 true
+    },
+    cssLoaders: {
+      include: [path.join(process.cwd(), 'node_modules/hoolinks-legion-design')],
     },
     plugins: [
       new ProgressBarPlugin({
