@@ -38,7 +38,7 @@ const Optimization = {
           },
       }
   },
-  minimizer:isDev()?[]: [
+  /* minimizer:isDev()?[]: [
     new UglifyJSPlugin({
       parallel: true,
       uglifyOptions: {
@@ -48,7 +48,7 @@ const Optimization = {
         }
       },
     }),
-  ],
+  ], */
 }
 // const ProgressBarPlugin = require('progress-bar-webpack-plugin');
 // const chalk = require('chalk');
@@ -535,6 +535,20 @@ export default function getBaseConfig({
                 }
             ],
        }),
+       ...(isDev() ? [] : [
+        new UglifyJSPlugin({
+            cache: true,
+            parallel: true, // 开启并行压缩，充分利用cpu
+            sourceMap: false,
+            extractComments: false, // 移除注释
+            uglifyOptions: {
+                compress: {
+                    drop_debugger: true,
+                    drop_console: true
+                }
+            },
+        }),
+    ]),
       /* new HtmlWebpackHarddiskPlugin(), */
       new webpack.DefinePlugin({
         'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || DEV),

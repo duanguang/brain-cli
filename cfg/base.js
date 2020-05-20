@@ -33,17 +33,6 @@ const Optimization = {
             },
         }
     },
-    minimizer: env_1.isDev() ? [] : [
-        new UglifyJSPlugin({
-            parallel: true,
-            uglifyOptions: {
-                compress: {
-                    drop_debugger: true,
-                    drop_console: true
-                }
-            },
-        }),
-    ],
 };
 // const ProgressBarPlugin = require('progress-bar-webpack-plugin');
 // const chalk = require('chalk');
@@ -491,6 +480,20 @@ function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPa
                     }
                 ],
             }),
+            ...(env_1.isDev() ? [] : [
+                new UglifyJSPlugin({
+                    cache: true,
+                    parallel: true,
+                    sourceMap: false,
+                    extractComments: false,
+                    uglifyOptions: {
+                        compress: {
+                            drop_debugger: true,
+                            drop_console: true
+                        }
+                    },
+                }),
+            ]),
             /* new HtmlWebpackHarddiskPlugin(), */
             new webpack.DefinePlugin({
                 'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || constants_1.DEV),
