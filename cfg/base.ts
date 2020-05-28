@@ -15,7 +15,7 @@ import LegionExtractStaticFilePlugin from '../libs/webpack/plugins/LegionExtract
 import { getApps } from '../libs/webpack/entries/getEntries';
 import { merge } from '../libs/utils/objects';
 const nodeModulesPath = path.resolve(process.cwd(), 'node_modules');
-/* const ExtractTextPlugin = require('extract-text-webpack-plugin'); */
+const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const HtmlWebpackHarddiskPlugin = require('html-webpack-harddisk-plugin');
 const OptimizeCssAssetsPlugin = require('optimize-css-assets-webpack-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
@@ -25,6 +25,7 @@ const SpritesmithPlugin = require('webpack-spritesmith');
 const express = require('express');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const UglifyJSPlugin = require('uglifyjs-webpack-plugin');
+const TerserPlugin = require('terser-webpack-plugin');
 const Optimization = {
   runtimeChunk: false,
   splitChunks: {
@@ -147,20 +148,35 @@ export default function getBaseConfig({
       if (loaderOptions) {
         style.push(loaderOptions);
       }
-      let styles = [{
+      if (__DEV__) {
+        let styles = ['style-loader', ...style];
+        return styles;
+      }
+      /* let styles = [{
               loader: MiniCssExtractPlugin.loader,options: {
               hmr:__DEV__?true:false,
           }}, ...style];
-      return styles;
+      return styles; */
+      return ExtractTextPlugin.extract({
+        fallback: 'style-loader',
+        use: style
+      });
     }
-    config.plugins.push(
+    /* config.plugins.push(
       new MiniCssExtractPlugin({	
         ignoreOrder: true, // 修复min-css 处理antd less 时css 顺序报错
         filename:__DEV__? '[name]/styles/[name].bundle.css':'[name]/styles/[name].[contenthash:8].bundle.css'    // [name] 占位符，为 entry 入口属性，默认 main
       })
-    );
+    ); */
     if (!__DEV__) {
       // ExtractTextPlugin.extract = f => `style-loader!` + f;
+      config.plugins.push(
+        //new ExtractTextPlugin('[name]/styles/[name].css')
+        new ExtractTextPlugin({
+          filename: '[name]/styles/[name].[hash:8].bundle.css',
+          allChunks: true
+        })
+      );
       config.plugins.push(
         new OptimizeCssAssetsPlugin({
           assetNameRegExp: /\.optimize\.css$/g,
@@ -183,11 +199,11 @@ export default function getBaseConfig({
       }
     }
     const loaders = [
-      {
+      /* {
         test: /\.css$/,
         use: generateLoaders(),
         include: [nodeModulesPath]
-      },
+      }, */
       {
         test: /\.less/,
         use: generateLoaders(CSS_MODULE_OPTION, 'less-loader', postcss_loader),
@@ -196,7 +212,7 @@ export default function getBaseConfig({
       {
         test: /\.less/,
         use: generateLoaders(null, {loader:'less-loader',options:{ javascriptEnabled: true }}),
-        include: [path.resolve(nodeModulesPath, 'antd'),nodeModulesPath]
+        include: [path.resolve(nodeModulesPath, 'antd')]
       },
       {
         test: new RegExp(`^(?!.*\\.modules).*\\.css`),
@@ -536,12 +552,12 @@ export default function getBaseConfig({
             ],
        }),
        ...(isDev() ? [] : [
-        new UglifyJSPlugin({
+        new TerserPlugin({
             cache: true,
             parallel: true, // 开启并行压缩，充分利用cpu
             sourceMap: false,
             extractComments: false, // 移除注释
-            uglifyOptions: {
+            terserOptions: {
                 compress: {
                     drop_debugger: true,
                     drop_console: true
@@ -588,20 +604,6 @@ export default function getBaseConfig({
   } else {
     /* config.plugins.push(new webpack.NamedModulesPlugin())
     config.plugins.push(new webpack.optimize.ModuleConcatenationPlugin()) */
-    config.plugins.push(
-      
-     /*  new webpack.optimize.UglifyJsPlugin({
-        // mangle: false,
-        // 最紧凑的输出
-        //beautify: false,
-        compress: {
-          warnings: false,
-          drop_debugger: true, // 删除所有的 `console` 语句// 还可以兼容ie浏览器
-          drop_console: true
-        },
-        comments: false // 删除所有的注释
-      }) */
-    );
     
     if (process.env.environment === 'report') {
       config.plugins.push(
