@@ -607,11 +607,11 @@ export default function getBaseConfig({
                 },
                 {
                   loader: require.resolve('ts-loader'),
-                  options: Object.assign({
+                  options: {
                     // disable type checker - we will use it in fork plugin
-                      transpileOnly: true,
-                      happyPackMode: true
-                    }, (tsCompilePlugin&&tsCompilePlugin.option)?tsCompilePlugin.option: {})
+                    transpileOnly: true,
+                    happyPackMode: true
+                  }
                 }
             ],
        }),
