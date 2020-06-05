@@ -606,12 +606,12 @@ export default function getBaseConfig({
                 query: babel.query
                 },
                 {
-                loader: require.resolve('ts-loader'),
-                options: {
+                  loader: require.resolve('ts-loader'),
+                  options: Object.assign({
                     // disable type checker - we will use it in fork plugin
-                    transpileOnly: true,
-                    happyPackMode: true
-                }
+                      transpileOnly: true,
+                      happyPackMode: true
+                    }, (tsCompilePlugin&&tsCompilePlugin.option)?tsCompilePlugin.option: {})
                 }
             ],
        }),
