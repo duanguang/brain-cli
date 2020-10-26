@@ -4,14 +4,17 @@
         text-align: center;
         color: #79808c;
     }
+
     .content:first-child {
         padding-top: 6.8rem;
     }
+
     .title {
         font-size: 2rem;
         font-weight: bold;
         position: relative;
     }
+
     .title:after {
         content: " ";
         border-bottom: 4px solid #339afe;
@@ -23,80 +26,92 @@
         right: 0;
         margin: auto;
     }
+
     .slogan {
         margin-top: 2rem;
         font-size: 1.1rem;
-        color: rgba(121,128,140,1);
+        color: rgba(121, 128, 140, 1);
         line-height: 1.92rem;
     }
+
     // 我们不仅仅是设计师
     .design {
         padding-top: 3.9rem;
+        background: url(../../public/images/home/animation.png) center no-repeat;
+
         .cate {
             position: relative;
             display: inline-block;
             margin-right: 1.6rem;
             cursor: pointer;
             width: 17.55rem;
-            height: 25rem;    
-            // transform:rotateY(0deg);
+            height: 25rem;
+            /* transform: rotateY(0deg); */
+
             img {
                 width: 100%;
                 height: 100%;
             }
         }
+
         .cover {
             position: relative;
             width: 100%;
             height: 100%;
             transition: all .5s ease-in-out;
-            transform-style:preserve-3d;
-            backface-visibility:hidden;
-            transform:rotateY(180deg);
-            z-index:1;
+            transform-style: preserve-3d;
+            backface-visibility: hidden;
+            transform: rotateY(180deg);
+            z-index: 1;
             box-shadow: 0 .25rem 1rem .05rem #ccc;
             border-radius: .75rem;
+
             img {
                 border-radius: .75rem;
             }
         }
+
         .flip-item-bling {
-            position:absolute;
-            top:50%;
-            left:50%;
-            width:10rem;
-            height:10rem;
-            margin-top:-5rem;
-            margin-left:-5rem;
-            background:url(../../public/images/home/animation.png) center no-repeat;
-            z-index:-1;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 10rem;
+            height: 10rem;
+            margin-top: -5rem;
+            margin-left: -5rem;
+            background: url(../../public/images/home/animation.png) center no-repeat;
+            z-index: -1;
         }
+
         .cate:hover {
             .transform {
-                z-index:1;
-                transform:rotateY(180deg);
+                z-index: 1;
+                transform: rotateY(180deg);
             }
+
             .cover {
-                z-index:2;
-                transform:rotateY(0deg);
+                z-index: 2;
+                transform: rotateY(0deg);
             }
         }
+
         .transform {
-            // transform: rotateY(180deg);
-            // display: none;
-            // width: 17.55rem;
-            // height: 25.4rem;
+            /* transform: rotateY(180deg);
+            display: none;
+            width: 17.55rem;
+            height: 25.4rem; */
             box-shadow: 0 .25rem 1rem .05rem #ccc;
             position: absolute;
             top: 0;
             width: 100%;
             height: 100%;
-            transition:all .5s ease-in-out;
-            transform-style:preserve-3d;
-            backface-visibility:hidden;
-            transform:rotateY(0deg);
-            z-index:2;
+            transition: all .5s ease-in-out;
+            transform-style: preserve-3d;
+            backface-visibility: hidden;
+            transform: rotateY(0deg);
+            z-index: 2;
             border-radius: .75rem;
+
             .intro {
                 position: absolute;
                 top: 12.25rem;
@@ -104,6 +119,7 @@
                 padding-top: 1.95rem;
                 color: #79808c;
                 text-align: center;
+
                 &:after {
                     content: " ";
                     border-bottom: 1px solid #79808c;
@@ -115,32 +131,37 @@
                     right: 0;
                     margin: auto;
                 }
+
                 >div {
                     padding-bottom: 2.4rem;
                 }
+
                 span {
                     font-size: .7rem;
                     line-height: 1.2rem;
                     display: block;
                 }
             }
+
             .intro-title {
                 padding-bottom: 0.15rem;
                 font-size: 1.4rem;
                 line-height: 1.85rem;
                 font-weight: bold;
             }
+
             .small {
                 font-size: .7rem;
             }
         }
     }
-    
+
     // 我们的项目
     .project {
         padding-top: 4.65rem;
+
         .item {
-            width: 7.85rem; 
+            width: 7.85rem;
             height: 31.2rem;
             display: inline-block;
             transition: all .4s;
@@ -148,104 +169,132 @@
             box-shadow: inset .25rem 0 1rem 0 #ececec;
             cursor: pointer;
             overflow: hidden;
+
             &:hover {
                 .intro {
                     display: block;
                 }
+
                 .project-title {
                     display: none;
                 }
+
                 width: 27.9rem;
             }
+
             .line {
                 border-top: .15rem solid #4f99fd;
                 position: absolute;
                 left: 0;
                 right: 0;
                 margin: auto;
-                // top: -.18rem;
+                /* top: -.18rem; */
                 width: 98%;
                 border-top-left-radius: .4rem;
                 border-top-right-radius: .4rem;
             }
+
             &:first-child {
                 width: 27.9rem;
+
                 .intro {
                     display: block;
                 }
+
                 box-shadow: none;
                 background: #e6edff;
-                color: #5a8ff6;;
+                color: #5a8ff6;
+                ;
+
                 .project-title {
                     top: 1.55rem;
                     right: 1rem;
                 }
             }
+
             &:nth-child(2) {
                 background: #f1faff;
                 color: #329ADE;
+
                 .project-title {
                     top: 2.5rem;
                 }
             }
+
             &:nth-child(2) .line {
-                border-color: #80d0fe;;
+                border-color: #80d0fe;
+                ;
             }
+
             &:nth-child(3) {
                 background: #FFFAFB;
                 color: #FF84A8;
+
                 .project-title {
                     top: 2.3rem;
                 }
             }
+
             &:nth-child(3) .line {
                 border-color: #ff84a8;
             }
+
             &:nth-child(4) {
                 background: #FFF3F8;
                 color: #FAA2C7;
+
                 .project-title {
                     top: 2.5rem;
                 }
             }
+
             &:nth-child(4) .line {
                 border-color: #ffbad7;
             }
+
             &:nth-child(5) {
                 background: #FCF7FF;
                 color: #C3A0DC;
+
                 .project-title {
                     top: 3.75rem;
                     right: -1.3rem;
                 }
             }
+
             &:nth-child(5) .line {
                 border-color: #cda9e7;
             }
+
             &:nth-child(6) {
                 background: #F6FFFD;
                 color: #6BD3BF;
+
                 .project-title {
                     top: 9.25rem;
                     right: -6.7rem;
                 }
             }
+
             &:nth-child(6) .line {
                 border-color: #84e5d2;
             }
+
             &:nth-child(7) {
                 background: #FEFCF5;
                 color: #F7D16C;
-                .project-title {    
+
+                .project-title {
                     top: 11.1rem;
                     right: -8.4rem;
                 }
             }
+
             &:nth-child(7) .line {
                 border-color: #fde979;
             }
         }
-        
+
         .project-title {
             transform: rotate(90deg);
             font-size: 2.75rem;
@@ -255,21 +304,26 @@
             top: 0;
             right: 0;
             font-weight: bold;
+
             p {
                 display: inline;
+
                 &:last-child {
                     padding-left: 1.15rem;
                 }
             }
         }
+
         .intro {
             float: left;
             position: relative;
             display: none;
             height: 100%;
+
             img {
                 height: 100%;
             }
+
             .intro-content {
                 position: absolute;
                 bottom: 3rem;
@@ -278,12 +332,14 @@
                 color: #fff;
                 font-size: 0.8rem;
                 width: 27.9rem;
+
                 >div {
                     position: relative;
                     font-size: 1.4rem;
                     font-weight: bold;
                     font-family: Arial, Helvetica, sans-serif;
                     margin-bottom: 1.1rem;
+
                     &:after {
                         content: " ";
                         border-bottom: 3px solid #fff;
@@ -301,16 +357,19 @@
 
     // 更懂设计更懂你
     .video-cover {
-        background-color: rgba(243,245,247,1);
+        background-color: rgba(243, 245, 247, 1);
+
         >div {
             padding-bottom: 4.5rem;
             background: url('../../public/images/home/video-cover.png');
             background-size: 100% 100%;
         }
+
         .title {
             padding-top: 2.7rem;
             margin-bottom: 5.5rem;
         }
+
         video {
             width: 59.35rem;
             height: 33.4rem;
@@ -322,5 +381,5 @@
     .container .project .intro {
         float: none;
         height: 100%
-    }  
+    }
 }
