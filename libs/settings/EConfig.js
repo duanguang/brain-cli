@@ -35,6 +35,7 @@ class EConfig {
             tsCompilePlugin: {
                 loader: 'ts-loader'
             },
+            output: {},
             plugins: []
         };
         this.init();

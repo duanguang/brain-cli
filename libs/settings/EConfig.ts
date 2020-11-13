@@ -69,6 +69,10 @@ export default class EConfig {
             loader: 'ts-loader',
             option?:any
         },
+        output: {
+            library?: (name:string)=>string|string;
+            libraryTarget?: 'umd'|'var',
+        }
         /**
          *
          * 扩展loader加载器
@@ -99,6 +103,9 @@ export default class EConfig {
         */
         tsCompilePlugin: {
             loader:'ts-loader'
+        },
+        output: {
+                
         },
         plugins:[]
     };

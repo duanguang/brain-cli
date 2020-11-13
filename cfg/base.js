@@ -21,24 +21,23 @@ const express = require('express');
 // const chalk = require('chalk');
 const HappyPack = require('happypack'), os = require('os'), happyThreadPool = HappyPack.ThreadPool({ size: os.cpus().length });
 const entries = getEntries_1.getApps();
-function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPath, apps, server, babel, webpack: webpackConfig, htmlWebpackPlugin, projectType, isTslint }) {
+function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPath, apps, server, babel, webpack: webpackConfig, htmlWebpackPlugin, projectType, isTslint, }) {
     const __DEV__ = env_1.isDev();
     publicPath += name + '/';
-    const { disableReactHotLoader, commonsChunkPlugin, cssModules, plugins, disableHappyPack, tsCompilePlugin } = webpackConfig;
+    const { disableReactHotLoader, commonsChunkPlugin, cssModules, plugins, disableHappyPack, tsCompilePlugin, output, } = webpackConfig;
     const DisableReactHotLoader = disableReactHotLoader || false; //默认启用热加载
     let CommonsChunkPlugin = { name: 'common', value: ['invariant'] };
     if (commonsChunkPlugin &&
         commonsChunkPlugin instanceof Array &&
         commonsChunkPlugin.length > 0) {
         CommonsChunkPlugin.value = [
-            ...new Set(commonsChunkPlugin.concat(CommonsChunkPlugin.value))
+            ...new Set(commonsChunkPlugin.concat(CommonsChunkPlugin.value)),
         ];
     }
     const { noInfo, proxy } = devServer;
     const webpackDevEntries = [
         `webpack-dev-server/client?http://${server}:${defaultPort}`,
-        `webpack/hot/only-dev-server`
-        //'webpack/hot/dev-server'
+        `webpack/hot/only-dev-server`,
     ];
     function getEntries() {
         let entity = entries().reduce((prev, app) => {
@@ -70,7 +69,7 @@ function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPa
         const CSS_MODULE_OPTION = {
             modules: true,
             importLoaders: 1,
-            localIdentName: `[local]-[hash:base64:6]`
+            localIdentName: `[local]-[hash:base64:6]`,
         };
         let browsers = EConfig_1.default.getInstance().postcss.autoprefixer.browsers;
         let px2rem = EConfig_1.default.getInstance().postcss.px2rem;
@@ -78,8 +77,8 @@ function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPa
             loader: 'postcss-loader',
             options: {
                 ident: 'postcss',
-                plugins: [require('autoprefixer')({ browsers: browsers })]
-            }
+                plugins: [require('autoprefixer')({ browsers: browsers })],
+            },
         };
         if (px2rem) {
             postcss_loader.options.plugins.push(require('px2rem')(px2rem));
@@ -101,7 +100,7 @@ function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPa
             }
             return ExtractTextPlugin.extract({
                 fallback: 'style-loader',
-                use: style
+                use: style,
             });
         }
         if (!__DEV__) {
@@ -110,16 +109,29 @@ function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPa
             //new ExtractTextPlugin('[name]/styles/[name].css')
             new ExtractTextPlugin({
                 filename: '[name]/styles/[name].[contenthash:8].bundle.css',
-                allChunks: true
+                allChunks: true,
             }));
             config.plugins.push(new OptimizeCssAssetsPlugin({
                 assetNameRegExp: /\.optimize\.css$/g,
                 cssProcessor: require('cssnano'),
                 cssProcessorOptions: { discardComments: { removeAll: true } },
-                canPrint: true
+                canPrint: true,
             }));
         }
         const loaders = [
+            /* {
+            test: /\.css$/,
+            use: generateLoaders(),
+            // use: ExtractTextPlugin.extract(
+            //     {
+            //         fallback: 'style-loader',
+            //         use: [
+            //           { loader: 'css-loader' },
+      
+            //         ]
+            //       }),
+            include: [nodeModulesPath]
+          }, */
             {
                 test: /\.less/,
                 use: generateLoaders(CSS_MODULE_OPTION, 'less-loader', postcss_loader),
@@ -130,7 +142,7 @@ function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPa
                 //             {loader:`css-loader`,options:CSS_MODULE_OPTION},'less-loader',postcss_loader
                 //         ]
                 //       }),
-                include: [path.resolve(nodeModulesPath, 'basics-widget')]
+                include: [path.resolve(nodeModulesPath, 'basics-widget')],
             },
             {
                 test: /\.less/,
@@ -142,7 +154,7 @@ function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPa
                 //             {loader:`css-loader`},'less-loader',postcss_loader
                 //         ]
                 //       }),
-                include: [path.resolve(nodeModulesPath, 'antd')]
+                include: [path.resolve(nodeModulesPath, 'antd')],
             },
             {
                 test: new RegExp(`^(?!.*\\.modules).*\\.css`),
@@ -154,13 +166,13 @@ function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPa
                 //             {loader:`css-loader`,options:CSS_MODULE_OPTION},postcss_loader
                 //         ]
                 //       }),
-                exclude: [nodeModulesPath]
+                exclude: [nodeModulesPath],
             },
             {
                 /* test: /\.css$/, */
                 test: new RegExp(`^(.*\\.modules).*\\.css`),
                 use: generateLoaders(CSS_MODULE_OPTION, null, postcss_loader),
-                exclude: [nodeModulesPath]
+                exclude: [nodeModulesPath],
             },
             {
                 test: new RegExp(`^(?!.*\\.modules).*\\.less`),
@@ -173,24 +185,28 @@ function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPa
                 //         ]
                 //       }
                 // ),
-                exclude: [nodeModulesPath]
+                exclude: [nodeModulesPath],
             },
             {
                 /* test: /\.less/, */
                 test: new RegExp(`^(.*\\.modules).*\\.less`),
                 use: generateLoaders(CSS_MODULE_OPTION, 'less-loader', postcss_loader),
-                exclude: [nodeModulesPath]
+                exclude: [nodeModulesPath],
             },
         ];
         if (webpackConfig.extend && typeof webpackConfig.extend === 'function') {
             // @ts-ignore
-            webpackConfig.extend && webpackConfig.extend(loaders, {
-                isDev: __DEV__, loaderType: 'StyleLoader', projectType, transform: {
-                    cssModule: CSS_MODULE_OPTION,
-                    LoaderOptions: postcss_loader,
-                    execution: generateLoaders
-                }
-            });
+            webpackConfig.extend &&
+                webpackConfig.extend(loaders, {
+                    isDev: __DEV__,
+                    loaderType: 'StyleLoader',
+                    projectType,
+                    transform: {
+                        cssModule: CSS_MODULE_OPTION,
+                        LoaderOptions: postcss_loader,
+                        execution: generateLoaders,
+                    },
+                });
         }
         return loaders;
     }
@@ -198,8 +214,8 @@ function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPa
         return [
             {
                 test: /\.json$/,
-                loader: 'json-loader'
-            }
+                loader: 'json-loader',
+            },
         ];
     }
     function getImageLoaders() {
@@ -207,8 +223,8 @@ function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPa
             return [
                 {
                     test: /\.(png|jpe?g|gif)$/,
-                    loaders: [`file-loader`]
-                }
+                    loaders: [`file-loader`],
+                },
             ];
         }
         return [
@@ -216,19 +232,17 @@ function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPa
                 test: /\.(png|jpe?g|gif)$/,
                 //loader: `url-loader?limit=${8192}&name=${path.posix.join('common', 'images/[hash:8].[name].[ext]')}`,
                 loaders: [
-                    `file-loader?limit=${imageInLineSize}&name=common/images/[hash:8].[name].[ext]`
-                    //optimizationLevel似乎没什么用
-                    //`image-webpack?{optipng:{optimizationLevel:7}, pngquant:{quality: "65-90", speed: 4}, mozjpeg: {quality: 65}}`
-                ]
-            }
+                    `file-loader?limit=${imageInLineSize}&name=common/images/[hash:8].[name].[ext]`,
+                ],
+            },
         ];
     }
     function getFontLoaders() {
         return [
             {
                 test: /\.(woff|woff2|svg|eot|ttf)$/,
-                loader: `url-loader?limit=${imageInLineSize}&name=fonts/[hash:8].[name].[ext]`
-            }
+                loader: `url-loader?limit=${imageInLineSize}&name=fonts/[hash:8].[name].[ext]`,
+            },
         ];
     }
     function getTsLoaders() {
@@ -238,8 +252,8 @@ function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPa
                 options: Object.assign({
                     // disable type checker - we will use it in fork plugin
                     transpileOnly: true,
-                    happyPackMode: true
-                }, tsCompilePlugin.option || {})
+                    happyPackMode: true,
+                }, (tsCompilePlugin.option || {})),
             };
         }
     }
@@ -256,7 +270,7 @@ function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPa
                     // loader: 'react-hot',
                     loader: 'react-hot-loader!babel-loader',
                     include: [path.join(process.cwd(), './src')],
-                    exclude: [nodeModulesPath] //优化构建效率
+                    exclude: [nodeModulesPath],
                 });
                 /* loaders.push({
                             test: /\.(jsx|js)?$/,
@@ -264,8 +278,14 @@ function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPa
                             loader: 'react-hot-loader!babel-loader',
                             include: [path.join(process.cwd(), 'node_modules/hoolinks-legion-design')]
                 }); */
-                if (webpackConfig.extend && typeof webpackConfig.extend === 'function') {
-                    webpackConfig.extend && webpackConfig.extend(loaders, { isDev: __DEV__, loaderType: 'HotLoader', projectType });
+                if (webpackConfig.extend &&
+                    typeof webpackConfig.extend === 'function') {
+                    webpackConfig.extend &&
+                        webpackConfig.extend(loaders, {
+                            isDev: __DEV__,
+                            loaderType: 'HotLoader',
+                            projectType,
+                        });
                 }
             }
             else {
@@ -275,13 +295,13 @@ function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPa
         loaders.push({
             test: /\.(jsx|js)?$/,
             /* loader: `babel-loader`,
-            query: babel.query, */
+                  query: babel.query, */
             include: [
                 path.join(process.cwd(), 'node_modules/basics-widget'),
-                path.join(process.cwd(), './src')
+                path.join(process.cwd(), './src'),
             ],
             loader: 'happypack/loader?id=js',
-            exclude: [nodeModulesPath]
+            exclude: [nodeModulesPath],
         });
         /* loaders.push({
           test: /\.(jsx|js)?$/,
@@ -291,21 +311,29 @@ function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPa
           loader: 'happypack/loader?id=js',
         }); */
         if (webpackConfig.extend && typeof webpackConfig.extend === 'function') {
-            webpackConfig.extend && webpackConfig.extend(loaders, { isDev: __DEV__, loaderType: 'JsLoader', projectType });
+            webpackConfig.extend &&
+                webpackConfig.extend(loaders, {
+                    isDev: __DEV__,
+                    loaderType: 'JsLoader',
+                    projectType,
+                });
         }
         if (projectType === 'ts') {
-            if (tsCompilePlugin && tsCompilePlugin.option && tsCompilePlugin.option.getCustomTransformers) { // 解决多线程下ts-loader 编译插件无法被执行问题
+            if (tsCompilePlugin &&
+                tsCompilePlugin.option &&
+                tsCompilePlugin.option.getCustomTransformers) {
+                // 解决多线程下ts-loader 编译插件无法被执行问题
                 loaders.push({
                     test: /\.(ts|tsx)$/,
                     include: [path.join(process.cwd(), './src')],
                     use: [
                         {
                             loader: 'babel-loader',
-                            query: babel.query
+                            query: babel.query,
                         },
                         getTsLoaders(),
                     ],
-                    exclude: [nodeModulesPath]
+                    exclude: [nodeModulesPath],
                 });
             }
             else {
@@ -327,11 +355,16 @@ function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPa
                       }
                     ], */
                     loader: 'happypack/loader?id=ts',
-                    exclude: [nodeModulesPath]
+                    exclude: [nodeModulesPath],
                 });
             }
             if (webpackConfig.extend && typeof webpackConfig.extend === 'function') {
-                webpackConfig.extend && webpackConfig.extend(loaders, { isDev: __DEV__, loaderType: 'TsLoader', projectType });
+                webpackConfig.extend &&
+                    webpackConfig.extend(loaders, {
+                        isDev: __DEV__,
+                        loaderType: 'TsLoader',
+                        projectType,
+                    });
             }
             /* loaders.push({
               test: /\.(ts|tsx)$/,
@@ -345,8 +378,8 @@ function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPa
         return [
             {
                 test: /\.(mp4|ogg)$/,
-                loader: 'file-loader?&name=others/[name].[ext]'
-            }
+                loader: 'file-loader?&name=others/[name].[ext]',
+            },
         ];
     }
     function getTemplateJspLoaders() {
@@ -354,8 +387,8 @@ function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPa
             {
                 test: /\.jsp$/,
                 use: 'raw-loader',
-                exclude: [nodeModulesPath]
-            }
+                exclude: [nodeModulesPath],
+            },
         ];
     }
     function getTslintLoaders() {
@@ -366,8 +399,8 @@ function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPa
                     exclude: /node_modules/,
                     enforce: 'pre',
                     /* loader: 'happypack/loader?id=tslint', */
-                    loader: 'tslint-loader'
-                }
+                    loader: 'tslint-loader',
+                },
             ];
         }
         return [];
@@ -404,7 +437,7 @@ function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPa
         return new SpritesmithPlugin({
             src: {
                 cwd: path.resolve(process.cwd(), `./src/${item}/assets/images/icons/`),
-                glob: '**/*.png' // 匹配任意 png 图标
+                glob: '**/*.png',
             },
             target: {
                 image: path.resolve(process.cwd(), `./src/${item}/assets/css/sprites-generated.png`),
@@ -413,28 +446,41 @@ function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPa
                     [
                         path.resolve(process.cwd(), `./src/${item}/assets/css/sprites-generated.css`),
                         {
-                            format: 'function_based_template'
-                        }
-                    ]
-                ]
-                // css: path.resolve(__dirname, '../src/assets/spritesmith-generated/sprite.less')
+                            format: 'function_based_template',
+                        },
+                    ],
+                ],
             },
             customTemplates: {
-                function_based_template: templateFunction
+                function_based_template: templateFunction,
             },
             apiOptions: {
-                cssImageRef: './sprites-generated.png' // css文件中引用雪碧图的相对位置路径配置
+                cssImageRef: './sprites-generated.png',
             },
             spritesmithOptions: {
-                padding: 4
-            }
+                padding: 4,
+            },
         });
     });
+    const library = {};
+    if (output && typeof output === 'object' && !Array.isArray(output)) {
+        const libraryArrylist = ['library', 'libraryTarget'];
+        libraryArrylist.map((item) => {
+            if (output.hasOwnProperty(item)) {
+                if (typeof output[item] === 'string') {
+                    library[item] = output[item];
+                }
+                else if (typeof output[item] === 'function') {
+                    library[item] = output[item](name);
+                }
+            }
+        });
+    }
     const config = {
         entry: getEntries(),
         //port: defaultPort,
         //additionalPaths: [],
-        output: {
+        output: Object.assign(Object.assign({}, library), { 
             /**遇到问题： 对于同一个页面功能由不同的同事开发， 都用到了 webpack 以及 CommonsChunkPlugin，最后把打包出来的代码，整合到一起的时候，冲突了。
              * 问题表现：各自用 webpack 打包代码没有问题，但是加载到页面上时，代码报错且错误难以定位。
              * 解决方法：在 webpack 的配置选项里使用 output.jsonpFunction。
@@ -444,22 +490,23 @@ function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPa
       如果使用了 output.library 选项，那么这个 library 的命名会自动附加上。
       事实上 webpack 并不在全局命名空间下运行，但是 CommonsChunkPlugin 这样的插件会使用异步 JSONP 的方法按需加载代码块。插件会注册一个全局的函数叫 window.webpackJsonp，所以同一个页面上运行多个源自不同 webpack 打包出来的代码时，可能会引起冲突。
              */
-            jsonpFunction: process.env.webpackJsonp || `webpackJsonpName`,
-            path: path.join(process.cwd(), `${constants_1.DIST}`),
-            filename: `[name]/js/[name].[chunkhash:5].bundle.js`,
-            chunkFilename: 'common/js/[name]-[id].[chunkhash:5].bundle.js',
+            jsonpFunction: process.env.webpackJsonp || `webpackJsonpName`, path: path.join(process.cwd(), `${constants_1.DIST}`), filename: `[name]/js/[name].[chunkhash:5].bundle.js`, chunkFilename: 'common/js/[name]-[id].[chunkhash:5].bundle.js', 
             //chunkFilename:path.posix.join('common', 'js/[name]-[id].[chunkhash:5].bundle.js'),
-            publicPath: __DEV__ ? publicPath : process.env.cdnRelease || '../'
-        },
+            publicPath: __DEV__ ? publicPath : process.env.cdnRelease || '../' }),
         devtool: __DEV__ && 'cheap-module-source-map',
         resolve: {
             alias: {},
             extensions: ['.web.js', '.js', '.json', '.ts', '.tsx', '.jsx'],
             //modulesDirectories: ['src', 'node_modules', path.join(__dirname, '../node_modules')],
-            modules: ['src', 'node_modules', path.join(process.cwd(), `src`), path.join(process.cwd(), `node_modules`)]
+            modules: [
+                'src',
+                'node_modules',
+                path.join(process.cwd(), `src`),
+                path.join(process.cwd(), `node_modules`),
+            ],
         },
         module: {
-            loaders: []
+            loaders: [],
         },
         plugins: [
             ...getHtmlWebpackPlugins(),
@@ -483,14 +530,14 @@ function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPa
                     //   )
                     return (module.context && module.context.indexOf('node_modules') !== -1);
                 },
-                filename: 'common/js/[name].[chunkhash:5].core.js'
+                filename: 'common/js/[name].[chunkhash:5].core.js',
             }),
             new webpack.optimize.CommonsChunkPlugin({
                 name: 'manifest',
                 chunks: ['common'],
                 filename: process.env.NODE_ENV !== 'dev'
                     ? 'common/js/manifest.[chunkhash:5].js'
-                    : 'common/js/manifest.js'
+                    : 'common/js/manifest.js',
             }),
             new HappyPack({
                 id: 'js',
@@ -500,8 +547,8 @@ function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPa
                     {
                         loader: `babel-loader`,
                         query: babel.query,
-                    }
-                ]
+                    },
+                ],
             }),
             //如果有单独提取css文件的话
             // new HappyPack({
@@ -521,16 +568,16 @@ function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPa
                 use: [
                     {
                         loader: 'babel-loader',
-                        query: babel.query
+                        query: babel.query,
                     },
                     {
                         loader: require.resolve('ts-loader'),
                         options: {
                             // disable type checker - we will use it in fork plugin
                             transpileOnly: true,
-                            happyPackMode: true
-                        }
-                    }
+                            happyPackMode: true,
+                        },
+                    },
                 ],
             }),
             new HtmlWebpackHarddiskPlugin(),
@@ -539,9 +586,9 @@ function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPa
                 'process.env.environment': '"' + process.env.environment + '"',
                 'process.env.apps': '"' + process.env.apps + '"',
                 'process.env.webpackJsonp': '"' + process.env.webpackJsonp + '"',
-                'process.env.cdnRelease': '"' + process.env.cdnRelease + '"'
-            })
-        ]
+                'process.env.cdnRelease': '"' + process.env.cdnRelease + '"',
+            }),
+        ],
     };
     if (__DEV__) {
         config.devServer = {
@@ -550,8 +597,11 @@ function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPa
             historyApiFallback: {
                 rewrites: apps.map((app) => ({
                     from: constants_1.HISTORY_REWRITE_FALL_BACK_REGEX_FUNC(app),
-                    to: `${publicPath}/${app}/index.html`
-                }))
+                    to: `${publicPath}/${app}/index.html`,
+                })),
+            },
+            headers: {
+                'Access-Control-Allow-Origin': '*',
             },
             hot: true,
             port: defaultPort,
@@ -561,8 +611,7 @@ function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPa
             inline: false,
             before: function (app) {
                 app.use(path.posix.join(`/static`), express.static('./static')); // 代理静态资源
-            }
-            //progress: true,
+            },
         };
         config.plugins.push(new webpack.NoEmitOnErrorsPlugin());
         config.plugins.push(new webpack.HotModuleReplacementPlugin());
@@ -575,9 +624,9 @@ function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPa
             compress: {
                 warnings: false,
                 drop_debugger: true,
-                drop_console: true
+                drop_console: true,
             },
-            comments: false // 删除所有的注释
+            comments: false,
         })
         /* new ParallelUglifyPlugin({
           cacheDir: '.uglifyCache/', // Optional absolute path to use as a cache. If not provided, caching will not be used.
@@ -611,8 +660,8 @@ function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPa
             {
                 from: path.join(process.cwd(), `static`),
                 to: 'common',
-                ignore: ['.*']
-            }
+                ignore: ['.*'],
+            },
         ]));
     }
     config.module = {
@@ -624,9 +673,8 @@ function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPa
             ...getFontLoaders(),
             ...getFileResourcesLoaders(),
             ...getTslintLoaders(),
-            ...getTemplateJspLoaders()
-        ]
-        //noParse: []
+            ...getTemplateJspLoaders(),
+        ],
     };
     return config;
 }
