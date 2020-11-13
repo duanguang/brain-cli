@@ -145,6 +145,7 @@ module.exports = {
 
 ## changeLog webpack4.x
 - v1.0.8-alpha.5  新增webpack 配置文件输出属性output支持自定义library及libraryTarget
+- v1.0.8-alpha.4  fix: 修复file-loader 插件通过require 引入文件及样式引入文件,404问题
 ## License
 [MIT](LICENSE)
 
