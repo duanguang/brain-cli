@@ -57,7 +57,8 @@ interface IWebpack{
      */
     plugins?: [];
     output?: {
-        libraryTarget?: 'var' | 'window' | 'this' | 'umd'
+        library?: (name:string)=>string|string; 
+        libraryTarget?:'var' | 'window' | 'this' | 'umd';
     };
 
     /**
@@ -96,7 +97,7 @@ interface IWebpack{
          */
         exclude: string[],
         
-    }
+    },
 }
 const nodeModulesPath = path.resolve(process.cwd(), 'node_modules');
 export default class EConfig {

@@ -42,7 +42,7 @@ const entries = getEntries_1.getApps();
 function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPath, apps, server, babel, webpack: webpackConfig, htmlWebpackPlugin, projectType, isTslint, }) {
     const __DEV__ = env_1.isDev();
     publicPath += name + '/';
-    const { disableReactHotLoader, commonsChunkPlugin, cssModules, plugins, disableHappyPack, tsCompilePlugin, cssLoaders, } = webpackConfig;
+    const { disableReactHotLoader, commonsChunkPlugin, cssModules, plugins, disableHappyPack, tsCompilePlugin, cssLoaders, output, } = webpackConfig;
     const NewOptimization = objects_1.merge(Optimization, webpackConfig.optimization);
     const DisableReactHotLoader = disableReactHotLoader || false; //默认启用热加载
     const { noInfo, proxy } = devServer;
@@ -456,11 +456,25 @@ function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPa
             },
         });
     });
+    const library = {};
+    if (output && typeof output === 'object' && !Array.isArray(output)) {
+        const libraryArrylist = ['library', 'libraryTarget'];
+        libraryArrylist.map((item) => {
+            if (output.hasOwnProperty(item)) {
+                if (typeof output[item] === 'string') {
+                    library[item] = output[item];
+                }
+                else if (typeof output[item] === 'function') {
+                    library[item] = output[item](name);
+                }
+            }
+        });
+    }
     const config = {
         entry: getEntries(),
         //port: defaultPort,
         //additionalPaths: [],
-        output: {
+        output: Object.assign(Object.assign({}, library), { 
             /**遇到问题： 对于同一个页面功能由不同的同事开发， 都用到了 webpack 以及 CommonsChunkPlugin，最后把打包出来的代码，整合到一起的时候，冲突了。
              * 问题表现：各自用 webpack 打包代码没有问题，但是加载到页面上时，代码报错且错误难以定位。
              * 解决方法：在 webpack 的配置选项里使用 output.jsonpFunction。
@@ -470,15 +484,11 @@ function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPa
       如果使用了 output.library 选项，那么这个 library 的命名会自动附加上。
       事实上 webpack 并不在全局命名空间下运行，但是 CommonsChunkPlugin 这样的插件会使用异步 JSONP 的方法按需加载代码块。插件会注册一个全局的函数叫 window.webpackJsonp，所以同一个页面上运行多个源自不同 webpack 打包出来的代码时，可能会引起冲突。
              */
-            jsonpFunction: process.env.webpackJsonp || `webpackJsonpName`,
-            path: path.join(process.cwd(), `${constants_1.DIST}`),
-            filename: __DEV__
+            jsonpFunction: process.env.webpackJsonp || `webpackJsonpName`, path: path.join(process.cwd(), `${constants_1.DIST}`), filename: __DEV__
                 ? `[name]/js/[name].js`
-                : `[name]/js/[name].[chunkhash:5].bundle.js`,
-            chunkFilename: 'common/js/[name].[chunkhash:5].bundle.js',
+                : `[name]/js/[name].[chunkhash:5].bundle.js`, chunkFilename: 'common/js/[name].[chunkhash:5].bundle.js', 
             //chunkFilename:path.posix.join('common', 'js/[name]-[id].[chunkhash:5].bundle.js'),
-            publicPath: __DEV__ ? publicPath : process.env.cdnRelease || '../',
-        },
+            publicPath: __DEV__ ? publicPath : process.env.cdnRelease || '../' }),
         devtool: __DEV__ && 'cheap-module-source-map',
         resolve: {
             alias: {},
@@ -571,6 +581,9 @@ function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPa
                     from: constants_1.HISTORY_REWRITE_FALL_BACK_REGEX_FUNC(app),
                     to: `${publicPath}/${app}/index.html`,
                 })),
+            },
+            headers: {
+                'Access-Control-Allow-Origin': '*',
             },
             hot: true,
             port: defaultPort,

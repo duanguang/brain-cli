@@ -82,6 +82,7 @@ export default function getBaseConfig({
     disableHappyPack,
     tsCompilePlugin,
     cssLoaders,
+    output,
   } = webpackConfig;
   const NewOptimization = merge(Optimization, webpackConfig.optimization);
   const DisableReactHotLoader = disableReactHotLoader || false; //默认启用热加载
@@ -533,11 +534,26 @@ export default function getBaseConfig({
       },
     });
   });
+  const library = {}; 
+  if (output && typeof output === 'object' && !Array.isArray(output)) { 
+    const libraryArrylist = ['library','libraryTarget']; 
+    libraryArrylist.map((item) => { 
+      if (output.hasOwnProperty(item)) { 
+        if (typeof output[item] === 'string') { 
+          library[item] = output[item]; 
+        } 
+        else if (typeof output[item] === 'function') { 
+          library[item] = output[item](name); 
+        } 
+      } 
+    }) 
+  } 
   const config: any = {
     entry: getEntries(),
     //port: defaultPort,
     //additionalPaths: [],
     output: {
+      ...library, 
       /**遇到问题： 对于同一个页面功能由不同的同事开发， 都用到了 webpack 以及 CommonsChunkPlugin，最后把打包出来的代码，整合到一起的时候，冲突了。
        * 问题表现：各自用 webpack 打包代码没有问题，但是加载到页面上时，代码报错且错误难以定位。
        * 解决方法：在 webpack 的配置选项里使用 output.jsonpFunction。
@@ -648,6 +664,9 @@ export default function getBaseConfig({
           from: HISTORY_REWRITE_FALL_BACK_REGEX_FUNC(app),
           to: `${publicPath}/${app}/index.html`,
         })),
+      },
+      headers: {
+        'Access-Control-Allow-Origin': '*',
       },
       hot: true,
       port: defaultPort,
