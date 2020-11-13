@@ -137,7 +137,8 @@ module.exports = {
 - brain-cli dll
 
 ## changeLog
-- v0.3.21 新增dll 文件支持指定资源发布路径，默认没有指定情况下，去相对或者模块cdn参数值
+- v0.3.28-beta.1  新增webpack 配置文件输出属性output支持自定义library及libraryTarget
+- v0.3.27 新增dll 文件支持指定资源发布路径，默认没有指定情况下，去相对或者模块cdn参数值
 - v0.3.20 修复开启多线程，在linux系统环境loader名称大小写问题
 - v0.3.15 增加资源可指定cdn及css modules 启用，可以指定文件类型进行css modules
 - v0.3.13 调整按需加载文件路径，增加本地静态资源读取能力，可读取static文件

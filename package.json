@@ -1,7 +1,7 @@
 {
   "name": "brain-cli",
   "license": "MIT",
-  "version": "0.3.27",
+  "version": "0.3.28-beta.1",
   "description": "A command line tool used to run  projects",
   "scripts": {
     "clean": "rimraf dist/*",
