@@ -3,7 +3,7 @@ import WebpackDllManifest from '../libs/settings/WebpackDllManifest';
 const path = require('path');
 const webpack = require('webpack');
 const {webpack:{dllConfig}} = EConfig.getInstance();
-const {vendors,...otherDll } = dllConfig
+const {vendors,dllCompileParam:{output,plugins=[]},...otherDll } = dllConfig
 const webpackDllManifest = WebpackDllManifest.getInstance();
 const distPath = webpackDllManifest.distPath;
 const DllPlugins = {}
@@ -25,6 +25,7 @@ if (otherDll&& typeof otherDll==='object'&&!Array.isArray(otherDll)) {
                     key:vendorsDll
                 },
                 output: {
+                    ...output,
                     path: distPath,
                     // filename: `${distFileName}.js`,
                     filename: `${key}.dll.${distFileName}.js`,
@@ -63,7 +64,8 @@ if (otherDll&& typeof otherDll==='object'&&!Array.isArray(otherDll)) {
                           comments: false,
                         },
                         sourceMap: false
-                      })
+                    }),
+                    ...plugins
                 ]
             };
             DllPlugins[key] = dll

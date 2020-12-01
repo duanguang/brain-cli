@@ -6,7 +6,7 @@ import { getDllReferencePlugin } from './helpers';
 import { DllPlugins } from './dllPlugins';
 const AddAssetHtmlPlugin = require('add-asset-html-webpack-plugin');
 const {webpack:{dllConfig}} = EConfig.getInstance();
-const {vendors,...otherDll } = dllConfig
+const {vendors,dllCompileParam,...otherDll } = dllConfig
 const path = require('path')
 export default function getDistConfig(eConfig: EConfig) {
     const config = getBaseConfig(eConfig);

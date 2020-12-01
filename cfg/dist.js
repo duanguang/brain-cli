@@ -19,7 +19,7 @@ const helpers_1 = require("./helpers");
 const dllPlugins_1 = require("./dllPlugins");
 const AddAssetHtmlPlugin = require('add-asset-html-webpack-plugin');
 const { webpack: { dllConfig } } = EConfig_1.default.getInstance();
-const { vendors } = dllConfig, otherDll = __rest(dllConfig, ["vendors"]);
+const { vendors, dllCompileParam } = dllConfig, otherDll = __rest(dllConfig, ["vendors", "dllCompileParam"]);
 const path = require('path');
 function getDistConfig(eConfig) {
     const config = base_1.default(eConfig);

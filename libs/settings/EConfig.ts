@@ -51,14 +51,16 @@ export default class EConfig {
     public webpack: {
         dllConfig: {
             vendors: string[] | { cdn?: string; FrameList: string[] };
-            output?: {
-                libraryTarget?: 'umd' | 'var' | 'commonjs2' | 'commonjs' | 'amd' | 'window' | 'global' | 'this',
-                //当使用了 libraryTarget: "umd"，设置：true 会对 UMD 的构建过程中的 AMD 模块进行命名。否则就使用匿名的 define。
-                umdNamedDefine?: boolean;
-                // globalObject为改变全局指向
-                globalObject?:'this'
-            },
-            plugins?: [];
+            dllCompileParam: {
+                output?: {
+                    libraryTarget?: 'umd' | 'var' | 'commonjs2' | 'commonjs' | 'amd' | 'window' | 'global' | 'this',
+                    //当使用了 libraryTarget: "umd"，设置：true 会对 UMD 的构建过程中的 AMD 模块进行命名。否则就使用匿名的 define。
+                    umdNamedDefine?: boolean;
+                    // globalObject为改变全局指向
+                    globalObject?:'this'
+                },
+                plugins?: [];
+            }
         },
         disableReactHotLoader: boolean,
         commonsChunkPlugin?: ICommonsChunkPlugin,
@@ -90,6 +92,7 @@ export default class EConfig {
     } = {
         dllConfig: {
             vendors: ['react','react-dom','invariant'],
+            dllCompileParam:{},
         },
         disableReactHotLoader: false,
         /**

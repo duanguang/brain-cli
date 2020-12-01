@@ -2,7 +2,7 @@ import EConfig from '../libs/settings/EConfig';
 import WebpackDllManifest from '../libs/settings/WebpackDllManifest';
 const path = require('path');
 const webpack = require('webpack');
-const {webpack:{dllConfig:{vendors,output,plugins=[]}}} = EConfig.getInstance();
+const {webpack:{dllConfig:{vendors,dllCompileParam:{output,plugins=[]}}}} = EConfig.getInstance();
 
 const webpackDllManifest = WebpackDllManifest.getInstance();
 const distPath = webpackDllManifest.distPath;

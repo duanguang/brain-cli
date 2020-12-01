@@ -4,7 +4,7 @@ const EConfig_1 = require("../libs/settings/EConfig");
 const WebpackDllManifest_1 = require("../libs/settings/WebpackDllManifest");
 const path = require('path');
 const webpack = require('webpack');
-const { webpack: { dllConfig: { vendors, output, plugins = [] } } } = EConfig_1.default.getInstance();
+const { webpack: { dllConfig: { vendors, dllCompileParam: { output, plugins = [] } } } } = EConfig_1.default.getInstance();
 const webpackDllManifest = WebpackDllManifest_1.default.getInstance();
 const distPath = webpackDllManifest.distPath;
 const vendorsFrame = (typeof vendors === 'object' && !Array.isArray(vendors)) ? vendors.FrameList : Array.isArray(vendors) ? vendors : [];
