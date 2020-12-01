@@ -137,7 +137,7 @@ module.exports = {
 - brain-cli dll
 
 ## changeLog
-##  v0.3.28-beta.1 (2020-12-01)
+##  v0.3.28-beta.2 (2020-12-01)
 - feat: 新增webpack dll 配置文件输出属性output支持自定义libraryTarget及其他属性 
 - feat: 新增webpack dll  插件支持自定义
 
