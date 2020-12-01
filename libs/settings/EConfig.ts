@@ -15,7 +15,17 @@ export const configFileList = [PROJECT_USER_CONFIG_FILE, PROJECT_USER_CONFIG_IGN
     enable:boolean
 }
 interface IDllConfig{
-    vendors: string[] | { cdn?: string;FrameList:string[]}
+    vendors: string[] | { cdn?: string; FrameList: string[] }
+    dllCompileParam: {
+        output?: {
+            libraryTarget?: 'umd' | 'var' | 'commonjs2' | 'commonjs' | 'amd' | 'window' | 'global' | 'this',
+            //当使用了 libraryTarget: "umd"，设置：true 会对 UMD 的构建过程中的 AMD 模块进行命名。否则就使用匿名的 define。
+            umdNamedDefine?: boolean;
+            // globalObject为改变全局指向
+            globalObject?:'this'
+        },
+        plugins?: [];
+    }
 }
 interface extendConfig{
     isDev: boolean,
@@ -123,6 +133,7 @@ export default class EConfig {
     public webpack: IWebpack = {
         dllConfig: {
             vendors: ['react','react-dom','invariant'],
+            dllCompileParam:{},
         },
         disableReactHotLoader: false,
         commonsChunkPlugin:['common'],

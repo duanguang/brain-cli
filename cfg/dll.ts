@@ -2,7 +2,7 @@ import EConfig from '../libs/settings/EConfig';
 import WebpackDllManifest from '../libs/settings/WebpackDllManifest';
 const path = require('path');
 const webpack = require('webpack');
-const {webpack:{dllConfig:{vendors}}} = EConfig.getInstance();
+const {webpack:{dllConfig:{vendors,dllCompileParam:{output,plugins=[]}}}} = EConfig.getInstance();
 
 const webpackDllManifest = WebpackDllManifest.getInstance();
 const distPath = webpackDllManifest.distPath;
@@ -17,6 +17,7 @@ if (isVendorExist) {
         },
         mode: 'production',
         output: {
+            ...output,
             path: distPath,
             // filename: `${distFileName}.js`,
             filename: `vendor.dll.${distFileName}.js`,
@@ -44,7 +45,7 @@ if (isVendorExist) {
                  */
                 name: `[name]_${distFileName}_library`
             }),
-            
+            ...plugins
         ]
     };
 }

@@ -16,7 +16,7 @@ const WebpackDllManifest_1 = require("../libs/settings/WebpackDllManifest");
 const path = require('path');
 const webpack = require('webpack');
 const { webpack: { dllConfig } } = EConfig_1.default.getInstance();
-const { vendors } = dllConfig, otherDll = __rest(dllConfig, ["vendors"]);
+const { vendors, dllCompileParam: { output, plugins = [] } } = dllConfig, otherDll = __rest(dllConfig, ["vendors", "dllCompileParam"]);
 const webpackDllManifest = WebpackDllManifest_1.default.getInstance();
 const distPath = webpackDllManifest.distPath;
 const DllPlugins = {};
@@ -40,17 +40,15 @@ if (otherDll && typeof otherDll === 'object' && !Array.isArray(otherDll)) {
                     key: vendorsDll
                 },
                 mode: 'production',
-                output: {
-                    path: distPath,
+                output: Object.assign(Object.assign({}, output), { path: distPath, 
                     // filename: `${distFileName}.js`,
-                    filename: `${key}.dll.${distFileName}.js`,
+                    filename: `${key}.dll.${distFileName}.js`, 
                     /**
                      * output.library
                      * 将会定义为 window.${output.library}
                      * 在这次的例子中，将会定义为`window.vendor_library`
                      */
-                    library: `${key}_${distFileName}_library`,
-                },
+                    library: `${key}_${distFileName}_library` }),
                 plugins: [
                     new webpack.DllPlugin({
                         /**
@@ -67,6 +65,7 @@ if (otherDll && typeof otherDll === 'object' && !Array.isArray(otherDll)) {
                          */
                         name: `${key}_${distFileName}_library`
                     }),
+                    ...plugins
                 ]
             };
             DllPlugins[key] = dll;

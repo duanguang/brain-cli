@@ -18,6 +18,7 @@ class EConfig {
         this.webpack = {
             dllConfig: {
                 vendors: ['react', 'react-dom', 'invariant'],
+                dllCompileParam: {},
             },
             disableReactHotLoader: false,
             commonsChunkPlugin: ['common'],
