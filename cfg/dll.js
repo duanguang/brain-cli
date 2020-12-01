@@ -4,7 +4,7 @@ const EConfig_1 = require("../libs/settings/EConfig");
 const WebpackDllManifest_1 = require("../libs/settings/WebpackDllManifest");
 const path = require('path');
 const webpack = require('webpack');
-const { webpack: { dllConfig: { vendors } } } = EConfig_1.default.getInstance();
+const { webpack: { dllConfig: { vendors, output, plugins = [] } } } = EConfig_1.default.getInstance();
 const webpackDllManifest = WebpackDllManifest_1.default.getInstance();
 const distPath = webpackDllManifest.distPath;
 const vendorsFrame = (typeof vendors === 'object' && !Array.isArray(vendors)) ? vendors.FrameList : Array.isArray(vendors) ? vendors : [];
@@ -15,17 +15,15 @@ if (isVendorExist) {
         entry: {
             vendors: vendorsFrame
         },
-        output: {
-            path: distPath,
+        output: Object.assign(Object.assign({}, output), { path: distPath, 
             // filename: `${distFileName}.js`,
-            filename: `vendor.dll.${distFileName}.js`,
+            filename: `vendor.dll.${distFileName}.js`, 
             /**
              * output.library
              * 将会定义为 window.${output.library}
              * 在这次的例子中，将会定义为`window.vendor_library`
              */
-            library: `[name]_${distFileName}_library`,
-        },
+            library: `[name]_${distFileName}_library` }),
         plugins: [
             new webpack.DllPlugin({
                 /**
@@ -53,7 +51,8 @@ if (isVendorExist) {
                     comments: false,
                 },
                 sourceMap: false
-            })
+            }),
+            ...plugins
         ]
     };
 }
