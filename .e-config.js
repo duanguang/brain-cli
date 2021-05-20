@@ -51,7 +51,7 @@ module.exports = {
   webpack: {
     dllConfig: {
        vendors: ['react','react-dom','invariant'],
-       /* framework: {cdn:'',FrameList:['invariant']}, */
+       framework: {cdn:'',FrameList:['invariant']},
     /* framework:['react','react-dom'] */ // 支持自定义dll 包
       /* framework:{cdn:'https://hoolinks1.com',FrameList:['react','react-dom']} */
     },

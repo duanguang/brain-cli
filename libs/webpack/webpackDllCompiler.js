@@ -8,17 +8,6 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-var __rest = (this && this.__rest) || function (s, e) {
-    var t = {};
-    for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
-        t[p] = s[p];
-    if (s != null && typeof Object.getOwnPropertySymbols === "function")
-        for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
-            if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i]))
-                t[p[i]] = s[p[i]];
-        }
-    return t;
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 const webpack = require("webpack");
 const WebpackDllManifest_1 = require("../settings/WebpackDllManifest");
@@ -26,7 +15,7 @@ const logs_1 = require("../utils/logs");
 const dllPlugins_1 = require("../../cfg/dllPlugins");
 const EConfig_1 = require("../settings/EConfig");
 const dllConfig = require('../../cfg/dll');
-const _a = EConfig_1.default.getInstance().webpack.dllConfig, { vendors } = _a, otherDll = __rest(_a, ["vendors"]);
+const { vendors, customDll } = EConfig_1.default.getInstance().webpack.dllConfig;
 function webpackDllCompiler() {
     const requireCompile = WebpackDllManifest_1.default.getInstance().isCompileManifestDirty();
     return new Promise((resolve, reject) => {
@@ -61,13 +50,9 @@ function webpackDllPluginsCompiler() {
         const promiseDll = [];
         Object.keys(dllPlugins_1.DllPlugins).forEach((key) => {
             let vendorsDll = [];
-            if (typeof otherDll[key] === 'object') {
-                if (Array.isArray(otherDll[key])) {
-                    vendorsDll = otherDll[key];
-                }
-                else {
-                    vendorsDll = otherDll[key].FrameList || [];
-                }
+            const item = customDll.find((item) => item.key === key);
+            if (item) {
+                vendorsDll = item.value;
             }
             const requireCompile = WebpackDllManifest_1.default.getInstance().isCompileManifestDirty(key, WebpackDllManifest_1.default.getInstance().getDllPluginsHash(vendorsDll));
             const promise = new Promise((resolve, reject) => {

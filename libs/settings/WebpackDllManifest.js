@@ -15,7 +15,7 @@ class WebpackDllManifest {
             }
             else {
                 const vendors = EConfig_1.default.getInstance().webpack.dllConfig.vendors;
-                this.vendors = vendors.FrameList;
+                this.vendors = vendors.value;
             }
         }
         this.distPath = constants_1.WEBPACK_DLL_MANIFEST_DIST;

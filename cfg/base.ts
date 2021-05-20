@@ -156,27 +156,14 @@ export default function getBaseConfig({
         let styles = ['style-loader', ...style];
         return styles;
       }
-      /* let styles = [{
-              loader: MiniCssExtractPlugin.loader,options: {
-              hmr:__DEV__?true:false,
-          }}, ...style];
-      return styles; */
       return ExtractTextPlugin.extract({
         fallback: 'style-loader',
         use: style,
         /* publicPath: '/', */
       });
     }
-    /* config.plugins.push(
-      new MiniCssExtractPlugin({	
-        ignoreOrder: true, // 修复min-css 处理antd less 时css 顺序报错
-        filename:__DEV__? '[name]/styles/[name].bundle.css':'[name]/styles/[name].[contenthash:8].bundle.css'    // [name] 占位符，为 entry 入口属性，默认 main
-      })
-    ); */
     if (!__DEV__) {
-      // ExtractTextPlugin.extract = f => `style-loader!` + f;
       config.plugins.push(
-        //new ExtractTextPlugin('[name]/styles/[name].css')
         new ExtractTextPlugin({
           filename: '[name]/styles/[name].[hash:8].bundle.css',
           allChunks: true,
@@ -207,16 +194,6 @@ export default function getBaseConfig({
       }
     }
     const loaders = [
-      /* {
-        test: /\.css$/,
-        use: generateLoaders(),
-        include: [nodeModulesPath]
-      }, */
-      {
-        test: /\.less/,
-        use: generateLoaders(CSS_MODULE_OPTION, 'less-loader', postcss_loader),
-        include: [path.resolve(nodeModulesPath, 'basics-widget')],
-      },
       {
         test: /\.less/,
         use: generateLoaders(null, {
@@ -242,8 +219,8 @@ export default function getBaseConfig({
         test: new RegExp(`^(?!.*\\.modules).*\\.less`),
         use: generateLoaders(
           null,
+          postcss_loader,
           { loader: 'less-loader', options: { javascriptEnabled: true } },
-          postcss_loader
         ),
         exclude: exclude,
         include: include,
@@ -253,8 +230,8 @@ export default function getBaseConfig({
         test: new RegExp(`^(.*\\.modules).*\\.less`),
         use: generateLoaders(
           CSS_MODULE_OPTION,
+          postcss_loader,
           { loader: 'less-loader', options: { javascriptEnabled: true } },
-          postcss_loader
         ),
         exclude: exclude,
         include: include,
@@ -406,20 +383,6 @@ export default function getBaseConfig({
         loaders.push({
           test: /\.(ts|tsx)$/,
           include: [path.join(process.cwd(), './src')],
-          /* use: [
-            {
-              loader: 'babel-loader',
-              query: babel.query
-            },
-            {
-              loader: require.resolve('ts-loader'),
-              options: {
-                // disable type checker - we will use it in fork plugin
-                  transpileOnly: true,
-                  happyPackMode: true
-              }
-            }
-          ], */
           loader: 'happypack/loader?id=ts',
           exclude: [nodeModulesPath],
         });
@@ -485,8 +448,10 @@ export default function getBaseConfig({
       .map(function (sprite: any) {
         // background-size: SWpx SHpx;
         return '.w-icon-N { width: SWpx; height: SHpx; }\n.w-icon-N .w-icon, .w-icon-N.w-icon { width: Wpx; height: Hpx; background-position: Xpx Ypx; margin-top: -SHpx; margin-left: -SWpx; } '
-          .replace(/N/g, sprite.name)
+          .replace(/N/g,sprite.name)
+          //@ts-ignore
           .replace(/SW/g, sprite.width / 2)
+           //@ts-ignore
           .replace(/SH/g, sprite.height / 2)
           .replace(/W/g, sprite.width)
           .replace(/H/g, sprite.height)
@@ -652,11 +617,6 @@ export default function getBaseConfig({
   };
   if (__DEV__) {
     config.devServer = {
-      /* stats: {
-                colors: true,
-                children: false,
-                warningsFilter: /export .* was not found in/
-      }, */
       stats: 'errors-only',
       contentBase: [`./${WORKING_DIRECTORY}/`],
       historyApiFallback: {
@@ -678,15 +638,10 @@ export default function getBaseConfig({
       },
       //progress: true,
     };
-    /*  config.plugins.push(new webpack.HotModuleReplacementPlugin()) */
   } else {
-    /* config.plugins.push(new webpack.NamedModulesPlugin())
-    config.plugins.push(new webpack.optimize.ModuleConcatenationPlugin()) */
-
     if (process.env.environment === 'report') {
       config.plugins.push(
         new BundleAnalyzerPlugin()
-        // new webpack.optimize.DedupePlugin()//webpack1用于优化重复模块
       );
     }
     config.plugins.push(new LegionExtractStaticFilePlugin());

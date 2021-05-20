@@ -2,18 +2,26 @@ import EConfig from '../libs/settings/EConfig';
 import WebpackDllManifest from '../libs/settings/WebpackDllManifest';
 const path = require('path');
 const webpack = require('webpack');
-const {webpack:{dllConfig:{vendors,dllCompileParam:{output,plugins=[]}}}} = EConfig.getInstance();
+const {webpack:{dllConfig:{vendors,dllCompileOptions:{output,plugins=[]}}}} = EConfig.getInstance();
 
 const webpackDllManifest = WebpackDllManifest.getInstance();
 const distPath = webpackDllManifest.distPath;
+let value = [];
+if (typeof vendors === 'object') {
+    if (!Array.isArray(vendors)) {
+        value = vendors.value;
+    }
+    else {
+        value = vendors
+    }
+}
 
-const vendorsFrame = (typeof vendors==='object'&&!Array.isArray(vendors))?vendors.FrameList:Array.isArray(vendors)?vendors:[]
-const isVendorExist = vendorsFrame && vendorsFrame.length;
+const isVendorExist = value && value.length;
 if (isVendorExist) {
     const distFileName = webpackDllManifest.getVendorsHash();
     module.exports = {
         entry: {
-            vendors:vendorsFrame
+            vendors:value
         },
         mode: 'production',
         output: {

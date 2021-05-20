@@ -2,7 +2,6 @@ import * as path from 'path';
 import {PROJECT_USER_CONFIG_FILE, PROJECT_USER_CONFIG_IGNORE_FILE} from '../constants/constants';
 import * as invariant from 'invariant';
 import {requireBabelify} from '../utils/requireBabelify';
-import { OptimizationOptions} from 'webpack/declarations/WebpackOptions'
 const deepAssign = require('deep-assign');
 const defaultEConfig = require(path.resolve(__dirname, `../../${PROJECT_USER_CONFIG_FILE}`));
 
@@ -14,18 +13,30 @@ export const configFileList = [PROJECT_USER_CONFIG_FILE, PROJECT_USER_CONFIG_IGN
  interface ICssModules{
     enable:boolean
 }
+export interface IDllConfigType{
+    externalUrl?: string;
+    value: string[];
+    options?: IDllCompileOptions;
+}
+export interface ICustomDllType extends IDllConfigType{
+    key: string;
+}
+export interface IDllCompileOptions{
+    output?: {
+        libraryTarget?: 'umd' | 'var' | 'commonjs2' | 'commonjs' | 'amd' | 'window' | 'global' | 'this',
+        //当使用了 libraryTarget: "umd"，设置：true 会对 UMD 的构建过程中的 AMD 模块进行命名。否则就使用匿名的 define。
+        umdNamedDefine?: boolean;
+        // globalObject为改变全局指向
+        globalObject?:'this'
+    },
+    plugins?: [];
+}
 interface IDllConfig{
-    vendors: string[] | { cdn?: string; FrameList: string[] }
-    dllCompileParam: {
-        output?: {
-            libraryTarget?: 'umd' | 'var' | 'commonjs2' | 'commonjs' | 'amd' | 'window' | 'global' | 'this',
-            //当使用了 libraryTarget: "umd"，设置：true 会对 UMD 的构建过程中的 AMD 模块进行命名。否则就使用匿名的 define。
-            umdNamedDefine?: boolean;
-            // globalObject为改变全局指向
-            globalObject?:'this'
-        },
-        plugins?: [];
-    }
+    /** 默认dll 文件 */
+    vendors: string[] | IDllConfigType
+    /** 自定义dll */
+    customDll?: ICustomDllType[]
+    dllCompileOptions: IDllCompileOptions
 }
 interface extendConfig{
     isDev: boolean,
@@ -77,7 +88,7 @@ interface IWebpack{
      * @type {OptimizationOptions}
      * @memberof IWebpack
      */
-    optimization?: OptimizationOptions;
+    optimization?: any;
     /**
          * ts 处理插件
         */
@@ -117,7 +128,7 @@ export default class EConfig {
     public server: string;
     public imageInLineSize: number;
     public publicPath: string;
-    public projectType :string='js';
+    public projectType :'ts' | 'js'='js';
     public isTslint:boolean = true
     public devServer: {
         noInfo: boolean,
@@ -133,7 +144,8 @@ export default class EConfig {
     public webpack: IWebpack = {
         dllConfig: {
             vendors: ['react','react-dom','invariant'],
-            dllCompileParam:{},
+            customDll:[],
+            dllCompileOptions:{},
         },
         disableReactHotLoader: false,
         commonsChunkPlugin:['common'],

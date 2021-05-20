@@ -109,27 +109,13 @@ function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPa
                 let styles = ['style-loader', ...style];
                 return styles;
             }
-            /* let styles = [{
-                    loader: MiniCssExtractPlugin.loader,options: {
-                    hmr:__DEV__?true:false,
-                }}, ...style];
-            return styles; */
             return ExtractTextPlugin.extract({
                 fallback: 'style-loader',
                 use: style,
             });
         }
-        /* config.plugins.push(
-          new MiniCssExtractPlugin({
-            ignoreOrder: true, // 修复min-css 处理antd less 时css 顺序报错
-            filename:__DEV__? '[name]/styles/[name].bundle.css':'[name]/styles/[name].[contenthash:8].bundle.css'    // [name] 占位符，为 entry 入口属性，默认 main
-          })
-        ); */
         if (!__DEV__) {
-            // ExtractTextPlugin.extract = f => `style-loader!` + f;
-            config.plugins.push(
-            //new ExtractTextPlugin('[name]/styles/[name].css')
-            new ExtractTextPlugin({
+            config.plugins.push(new ExtractTextPlugin({
                 filename: '[name]/styles/[name].[hash:8].bundle.css',
                 allChunks: true,
             }));
@@ -156,16 +142,6 @@ function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPa
             }
         }
         const loaders = [
-            /* {
-              test: /\.css$/,
-              use: generateLoaders(),
-              include: [nodeModulesPath]
-            }, */
-            {
-                test: /\.less/,
-                use: generateLoaders(CSS_MODULE_OPTION, 'less-loader', postcss_loader),
-                include: [path.resolve(nodeModulesPath, 'basics-widget')],
-            },
             {
                 test: /\.less/,
                 use: generateLoaders(null, {
@@ -189,14 +165,14 @@ function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPa
             },
             {
                 test: new RegExp(`^(?!.*\\.modules).*\\.less`),
-                use: generateLoaders(null, { loader: 'less-loader', options: { javascriptEnabled: true } }, postcss_loader),
+                use: generateLoaders(null, postcss_loader, { loader: 'less-loader', options: { javascriptEnabled: true } }),
                 exclude: exclude,
                 include: include,
             },
             {
                 /* test: /\.less/, */
                 test: new RegExp(`^(.*\\.modules).*\\.less`),
-                use: generateLoaders(CSS_MODULE_OPTION, { loader: 'less-loader', options: { javascriptEnabled: true } }, postcss_loader),
+                use: generateLoaders(CSS_MODULE_OPTION, postcss_loader, { loader: 'less-loader', options: { javascriptEnabled: true } }),
                 exclude: exclude,
                 include: include,
             },
@@ -339,20 +315,6 @@ function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPa
                 loaders.push({
                     test: /\.(ts|tsx)$/,
                     include: [path.join(process.cwd(), './src')],
-                    /* use: [
-                      {
-                        loader: 'babel-loader',
-                        query: babel.query
-                      },
-                      {
-                        loader: require.resolve('ts-loader'),
-                        options: {
-                          // disable type checker - we will use it in fork plugin
-                            transpileOnly: true,
-                            happyPackMode: true
-                        }
-                      }
-                    ], */
                     loader: 'happypack/loader?id=ts',
                     exclude: [nodeModulesPath],
                 });
@@ -416,7 +378,9 @@ function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPa
             // background-size: SWpx SHpx;
             return '.w-icon-N { width: SWpx; height: SHpx; }\n.w-icon-N .w-icon, .w-icon-N.w-icon { width: Wpx; height: Hpx; background-position: Xpx Ypx; margin-top: -SHpx; margin-left: -SWpx; } '
                 .replace(/N/g, sprite.name)
+                //@ts-ignore
                 .replace(/SW/g, sprite.width / 2)
+                //@ts-ignore
                 .replace(/SH/g, sprite.height / 2)
                 .replace(/W/g, sprite.width)
                 .replace(/H/g, sprite.height)
@@ -569,11 +533,6 @@ function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPa
     };
     if (__DEV__) {
         config.devServer = {
-            /* stats: {
-                      colors: true,
-                      children: false,
-                      warningsFilter: /export .* was not found in/
-            }, */
             stats: 'errors-only',
             contentBase: [`./${constants_1.WORKING_DIRECTORY}/`],
             historyApiFallback: {
@@ -594,15 +553,10 @@ function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPa
                 app.use(path.posix.join(`/static`), express.static('./static')); // 代理静态资源
             },
         };
-        /*  config.plugins.push(new webpack.HotModuleReplacementPlugin()) */
     }
     else {
-        /* config.plugins.push(new webpack.NamedModulesPlugin())
-        config.plugins.push(new webpack.optimize.ModuleConcatenationPlugin()) */
         if (process.env.environment === 'report') {
-            config.plugins.push(new BundleAnalyzerPlugin()
-            // new webpack.optimize.DedupePlugin()//webpack1用于优化重复模块
-            );
+            config.plugins.push(new BundleAnalyzerPlugin());
         }
         config.plugins.push(new LegionExtractStaticFilePlugin_1.default());
         config.plugins.push(new CopyWebpackPlugin([
