@@ -1,13 +1,4 @@
-/*
- * @Author: duanguang
- * @Date: 2021-05-07 22:55:50
- * @LastEditTime: 2021-05-21 00:04:38
- * @LastEditors: duanguang
- * @Description: 
- * @FilePath: /brain-cli/cfg/dllPlugins.ts
- * 「扫去窗上的尘埃，才可以看到窗外的美景。」
- */
-import { time } from 'console';
+
 import EConfig from '../libs/settings/EConfig';
 import WebpackDllManifest from '../libs/settings/WebpackDllManifest';
 const path = require('path');
@@ -17,7 +8,7 @@ const {
 } = EConfig.getInstance();
 const {
   vendors,
-  dllCompileOptions: { output, plugins = [] },
+  compileOptions: { output = {}, plugins = [] },
   customDll,
 } = dllConfig;
 const webpackDllManifest = WebpackDllManifest.getInstance();

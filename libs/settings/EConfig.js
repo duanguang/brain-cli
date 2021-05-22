@@ -19,14 +19,11 @@ class EConfig {
             dllConfig: {
                 vendors: ['react', 'react-dom', 'invariant'],
                 customDll: [],
-                dllCompileOptions: {},
+                compileOptions: {},
             },
             disableReactHotLoader: false,
             commonsChunkPlugin: ['common'],
             disableHappyPack: false,
-            cssModules: {
-                enable: false,
-            },
             /**
             *  ts 处理插件 主要有'ts-loader'|'awesome-typescript-loader'
             * 默认 'ts-loader'
@@ -35,10 +32,6 @@ class EConfig {
                 loader: 'ts-loader'
             },
             plugins: [],
-            cssLoaders: {
-                exclude: [nodeModulesPath],
-                include: [path.join(process.cwd(), './src')]
-            },
         };
         this.init();
     }

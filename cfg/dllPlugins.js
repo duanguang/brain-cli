@@ -5,7 +5,7 @@ const WebpackDllManifest_1 = require("../libs/settings/WebpackDllManifest");
 const path = require('path');
 const webpack = require('webpack');
 const { webpack: { dllConfig }, } = EConfig_1.default.getInstance();
-const { vendors, dllCompileOptions: { output, plugins = [] }, customDll, } = dllConfig;
+const { vendors, compileOptions: { output = {}, plugins = [] }, customDll, } = dllConfig;
 const webpackDllManifest = WebpackDllManifest_1.default.getInstance();
 const distPath = webpackDllManifest.distPath;
 const DllPlugins = {};

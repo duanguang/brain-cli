@@ -1,31 +1,42 @@
-import EConfig from '../libs/settings/EConfig';
+import EConfig, { IDllCompileOptions, IDllConfigType } from '../libs/settings/EConfig';
 import WebpackDllManifest from '../libs/settings/WebpackDllManifest';
 const path = require('path');
 const webpack = require('webpack');
-const {webpack:{dllConfig:{vendors,dllCompileOptions:{output,plugins=[]}}}} = EConfig.getInstance();
+const {webpack:{dllConfig:{vendors,compileOptions:{output = {},plugins=[]}}}} = EConfig.getInstance();
 
 const webpackDllManifest = WebpackDllManifest.getInstance();
 const distPath = webpackDllManifest.distPath;
 let value = [];
-if (typeof vendors === 'object') {
-    if (!Array.isArray(vendors)) {
-        value = vendors.value;
+let options: IDllCompileOptions = {output: {}, plugins: []};
+if (Object.prototype.toString.call(vendors) === '[object Object]') {
+    const newVendors = vendors as IDllConfigType;
+    value = newVendors.value;
+    if (newVendors.options) {
+        options = newVendors.options;
     }
-    else {
-        value = vendors
-    }
+}
+else if (Array.isArray(vendors)) {
+    value = vendors;
 }
 
 const isVendorExist = value && value.length;
 if (isVendorExist) {
     const distFileName = webpackDllManifest.getVendorsHash();
+    let dllPlugins = plugins;
+    if (
+        options.plugins &&
+        Array.isArray(options.plugins) &&
+        options.plugins.length
+    ){
+        dllPlugins = options.plugins;
+    }
     module.exports = {
         entry: {
             vendors:value
         },
         mode: 'production',
         output: {
-            ...output,
+            ...{ ...output, ...options.output },
             path: distPath,
             // filename: `${distFileName}.js`,
             filename: `vendor.dll.${distFileName}.js`,
@@ -53,7 +64,7 @@ if (isVendorExist) {
                  */
                 name: `[name]_${distFileName}_library`
             }),
-            ...plugins
+            ...dllPlugins
         ]
     };
 }

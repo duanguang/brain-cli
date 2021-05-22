@@ -42,7 +42,7 @@ const entries = getEntries_1.getApps();
 function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPath, apps, server, babel, webpack: webpackConfig, htmlWebpackPlugin, projectType, isTslint, }) {
     const __DEV__ = env_1.isDev();
     publicPath += name + '/';
-    const { disableReactHotLoader, commonsChunkPlugin, cssModules, plugins, disableHappyPack, tsCompilePlugin, cssLoaders, output, } = webpackConfig;
+    const { disableReactHotLoader, commonsChunkPlugin, plugins, disableHappyPack, tsCompilePlugin, output, } = webpackConfig;
     const NewOptimization = objects_1.merge(Optimization, webpackConfig.optimization);
     const DisableReactHotLoader = disableReactHotLoader || false; //默认启用热加载
     const { noInfo, proxy } = devServer;
@@ -89,14 +89,14 @@ function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPa
                 plugins: [require('autoprefixer')({ browsers: browsers })],
             },
         };
-        if (px2rem) {
-            postcss_loader.options.plugins.push(require('px2rem')(px2rem));
+        if (px2rem && Object.getOwnPropertyNames(px2rem).length) {
+            postcss_loader.options.plugins.push(require('postcss-plugin-px2rem')(px2rem));
         }
         function generateLoaders(cssModule, loader, loaderOptions) {
             let style = [
                 { loader: 'css-loader', options: { importLoaders: 1 } },
             ];
-            if (cssModule && cssModules.enable) {
+            if (cssModule) {
                 style[0] = Object.assign(style[0], { options: cssModule });
             }
             if (loader) {
@@ -126,21 +126,6 @@ function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPa
                 canPrint: true,
             }));
         }
-        let include = [];
-        let exclude = [];
-        if (cssLoaders) {
-            if (Array.isArray(cssLoaders.include)) {
-                const set = new Set([
-                    ...cssLoaders.include,
-                    path.join(process.cwd(), './src'),
-                ]);
-                include = [...set];
-            }
-            if (Array.isArray(cssLoaders.exclude)) {
-                const set = new Set([...cssLoaders.exclude, nodeModulesPath]);
-                exclude = [...set];
-            }
-        }
         const loaders = [
             {
                 test: /\.less/,
@@ -153,28 +138,28 @@ function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPa
             {
                 test: new RegExp(`^(?!.*\\.modules).*\\.css`),
                 use: generateLoaders(null, null, postcss_loader),
-                exclude: exclude,
-                include: include,
+                exclude: [nodeModulesPath],
+                include: path.join(process.cwd(), './src'),
             },
             {
                 /* test: /\.css$/, */
                 test: new RegExp(`^(.*\\.modules).*\\.css`),
                 use: generateLoaders(CSS_MODULE_OPTION, null, postcss_loader),
-                exclude: exclude,
-                include: include,
+                exclude: [nodeModulesPath],
+                include: path.join(process.cwd(), './src'),
             },
             {
                 test: new RegExp(`^(?!.*\\.modules).*\\.less`),
                 use: generateLoaders(null, postcss_loader, { loader: 'less-loader', options: { javascriptEnabled: true } }),
-                exclude: exclude,
-                include: include,
+                exclude: [nodeModulesPath],
+                include: path.join(process.cwd(), './src'),
             },
             {
                 /* test: /\.less/, */
                 test: new RegExp(`^(.*\\.modules).*\\.less`),
                 use: generateLoaders(CSS_MODULE_OPTION, postcss_loader, { loader: 'less-loader', options: { javascriptEnabled: true } }),
-                exclude: exclude,
-                include: include,
+                exclude: [nodeModulesPath],
+                include: path.join(process.cwd(), './src'),
             },
         ];
         if (webpackConfig.extend && typeof webpackConfig.extend === 'function') {

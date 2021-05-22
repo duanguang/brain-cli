@@ -1,7 +1,8 @@
 import * as path from 'path';
 import {PROJECT_USER_CONFIG_FILE, PROJECT_USER_CONFIG_IGNORE_FILE} from '../constants/constants';
 import * as invariant from 'invariant';
-import {requireBabelify} from '../utils/requireBabelify';
+import { requireBabelify } from '../utils/requireBabelify';
+import { OptimizationOptions} from 'webpack/declarations/WebpackOptions'
 const deepAssign = require('deep-assign');
 const defaultEConfig = require(path.resolve(__dirname, `../../${PROJECT_USER_CONFIG_FILE}`));
 
@@ -10,9 +11,6 @@ const defaultEConfig = require(path.resolve(__dirname, `../../${PROJECT_USER_CON
  */
 export const configFileList = [PROJECT_USER_CONFIG_FILE, PROJECT_USER_CONFIG_IGNORE_FILE];
  
- interface ICssModules{
-    enable:boolean
-}
 export interface IDllConfigType{
     externalUrl?: string;
     value: string[];
@@ -30,13 +28,14 @@ export interface IDllCompileOptions{
         globalObject?:'this'
     },
     plugins?: [];
+    externalUrl?: string;
 }
 interface IDllConfig{
     /** 默认dll 文件 */
     vendors: string[] | IDllConfigType
     /** 自定义dll */
     customDll?: ICustomDllType[]
-    dllCompileOptions: IDllCompileOptions
+    compileOptions: IDllCompileOptions
 }
 interface extendConfig{
     isDev: boolean,
@@ -68,8 +67,6 @@ interface IWebpack{
      */
     disableHappyPack: boolean;
 
-    cssModules: ICssModules;
-
     /**
      * 插件信息
      *
@@ -88,7 +85,7 @@ interface IWebpack{
      * @type {OptimizationOptions}
      * @memberof IWebpack
      */
-    optimization?: any;
+    optimization?: OptimizationOptions;
     /**
          * ts 处理插件
         */
@@ -102,23 +99,6 @@ interface IWebpack{
          */
     extend?: (loaders: any[],config: extendConfig) => void,
     
-    cssLoaders: {
-
-        /**
-         * 
-         * 样式处理包含文件夹
-         * @type {string[]}
-         */
-        include: string[],
-
-        /**
-         * 排除文件夹信息
-         *
-         * @type {string[]}
-         */
-        exclude: string[],
-        
-    },
 }
 const nodeModulesPath = path.resolve(process.cwd(), 'node_modules');
 export default class EConfig {
@@ -145,18 +125,11 @@ export default class EConfig {
         dllConfig: {
             vendors: ['react','react-dom','invariant'],
             customDll:[],
-            dllCompileOptions:{},
+            compileOptions:{},
         },
         disableReactHotLoader: false,
         commonsChunkPlugin:['common'],
         disableHappyPack:false,
-        cssModules: {
-            enable: false, // 默认为 false，如需使用 css modules 功能，则设为 true
-            // config: {
-            //   namingPattern: 'module', // 转换模式，取值为 global/module，下文详细说明
-            //   generateScopedName: '[name]__[local]___[hash:base64:5]'
-            // }
-        },
          /** 
          *  ts 处理插件 主要有'ts-loader'|'awesome-typescript-loader' 
          * 默认 'ts-loader'
@@ -165,10 +138,6 @@ export default class EConfig {
             loader:'ts-loader'
         },
         plugins: [],
-        cssLoaders: {
-            exclude:[nodeModulesPath],
-            include:[path.join(process.cwd(), './src')]
-        },
     };
 
     public babel: {

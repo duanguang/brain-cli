@@ -39,17 +39,6 @@ const Optimization = {
       },
     },
   },
-  /* minimizer:isDev()?[]: [
-    new UglifyJSPlugin({
-      parallel: true,
-      uglifyOptions: {
-        compress: {
-          drop_debugger: true,
-          drop_console: true
-        }
-      },
-    }),
-  ], */
 };
 // const ProgressBarPlugin = require('progress-bar-webpack-plugin');
 // const chalk = require('chalk');
@@ -77,11 +66,9 @@ export default function getBaseConfig({
   const {
     disableReactHotLoader,
     commonsChunkPlugin,
-    cssModules,
     plugins,
     disableHappyPack,
     tsCompilePlugin,
-    cssLoaders,
     output,
   } = webpackConfig;
   const NewOptimization = merge(Optimization, webpackConfig.optimization);
@@ -132,18 +119,22 @@ export default function getBaseConfig({
         plugins: [require('autoprefixer')({ browsers: browsers })],
       },
     };
-    if (px2rem) {
-      postcss_loader.options.plugins.push(require('px2rem')(px2rem));
+    if (px2rem&&Object.getOwnPropertyNames(px2rem).length) {
+      postcss_loader.options.plugins.push(require('postcss-plugin-px2rem')(px2rem));
     }
     function generateLoaders(
-      cssModule?,
+      cssModule?: {
+        modules: boolean,
+        importLoaders: number,
+        localIdentName: string,
+      },
       loader?: string | { loader: string; options: any },
       loaderOptions?
     ) {
       let style: any = [
         { loader: 'css-loader', options: { importLoaders: 1 } },
       ];
-      if (cssModule && cssModules.enable) {
+      if (cssModule) {
         style[0] = Object.assign(style[0], { options: cssModule });
       }
       if (loader) {
@@ -178,21 +169,6 @@ export default function getBaseConfig({
         })
       );
     }
-    let include = [];
-    let exclude = [];
-    if (cssLoaders) {
-      if (Array.isArray(cssLoaders.include)) {
-        const set = new Set([
-          ...cssLoaders.include,
-          path.join(process.cwd(), './src'),
-        ]);
-        include = [...set];
-      }
-      if (Array.isArray(cssLoaders.exclude)) {
-        const set = new Set([...cssLoaders.exclude, nodeModulesPath]);
-        exclude = [...set];
-      }
-    }
     const loaders = [
       {
         test: /\.less/,
@@ -205,15 +181,15 @@ export default function getBaseConfig({
       {
         test: new RegExp(`^(?!.*\\.modules).*\\.css`),
         use: generateLoaders(null, null, postcss_loader),
-        exclude: exclude,
-        include: include,
+        exclude: [nodeModulesPath],
+        include:  path.join(process.cwd(), './src'),
       },
       {
         /* test: /\.css$/, */
         test: new RegExp(`^(.*\\.modules).*\\.css`),
         use: generateLoaders(CSS_MODULE_OPTION, null, postcss_loader),
-        exclude: exclude,
-        include: include,
+        exclude: [nodeModulesPath],
+        include:  path.join(process.cwd(), './src'),
       },
       {
         test: new RegExp(`^(?!.*\\.modules).*\\.less`),
@@ -222,8 +198,8 @@ export default function getBaseConfig({
           postcss_loader,
           { loader: 'less-loader', options: { javascriptEnabled: true } },
         ),
-        exclude: exclude,
-        include: include,
+        exclude: [nodeModulesPath],
+        include:  path.join(process.cwd(), './src'),
       },
       {
         /* test: /\.less/, */
@@ -233,8 +209,8 @@ export default function getBaseConfig({
           postcss_loader,
           { loader: 'less-loader', options: { javascriptEnabled: true } },
         ),
-        exclude: exclude,
-        include: include,
+        exclude: [nodeModulesPath],
+        include:  path.join(process.cwd(), './src'),
       },
     ];
     if (webpackConfig.extend && typeof webpackConfig.extend === 'function') {

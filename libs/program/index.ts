@@ -3,11 +3,7 @@ import {configFileList, default as EConfig} from '../settings/EConfig';
 import * as path from 'path';
 import getConfig from '../../webpack.config';
 import webpack = require('webpack');
-import commander = require('commander');
-const SpeedMeasurePlugin = require("speed-measure-webpack-plugin");
-const smp = new SpeedMeasurePlugin();
-// import ICommand = commander.ICommand;
-export default function programInit(env: string,cmd?:{smp:'true'|'false',cssModules:'true'|'false'}) {
+export default function programInit(env: string,options?:any) {
     if (env==='dev') {
         /**
          * 在开发环境中, 允许直接配置config和ignoreConfig并更新指定常量区域
@@ -15,24 +11,16 @@ export default function programInit(env: string,cmd?:{smp:'true'|'false',cssModu
         // program.config && (configFileList[0] = program.config);
         // program.ignoreConfig && (configFileList[1] = program.ignoreConfig);
         //noinspection JSIgnoredPromiseFromCall
-        start(cmd);
+        start();
     }
     else if (env==='production') {
         const eConfig = EConfig.getInstance();
-        if (cmd.cssModules !== undefined) {
-            if (cmd.cssModules === 'true') {
-              eConfig.webpack.cssModules.enable = true
-            }
-            if (cmd.cssModules === 'false') {
-              eConfig.webpack.cssModules.enable = false
-            }
-        }
         const webpackConfig = getConfig(eConfig);
         if (Array.isArray(webpackConfig.pendings)) {
             webpackConfig.pendings.forEach(pending => pending());
         }
         delete webpackConfig.pendings;
-        webpack((cmd&&cmd['smp']==='true')?smp.wrap(webpackConfig):webpackConfig, function (err, stats) {
+        webpack(webpackConfig, function (err, stats) {
             if (err) throw err;
             process.stdout.write(stats.toString({
                     colors: true,

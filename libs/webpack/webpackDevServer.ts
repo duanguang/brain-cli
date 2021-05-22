@@ -9,20 +9,12 @@ const {name: projectName,apps} = eConfig;
 /**
  * 启动webpack服务器
  */
-export default function startWebpackDevServer(cmd?:{smp:'true'|'false',cssModules:'true'|'false'}) {
+export default function startWebpackDevServer(options?:any) {
   return new Promise((resolve, reject) => {
     const { server } = eConfig;
-    if (cmd.cssModules !== undefined) {
-      if (cmd.cssModules === 'true') {
-        eConfig.webpack.cssModules.enable = true
-      }
-      if (cmd.cssModules === 'false') {
-        eConfig.webpack.cssModules.enable = false
-      }
-    }
     const config = webpackConfig(eConfig);
     webpackDevServer.addDevServerEntrypoints(config, config.devServer);
-    new webpackDevServer(webpackCompiler(cmd), config.devServer).listen(
+    new webpackDevServer(webpackCompiler(), config.devServer).listen(
       eConfig.defaultPort,
       server,
       err => {

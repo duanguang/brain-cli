@@ -1,4 +1,3 @@
-import YoLegion from 'generator-brain-cli';
 const path = require('path');
 
 /*: IExtraWrite[]*/
@@ -10,5 +9,4 @@ const eConfig = [
 ];
 
 export default function init() {
-    YoLegion('init', eConfig);
 }

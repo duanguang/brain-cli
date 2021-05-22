@@ -50,20 +50,18 @@ module.exports = {
   },
   webpack: {
     dllConfig: {
-       vendors: ['react','react-dom','invariant'],
-       framework: {cdn:'',FrameList:['invariant']},
+      /* vendors: { value: ['react'],externalUrl:'http://localhost:8001/public/test/'}, */
+      vendors: ['react'],
+      customDll: [{ key: 'framework',value: ['invariant','react-dom'],externalUrl: '' }],
+      compileOptions: {
+        externalUrl:'http://localhost:8001/public/test/'
+      }
     /* framework:['react','react-dom'] */ // 支持自定义dll 包
       /* framework:{cdn:'https://hoolinks1.com',FrameList:['react','react-dom']} */
     },
     disableReactHotLoader: false,
     commonsChunkPlugin: ['common','vendor'],
     disableHappyPack: false,
-    cssModules: {
-      enable: true // 默认为 false，如需使用 css modules 功能，则设为 true
-    },
-    cssLoaders: {
-      include: [path.join(process.cwd(), 'node_modules/hoolinks-legion-design')],
-    },
     plugins: [
       new ProgressBarPlugin({
         summary: false,
