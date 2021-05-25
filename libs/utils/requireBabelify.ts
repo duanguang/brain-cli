@@ -1,4 +1,3 @@
-import * as babel from 'babel-core';
 const Module = require('module');
 
 const rawModuleCompile = Module.prototype._compile;

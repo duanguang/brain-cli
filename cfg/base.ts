@@ -9,7 +9,6 @@ import {
 import * as webpack from 'webpack';
 import htmlWebpackPlugins from '../libs/webpack/plugins/htmlWebpackPlugin';
 import { warning, log } from '../libs/utils/logs';
-import * as invariant from 'invariant';
 import { isDev } from '../libs/utils/env';
 import LegionExtractStaticFilePlugin from '../libs/webpack/plugins/LegionExtractStaticFilePlugin';
 import { getApps } from '../libs/webpack/entries/getEntries';
@@ -73,7 +72,10 @@ export default function getBaseConfig({
   } = webpackConfig;
   const NewOptimization = merge(Optimization, webpackConfig.optimization);
   const DisableReactHotLoader = disableReactHotLoader || false; //默认启用热加载
-  const { noInfo, proxy } = devServer;
+  const { noInfo, proxy,before,stats, 
+    contentBase,historyApiFallback,
+    headers = {},hot,port, ...serverProps
+  } = devServer;
   const webpackDevEntries = [
     /* 'react-hot-loader/patch',  */
     /*  `webpack-dev-server/client?http://localhost:${defaultPort}`,
@@ -82,20 +84,7 @@ export default function getBaseConfig({
   ];
   function getEntries(): any[] {
     let entity = entries().reduce((prev, app) => {
-      // prev={
-      //     'common/core':__DEV__?['react']:[
-      //         'react','mobx-react','mobx','babel-polyfill','superagent',
-      //         'react-router-dom','classnames','isomorphic-fetch',
-      //         'react-dom','history','invariant','warning','hoist-non-react-statics'
-      //     ]
-      // }
-
       prev[app] = `./src/${app}/index`;
-      // prev[app] = [
-      //     'babel-polyfill',
-      //     `./src/${app}/index`
-      // ];
-
       return prev;
     }, {} as any);
     let chunk = {};
@@ -515,9 +504,8 @@ export default function getBaseConfig({
     },
     devtool: __DEV__ && 'cheap-module-source-map',
     resolve: {
-      alias: {},
+      ...webpackConfig.resolve,
       extensions: ['.web.js', '.js', '.json', '.ts', '.tsx', '.jsx'], //自动扩展文件后缀
-      //modulesDirectories: ['src', 'node_modules', path.join(__dirname, '../node_modules')],
       modules: [
         'src',
         'node_modules',
@@ -528,7 +516,7 @@ export default function getBaseConfig({
     module: {
       loaders: [],
     },
-    mode: __DEV__ ? 'development' : 'production',
+    mode: isDev() ? 'development' : 'production',
     optimization: NewOptimization,
     plugins: [
       ...getHtmlWebpackPlugins(),
@@ -593,6 +581,7 @@ export default function getBaseConfig({
   };
   if (__DEV__) {
     config.devServer = {
+      ...serverProps,
       stats: 'errors-only',
       contentBase: [`./${WORKING_DIRECTORY}/`],
       historyApiFallback: {
@@ -603,6 +592,7 @@ export default function getBaseConfig({
       },
       headers: {
         'Access-Control-Allow-Origin': '*',
+        ...headers,
       },
       hot: true,
       port: defaultPort,
@@ -610,7 +600,8 @@ export default function getBaseConfig({
       noInfo: noInfo,
       proxy: proxy,
       before: function (app) {
-        app.use(path.posix.join(`/static`), express.static('./static')); // 代理静态资源
+        app.use(path.posix.join(`/static`),express.static('./static')); // 代理静态资源
+        before && before(app);
       },
       //progress: true,
     };

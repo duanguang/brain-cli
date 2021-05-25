@@ -15,7 +15,7 @@
     "dev": "node bin/index.js dev  --apps=app1",
     "dll": "node bin/index.js dll",
     "build": "node bin/index.js build",
-    "build:app3": "node bin/index.js build --apps=app1 --webpackJsonp=webpackJsonpLcmManifestQaName  --cdn= --smp=false ",
+    "build:app3": "node bin/index.js build --apps=app1 --webpackJsonp=webpackJsonpLcmManifestQaName  --cdn=  ",
     "build:dist": "node bin/index.js build dist",
     "build:prod": "node bin/index.js build prod",
     "build:test": "node bin/index.js build test",

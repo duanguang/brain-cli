@@ -32,6 +32,7 @@ class EConfig {
                 loader: 'ts-loader'
             },
             plugins: [],
+            resolve: {},
         };
         this.init();
     }

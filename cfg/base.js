@@ -1,4 +1,15 @@
 "use strict";
+var __rest = (this && this.__rest) || function (s, e) {
+    var t = {};
+    for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
+        t[p] = s[p];
+    if (s != null && typeof Object.getOwnPropertySymbols === "function")
+        for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
+            if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i]))
+                t[p[i]] = s[p[i]];
+        }
+    return t;
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 const path = require("path");
 const EConfig_1 = require("../libs/settings/EConfig");
@@ -45,7 +56,7 @@ function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPa
     const { disableReactHotLoader, commonsChunkPlugin, plugins, disableHappyPack, tsCompilePlugin, output, } = webpackConfig;
     const NewOptimization = objects_1.merge(Optimization, webpackConfig.optimization);
     const DisableReactHotLoader = disableReactHotLoader || false; //默认启用热加载
-    const { noInfo, proxy } = devServer;
+    const { noInfo, proxy, before, stats, contentBase, historyApiFallback, headers = {}, hot, port } = devServer, serverProps = __rest(devServer, ["noInfo", "proxy", "before", "stats", "contentBase", "historyApiFallback", "headers", "hot", "port"]);
     const webpackDevEntries = [
     /* 'react-hot-loader/patch',  */
     /*  `webpack-dev-server/client?http://localhost:${defaultPort}`,
@@ -54,18 +65,7 @@ function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPa
     ];
     function getEntries() {
         let entity = entries().reduce((prev, app) => {
-            // prev={
-            //     'common/core':__DEV__?['react']:[
-            //         'react','mobx-react','mobx','babel-polyfill','superagent',
-            //         'react-router-dom','classnames','isomorphic-fetch',
-            //         'react-dom','history','invariant','warning','hoist-non-react-statics'
-            //     ]
-            // }
             prev[app] = `./src/${app}/index`;
-            // prev[app] = [
-            //     'babel-polyfill',
-            //     `./src/${app}/index`
-            // ];
             return prev;
         }, {});
         let chunk = {};
@@ -439,21 +439,16 @@ function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPa
             //chunkFilename:path.posix.join('common', 'js/[name]-[id].[chunkhash:5].bundle.js'),
             publicPath: __DEV__ ? publicPath : process.env.cdnRelease || '../' }),
         devtool: __DEV__ && 'cheap-module-source-map',
-        resolve: {
-            alias: {},
-            extensions: ['.web.js', '.js', '.json', '.ts', '.tsx', '.jsx'],
-            //modulesDirectories: ['src', 'node_modules', path.join(__dirname, '../node_modules')],
-            modules: [
+        resolve: Object.assign(Object.assign({}, webpackConfig.resolve), { extensions: ['.web.js', '.js', '.json', '.ts', '.tsx', '.jsx'], modules: [
                 'src',
                 'node_modules',
                 path.join(process.cwd(), `src`),
                 path.join(process.cwd(), `node_modules`),
-            ],
-        },
+            ] }),
         module: {
             loaders: [],
         },
-        mode: __DEV__ ? 'development' : 'production',
+        mode: env_1.isDev() ? 'development' : 'production',
         optimization: NewOptimization,
         plugins: [
             ...getHtmlWebpackPlugins(),
@@ -517,27 +512,15 @@ function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPa
         ],
     };
     if (__DEV__) {
-        config.devServer = {
-            stats: 'errors-only',
-            contentBase: [`./${constants_1.WORKING_DIRECTORY}/`],
-            historyApiFallback: {
+        config.devServer = Object.assign(Object.assign({}, serverProps), { stats: 'errors-only', contentBase: [`./${constants_1.WORKING_DIRECTORY}/`], historyApiFallback: {
                 rewrites: apps.map((app) => ({
                     from: constants_1.HISTORY_REWRITE_FALL_BACK_REGEX_FUNC(app),
                     to: `${publicPath}/${app}/index.html`,
                 })),
-            },
-            headers: {
-                'Access-Control-Allow-Origin': '*',
-            },
-            hot: true,
-            port: defaultPort,
-            publicPath: publicPath,
-            noInfo: noInfo,
-            proxy: proxy,
-            before: function (app) {
+            }, headers: Object.assign({ 'Access-Control-Allow-Origin': '*' }, headers), hot: true, port: defaultPort, publicPath: publicPath, noInfo: noInfo, proxy: proxy, before: function (app) {
                 app.use(path.posix.join(`/static`), express.static('./static')); // 代理静态资源
-            },
-        };
+                before && before(app);
+            } });
     }
     else {
         if (process.env.environment === 'report') {

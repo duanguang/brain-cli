@@ -2,7 +2,7 @@ import * as path from 'path';
 import {PROJECT_USER_CONFIG_FILE, PROJECT_USER_CONFIG_IGNORE_FILE} from '../constants/constants';
 import * as invariant from 'invariant';
 import { requireBabelify } from '../utils/requireBabelify';
-import { OptimizationOptions} from 'webpack/declarations/WebpackOptions'
+import { OptimizationOptions,ResolveOptions} from 'webpack/declarations/WebpackOptions'
 const deepAssign = require('deep-assign');
 const defaultEConfig = require(path.resolve(__dirname, `../../${PROJECT_USER_CONFIG_FILE}`));
 
@@ -78,6 +78,7 @@ interface IWebpack{
         library?: (name:string)=>string|string; 
         libraryTarget?:'var' | 'window' | 'this' | 'umd';
     };
+    resolve?: ResolveOptions;
 
     /**
      * webpack 4 代码模块优化配置
@@ -113,6 +114,8 @@ export default class EConfig {
     public devServer: {
         noInfo: boolean,
         proxy: Object
+    } & {
+        [k: string]: any
     };
     public postcss: {
         autoprefixer: {
@@ -138,6 +141,7 @@ export default class EConfig {
             loader:'ts-loader'
         },
         plugins: [],
+        resolve:{},
     };
 
     public babel: {

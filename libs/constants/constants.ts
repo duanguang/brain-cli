@@ -19,3 +19,4 @@ export const HISTORY_REWRITE_FALL_BACK_REGEX_FUNC = (name: string) => {
 };
 
 export const URL_PREFIX = `app`;
+export const nodeModulesPath = path.resolve(process.cwd(), 'node_modules');
