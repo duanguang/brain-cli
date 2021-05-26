@@ -61,21 +61,13 @@ export class Command {
     this.program
       .command('dev')
       .option('--apps [value]','webpack Build a specified app name')
-      .option(
-        '--smp [value]',
-        'Whether to enable  Compile time statistics module'
-      )
-      .option(
-        '--cssModules [value]',
-        'Whether to enable cssModules'
-      )
       .description('start webpack dev server for develoment mode')
       .action(options => {
         let env = 'dev';
         this.setProcessEnv(env);
         this.setApps(options);
         log(`当前编译环境为: ${process.env.NODE_ENV} [${this.env[env]}]`);
-        programInit(env,{smp:options['smp'],cssModules:options['cssModules']});
+        programInit(env);
       });
   }
   start() {
@@ -118,14 +110,6 @@ export class Command {
       .option(
         '--cdn [value]',
         'The resource distribution server'
-      )
-      .option(
-        '--smp [value]',
-        'Whether to enable  Compile time statistics module'
-      )
-      .option(
-        '--cssModules [value]',
-        'Whether to enable cssModules'
       )
       .description('webpack building')
       .action((env = 'prod', options) => {

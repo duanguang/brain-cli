@@ -1,4 +1,4 @@
-import EConfig from './EConfig';
+import EConfig, { IDllConfigType } from './EConfig';
 import {shortHash,shortHashMd5} from '../utils/hash';
 import * as fs from 'fs';
 import {WEBPACK_DLL_MANIFEST_DIST} from '../constants/constants';
@@ -27,8 +27,8 @@ export default class WebpackDllManifest {
                 this.vendors = EConfig.getInstance().webpack.dllConfig.vendors as string[];
             }
             else {
-                const vendors :{ cdn?: string;FrameList:string[]}= EConfig.getInstance().webpack.dllConfig.vendors as { cdn?: string;FrameList:string[]}
-                this.vendors = vendors.FrameList;
+                const vendors: IDllConfigType = EConfig.getInstance().webpack.dllConfig.vendors as IDllConfigType;
+                this.vendors = vendors.value;
             }
         }
         this.distPath = WEBPACK_DLL_MANIFEST_DIST;
@@ -91,7 +91,7 @@ export default class WebpackDllManifest {
         } catch (e) {
             return true;
         }
-    }re
+    }
 
     public resolveManifestPath(entityName:string = 'vendor',vendorHash = this.getVendorsHash()) {
         /**

@@ -11,14 +11,15 @@ function getApps() {
             return entries;
         }
         else {
-            let envApps = process.env.apps;
-            if (typeof envApps === 'string') {
-                envApps = envApps.split(',');
+            let value = process.env.apps;
+            let envApps = [];
+            if (typeof value === 'string') {
+                envApps = value.split(',');
             }
             if (envApps.length > 0) {
                 let ignore = [];
-                let entriesList = envApps.filter((item) => {
-                    if (apps.findIndex((entity) => entity === item) > -1) {
+                let entriesList = envApps.filter(item => {
+                    if (apps.findIndex(entity => entity === item) > -1) {
                         return item;
                     }
                     else {
@@ -26,7 +27,7 @@ function getApps() {
                     }
                 });
                 function writeLog() {
-                    if (ignore.length === envApps) {
+                    if (envApps.length === ignore.length) {
                         logs_1.warning(`当前无匹配应用  打包范围为[全部app]...`);
                     }
                     if (ignore.length > 0) {
@@ -51,7 +52,7 @@ function getApps() {
 exports.getApps = getApps;
 function getEntries(entries) {
     let appEntry = {};
-    entries.forEach((item) => {
+    entries.forEach(item => {
         appEntry[`${item}`] = helpers_1.getEntry(`${item}.js`);
     });
     return appEntry;

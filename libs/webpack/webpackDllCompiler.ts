@@ -4,7 +4,7 @@ import { log } from '../utils/logs';
 import { DllPlugins } from '../../cfg/dllPlugins';
 import EConfig from '../settings/EConfig';
 const dllConfig = require('../../cfg/dll');
-const {vendors,...otherDll } = EConfig.getInstance().webpack.dllConfig;
+const {vendors,customDll } = EConfig.getInstance().webpack.dllConfig;
 export default function webpackDllCompiler(): Promise<any> {
     const requireCompile = WebpackDllManifest.getInstance().isCompileManifestDirty();
     return new Promise((resolve, reject) => {
@@ -16,7 +16,7 @@ export default function webpackDllCompiler(): Promise<any> {
         }
         if (requireCompile) {
             log(`create webpack dll manifest [vendors]`);
-            //console.info('create webpack dll manifest');
+            // console.info('create webpack dll manifest');
             const compiler = webpack(dllConfig);
             compiler.run((err, stats) => {
                 if (err) {
@@ -28,7 +28,7 @@ export default function webpackDllCompiler(): Promise<any> {
         }
         else {
             log('skip webpack dll manifest [vendors]')
-            //console.info('skip webpack dll manifest');
+            // console.info('skip webpack dll manifest');
             resolve();
         }
     });
@@ -36,13 +36,10 @@ export default function webpackDllCompiler(): Promise<any> {
 export async function webpackDllPluginsCompiler() {
     const promiseDll = []
     Object.keys(DllPlugins).forEach((key) => {
-        let vendorsDll = []
-        if (typeof otherDll[key] === 'object') {
-            if (Array.isArray(otherDll[key])) {
-                vendorsDll = otherDll[key]
-            } else {
-                vendorsDll = otherDll[key].FrameList || []
-            }
+        let vendorsDll = [];
+        const item = customDll.find((item) => item.key === key);
+        if (item) {
+            vendorsDll = item.value;
         }
         const requireCompile = WebpackDllManifest.getInstance().isCompileManifestDirty(key,WebpackDllManifest.getInstance().getDllPluginsHash(vendorsDll));
         const promise= new Promise((resolve, reject) => {

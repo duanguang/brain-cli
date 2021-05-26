@@ -1,17 +1,16 @@
+
 import {asSeconds} from '../utils/format';
 import getConfig from '../../webpack.config';
 import EConfig from '../settings/EConfig';
 import { log } from '../utils/logs';
 const webpack = require('webpack');
-const SpeedMeasurePlugin = require("speed-measure-webpack-plugin");
-const smp = new SpeedMeasurePlugin();
-export default function webpackCompiler(cmd?:{smp:'true'|'false'}) {
+export default function webpackCompiler(options?:any) {
     const webpackConfig = getConfig(EConfig.getInstance());
     if (Array.isArray(webpackConfig.pendings)) {
         webpackConfig.pendings.forEach(pending => pending());
     }
     delete webpackConfig.pendings;
-    const webpackCompiler = webpack((cmd&&cmd.smp==='true')?smp.wrap(webpackConfig):webpackConfig);
+    const webpackCompiler = webpack(webpackConfig);
 
     let bundleStartTime;
 

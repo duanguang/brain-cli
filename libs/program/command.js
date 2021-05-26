@@ -1,9 +1,10 @@
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
         function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
@@ -74,15 +75,13 @@ class Command {
         this.program
             .command('dev')
             .option('--apps [value]', 'webpack Build a specified app name')
-            .option('--smp [value]', 'Whether to enable  Compile time statistics module')
-            .option('--cssModules [value]', 'Whether to enable cssModules')
             .description('start webpack dev server for develoment mode')
             .action(options => {
             let env = 'dev';
             this.setProcessEnv(env);
             this.setApps(options);
             logs_1.log(`当前编译环境为: ${process.env.NODE_ENV} [${this.env[env]}]`);
-            index_1.default(env, { smp: options['smp'], cssModules: options['cssModules'] });
+            index_1.default(env);
         });
     }
     start() {
@@ -117,8 +116,6 @@ class Command {
             .option('--apps [value]', 'webpack Build a specified app name')
             .option('--webpackJsonp [value]', 'webpack Generate a specified webpackJsonp name')
             .option('--cdn [value]', 'The resource distribution server')
-            .option('--smp [value]', 'Whether to enable  Compile time statistics module')
-            .option('--cssModules [value]', 'Whether to enable cssModules')
             .description('webpack building')
             .action((env = 'prod', options) => {
             this.setProcessEnv(options.S ? 'report' : env);

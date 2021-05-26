@@ -1,15 +1,4 @@
 "use strict";
-var __rest = (this && this.__rest) || function (s, e) {
-    var t = {};
-    for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
-        t[p] = s[p];
-    if (s != null && typeof Object.getOwnPropertySymbols === "function")
-        for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
-            if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i]))
-                t[p[i]] = s[p[i]];
-        }
-    return t;
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 const helpers_1 = require("./helpers");
 const WebpackDllManifest_1 = require("../libs/settings/WebpackDllManifest");
@@ -17,7 +6,7 @@ const base_1 = require("./base");
 const EConfig_1 = require("../libs/settings/EConfig");
 const dllPlugins_1 = require("./dllPlugins");
 const { webpack: { dllConfig } } = EConfig_1.default.getInstance();
-const { vendors } = dllConfig, otherDll = __rest(dllConfig, ["vendors"]);
+const { vendors, customDll, compileOptions } = dllConfig;
 const path = require('path');
 // const webpack = require('webpack');
 // const config = require('./base');
@@ -29,31 +18,44 @@ function getDevConfig(eConfig) {
         () => {
             //TODO:暂时放在这里
             const filepath = WebpackDllManifest_1.default.getInstance().resolveManifestPath();
+            let vencdn = '';
+            if (Object.prototype.toString.call(vendors) === '[object Object]') {
+                if (vendors['externalUrl']) {
+                    vencdn = vendors['externalUrl'];
+                }
+            }
+            if (!vencdn) {
+                if (compileOptions && Object.prototype.toString.call(compileOptions) === '[object Object]') {
+                    vencdn = compileOptions.externalUrl || process.env.cdnRelease;
+                }
+            }
+            let venPublicPath = {};
+            if (vencdn) {
+                venPublicPath = { publicPath: vencdn };
+            }
             if (filepath) {
-                config.plugins.push(new AddAssetHtmlPlugin({
-                    includeSourcemap: false, filepath,
-                }));
+                config.plugins.push(new AddAssetHtmlPlugin(Object.assign({ includeSourcemap: false, filepath }, venPublicPath)));
                 const dllReferencePlugin = helpers_1.getDllReferencePlugin();
                 if (dllReferencePlugin) {
                     config.plugins.push(dllReferencePlugin);
                 }
             }
-            Object.keys(dllPlugins_1.DllPlugins).forEach((key) => {
+            Object.keys(dllPlugins_1.DllPlugins).forEach((keys) => {
                 let vendorsDll = [];
-                if (typeof otherDll[key] === 'object') {
-                    if (Array.isArray(otherDll[key])) {
-                        vendorsDll = otherDll[key];
-                    }
-                    else {
-                        vendorsDll = otherDll[key].FrameList || [];
-                    }
+                const item = customDll.find((i) => i.key === keys);
+                let cdn = '';
+                if (item) {
+                    vendorsDll = item.value;
+                    cdn = item.externalUrl || compileOptions.externalUrl || process.env.cdnRelease;
                 }
-                const filepath = WebpackDllManifest_1.default.getInstance().resolveManifestPath(key, WebpackDllManifest_1.default.getInstance().getDllPluginsHash(vendorsDll));
-                if (filepath) {
-                    config.plugins.push(new AddAssetHtmlPlugin({
-                        includeSourcemap: false, filepath,
-                    }));
-                    const dllReference = helpers_1.getDllReferencePlugin(key);
+                const filepathDll = WebpackDllManifest_1.default.getInstance().resolveManifestPath(keys, WebpackDllManifest_1.default.getInstance().getDllPluginsHash(vendorsDll));
+                let publicPath = {};
+                if (cdn) {
+                    publicPath = { publicPath: cdn };
+                }
+                if (filepathDll) {
+                    config.plugins.push(new AddAssetHtmlPlugin(Object.assign({ includeSourcemap: false, filepath: filepathDll }, publicPath)));
+                    const dllReference = helpers_1.getDllReferencePlugin(keys);
                     if (dllReference) {
                         config.plugins.push(dllReference);
                     }
@@ -61,15 +63,6 @@ function getDevConfig(eConfig) {
             });
         }
     ];
-    // const deps = [
-    //     'react/dist/react.js',
-    //     //'react-router/dist/react-router.min.js'
-    // ];
-    // deps.forEach(function (dep) {
-    //     const depPath = path.resolve(nodeModulesPath, dep);
-    //     config.resolve.alias[dep.split(path.sep)[0]] = depPath;
-    //     config.module.noParse.push(depPath);
-    // });
     return config;
 }
 exports.default = getDevConfig;

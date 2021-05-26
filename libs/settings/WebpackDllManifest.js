@@ -7,12 +7,6 @@ const constants_1 = require("../constants/constants");
 const path = require("path");
 const node_1 = require("../utils/node");
 class WebpackDllManifest {
-    static getInstance() {
-        if (!WebpackDllManifest.instance) {
-            WebpackDllManifest.instance = new WebpackDllManifest();
-        }
-        return WebpackDllManifest.instance;
-    }
     constructor() {
         /*  this.vendors = EConfig.getInstance().webpack.dllConfig.vendors; */
         if (typeof EConfig_1.default.getInstance().webpack.dllConfig.vendors === 'object') {
@@ -21,10 +15,16 @@ class WebpackDllManifest {
             }
             else {
                 const vendors = EConfig_1.default.getInstance().webpack.dllConfig.vendors;
-                this.vendors = vendors.FrameList;
+                this.vendors = vendors.value;
             }
         }
         this.distPath = constants_1.WEBPACK_DLL_MANIFEST_DIST;
+    }
+    static getInstance() {
+        if (!WebpackDllManifest.instance) {
+            WebpackDllManifest.instance = new WebpackDllManifest();
+        }
+        return WebpackDllManifest.instance;
     }
     getVendorsHash() {
         const isVendorsExist = this.vendors && this.vendors.length;

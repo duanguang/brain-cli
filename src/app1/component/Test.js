@@ -1,10 +1,18 @@
 import React from 'react';
 import '../assets/css/test.less'
+import { hot } from 'react-hot-loader/root';
+import styles from './index.modules.less'
+import * as rawObjectHash from 'object-hash';
+
+ function shortHash(val) {
+    return rawObjectHash(val, {encoding: 'base64'});
+}
 // import 'index.css'
-export default class Test extends React.Component{
+class Test extends React.Component{
     constructor(props) {
         super(props);
         this.getInitialState();
+        console.log(process.env.webpackJsonp)
     }
     getInitialState(){//注释信息
         this.state={
@@ -14,11 +22,11 @@ export default class Test extends React.Component{
     handleClick(){
         // this.setState({liked: !this.state.liked});
          this.setState({count:this.state.count+1});
-         console.log(this)
      }
      render(){
         return(
-            <div className="bg">2111322
+            <div className="bg">
+                <p className={styles['test-color']}>513:::::{shortHash('513')}</p>
                 <p className='test' onClick={this.handleClick.bind(this)}>
                     You  this. Click to toggle.state:{this.state.count}
                 </p>
@@ -26,3 +34,4 @@ export default class Test extends React.Component{
         )
     }
 }
+export default hot(Test);

@@ -4,28 +4,44 @@ const EConfig_1 = require("../libs/settings/EConfig");
 const WebpackDllManifest_1 = require("../libs/settings/WebpackDllManifest");
 const path = require('path');
 const webpack = require('webpack');
-const { webpack: { dllConfig: { vendors } } } = EConfig_1.default.getInstance();
+const { webpack: { dllConfig: { vendors, compileOptions: { output = {}, plugins = [] } } } } = EConfig_1.default.getInstance();
 const webpackDllManifest = WebpackDllManifest_1.default.getInstance();
 const distPath = webpackDllManifest.distPath;
-const vendorsFrame = (typeof vendors === 'object' && !Array.isArray(vendors)) ? vendors.FrameList : Array.isArray(vendors) ? vendors : [];
-const isVendorExist = vendorsFrame && vendorsFrame.length;
+let value = [];
+let options = { output: {}, plugins: [] };
+if (Object.prototype.toString.call(vendors) === '[object Object]') {
+    const newVendors = vendors;
+    value = newVendors.value;
+    if (newVendors.options) {
+        options = newVendors.options;
+    }
+}
+else if (Array.isArray(vendors)) {
+    value = vendors;
+}
+const isVendorExist = value && value.length;
 if (isVendorExist) {
     const distFileName = webpackDllManifest.getVendorsHash();
+    let dllPlugins = plugins;
+    if (options.plugins &&
+        Array.isArray(options.plugins) &&
+        options.plugins.length) {
+        dllPlugins = options.plugins;
+    }
     module.exports = {
         entry: {
-            vendors: vendorsFrame
+            vendors: value
         },
-        output: {
-            path: distPath,
+        mode: 'production',
+        output: Object.assign(Object.assign({}, Object.assign(Object.assign({}, output), options.output)), { path: distPath, 
             // filename: `${distFileName}.js`,
-            filename: `vendor.dll.${distFileName}.js`,
+            filename: `vendor.dll.${distFileName}.js`, 
             /**
              * output.library
              * 将会定义为 window.${output.library}
              * 在这次的例子中，将会定义为`window.vendor_library`
              */
-            library: `[name]_${distFileName}_library`,
-        },
+            library: `[name]_${distFileName}_library` }),
         plugins: [
             new webpack.DllPlugin({
                 /**
@@ -42,18 +58,7 @@ if (isVendorExist) {
                  */
                 name: `[name]_${distFileName}_library`
             }),
-            new webpack.optimize.UglifyJsPlugin({
-                compress: {
-                    warnings: false,
-                    drop_console: true,
-                    drop_debugger: true
-                },
-                output: {
-                    // 去掉注释内容
-                    comments: false,
-                },
-                sourceMap: false
-            })
+            ...dllPlugins
         ]
     };
 }

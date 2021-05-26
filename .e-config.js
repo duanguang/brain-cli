@@ -1,5 +1,6 @@
 const ProgressBarPlugin = require('progress-bar-webpack-plugin');
 const chalk = require('chalk');
+const  path = require('path');
 module.exports = {
   name: 'test',
   open: true,
@@ -49,17 +50,18 @@ module.exports = {
   },
   webpack: {
     dllConfig: {
-       vendors: ['react','react-dom','invariant'],
-       /* vendors: {cdn:'https://hoolinks.com',FrameList:['react','react-dom','invariant']}, */
+      /* vendors: { value: ['react'],externalUrl:'http://localhost:8001/public/test/'}, */
+      vendors: ['react'],
+      customDll: [{ key: 'framework',value: ['invariant','react-dom'],externalUrl: '' }],
+      compileOptions: {
+        externalUrl:'http://localhost:8001/public/test/'
+      }
     /* framework:['react','react-dom'] */ // 支持自定义dll 包
       /* framework:{cdn:'https://hoolinks1.com',FrameList:['react','react-dom']} */
     },
     disableReactHotLoader: false,
-    commonsChunkPlugin: ['react', 'react-dom', 'invariant'],
+    commonsChunkPlugin: ['common','vendor'],
     disableHappyPack: false,
-    cssModules: {
-      enable: true // 默认为 false，如需使用 css modules 功能，则设为 true
-    },
     plugins: [
       new ProgressBarPlugin({
         summary: false,
@@ -69,17 +71,44 @@ module.exports = {
           ' (:elapsed seconds)',
         summaryContent: ''
       })
-    ]
-    //commonsChunkPlugin:['react']
+    ],
+    /* optimization: {
+      splitChunks: {
+        cacheGroups: {
+          vendor: {
+            chunks: "initial",
+            minChunks: 1,
+            name: "vendor",
+            priority: 7,
+            test: /object-hash|lodash/,
+            //maxInitialRequests: 5, // The default limit is too small to showcase the effect
+            minSize: 0 // This is example is too small to create commons chunks
+          }
+        }
+      },
+    }, */
   },
   babel: {
     query: {
-      presets: ['es2015', 'stage-2', 'react'],
+      presets: [
+        [
+        "@babel/preset-env",
+        {
+         /*  targets: {
+            esmodules: true,
+          }, */
+          "useBuiltIns": "usage",
+          "corejs": "3",
+        }
+      ],
+     /*  "@babel/preset-env", */
+    "@babel/preset-react"],
+    
       cacheDirectory: true,
       plugins: [
         'add-module-exports',
-        'transform-runtime',
-        'transform-decorators-legacy'
+        '@babel/plugin-transform-runtime',
+        ["@babel/plugin-proposal-decorators", { "legacy": true }],
         // [
         //     "import",
         //     [
@@ -87,11 +116,12 @@ module.exports = {
         //         {libraryName: "antd", style: true}
         //     ]
         // ]
+        ['import', { libraryName: 'antd', style: true }],
       ]
     }
   },
   htmlWebpackPlugin: {
     title: 'webApp' /**/
   },
-  apps: ['app1', 'app2', 'app3']
+  apps: ['app1','app2']
 };

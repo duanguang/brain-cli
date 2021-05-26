@@ -1,8 +1,8 @@
 import * as path from 'path';
 import {PROJECT_USER_CONFIG_FILE, PROJECT_USER_CONFIG_IGNORE_FILE} from '../constants/constants';
 import * as invariant from 'invariant';
-import {requireBabelify} from '../utils/requireBabelify';
-
+import { requireBabelify } from '../utils/requireBabelify';
+import { OptimizationOptions,ResolveOptions} from 'webpack/declarations/WebpackOptions'
 const deepAssign = require('deep-assign');
 const defaultEConfig = require(path.resolve(__dirname, `../../${PROJECT_USER_CONFIG_FILE}`));
 
@@ -10,13 +10,32 @@ const defaultEConfig = require(path.resolve(__dirname, `../../${PROJECT_USER_CON
  * 可选配置列表, 优先级从低到高由左到右
  */
 export const configFileList = [PROJECT_USER_CONFIG_FILE, PROJECT_USER_CONFIG_IGNORE_FILE];
- interface ICommonsChunkPlugin{
-     name:string,
-     value:Array<string>
- }
  
- interface ICssModules{
-    enable:boolean
+export interface IDllConfigType{
+    externalUrl?: string;
+    value: string[];
+    options?: IDllCompileOptions;
+}
+export interface ICustomDllType extends IDllConfigType{
+    key: string;
+}
+export interface IDllCompileOptions{
+    output?: {
+        libraryTarget?: 'umd' | 'var' | 'commonjs2' | 'commonjs' | 'amd' | 'window' | 'global' | 'this',
+        //当使用了 libraryTarget: "umd"，设置：true 会对 UMD 的构建过程中的 AMD 模块进行命名。否则就使用匿名的 define。
+        umdNamedDefine?: boolean;
+        // globalObject为改变全局指向
+        globalObject?:'this'
+    },
+    plugins?: [];
+    externalUrl?: string;
+}
+interface IDllConfig{
+    /** 默认dll 文件 */
+    vendors: string[] | IDllConfigType
+    /** 自定义dll */
+    customDll?: ICustomDllType[]
+    compileOptions: IDllCompileOptions
 }
 interface extendConfig{
     isDev: boolean,
@@ -28,6 +47,61 @@ interface extendConfig{
        execution:(cssModule,loader,LoaderOptions)=>any
     }
 }
+interface IWebpack{
+    dllConfig: IDllConfig;
+
+    /**
+     * 是否开启热加载
+     *
+     * @type {boolean}
+     * @memberof IWebpack
+     */
+    disableReactHotLoader: boolean;
+
+    commonsChunkPlugin?:string[],
+    /**
+     * 是否禁用多线程
+     *
+     * @type {boolean}
+     * @memberof IWebpack
+     */
+    disableHappyPack: boolean;
+
+    /**
+     * 插件信息
+     *
+     * @type {[]}
+     * @memberof IWebpack
+     */
+    plugins?: [];
+    output?: {
+        library?: (name:string)=>string|string; 
+        libraryTarget?:'var' | 'window' | 'this' | 'umd';
+    };
+    resolve?: ResolveOptions;
+
+    /**
+     * webpack 4 代码模块优化配置
+     *
+     * @type {OptimizationOptions}
+     * @memberof IWebpack
+     */
+    optimization?: OptimizationOptions;
+    /**
+         * ts 处理插件
+        */
+    tsCompilePlugin: {
+        loader: 'ts-loader',
+        option?:any
+    },
+        /**
+         *
+         * 扩展loader加载器
+         */
+    extend?: (loaders: any[],config: extendConfig) => void,
+    
+}
+const nodeModulesPath = path.resolve(process.cwd(), 'node_modules');
 export default class EConfig {
     public name: string;
     public open: boolean;
@@ -35,11 +109,13 @@ export default class EConfig {
     public server: string;
     public imageInLineSize: number;
     public publicPath: string;
-    public projectType :'ts'|'js'='js';
+    public projectType :'ts' | 'js'='js';
     public isTslint:boolean = true
     public devServer: {
         noInfo: boolean,
         proxy: Object
+    } & {
+        [k: string]: any
     };
     public postcss: {
         autoprefixer: {
@@ -48,59 +124,24 @@ export default class EConfig {
         px2rem:{}
     };
 
-    public webpack: {
-        dllConfig: {
-            vendors: string[] | { cdn?: string;FrameList:string[]}
-        },
-        disableReactHotLoader: boolean,
-        commonsChunkPlugin?: ICommonsChunkPlugin,
-        
-        /**
-         * 是否启用多线程 false 启用 true 禁用
-         * 控制ts-loader 编译是否开启多线程
-         * @type {boolean}
-         */
-        disableHappyPack:boolean,//是否禁用多线程,
-        cssModules: ICssModules,
-        /**
-         * ts 处理插件
-         */
-        tsCompilePlugin: {
-            loader: 'ts-loader',
-            option?:any
-        },
-        /**
-         *
-         * 扩展loader加载器
-         */
-        extend?:(loaders:any[], config:extendConfig)=>void,
-        plugins?:[] //插件
-    } = {
+    public webpack: IWebpack = {
         dllConfig: {
             vendors: ['react','react-dom','invariant'],
+            customDll:[],
+            compileOptions:{},
         },
         disableReactHotLoader: false,
-        /**
-         * 是否启用多线程 false 启用 true 禁用
-         * 控制ts-loader 编译是否开启多线程
-         * @type {boolean}
-         */
+        commonsChunkPlugin:['common'],
         disableHappyPack:false,
-        cssModules: {
-            enable: false, // 默认为 false，如需使用 css modules 功能，则设为 true
-            // config: {
-            //   namingPattern: 'module', // 转换模式，取值为 global/module，下文详细说明
-            //   generateScopedName: '[name]__[local]___[hash:base64:5]'
-            // }
-            },
-        /** 
+         /** 
          *  ts 处理插件 主要有'ts-loader'|'awesome-typescript-loader' 
          * 默认 'ts-loader'
         */
         tsCompilePlugin: {
             loader:'ts-loader'
         },
-        plugins:[]
+        plugins: [],
+        resolve:{},
     };
 
     public babel: {

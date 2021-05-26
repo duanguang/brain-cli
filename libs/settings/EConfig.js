@@ -10,6 +10,7 @@ const defaultEConfig = require(path.resolve(__dirname, `../../${constants_1.PROJ
  * 可选配置列表, 优先级从低到高由左到右
  */
 exports.configFileList = [constants_1.PROJECT_USER_CONFIG_FILE, constants_1.PROJECT_USER_CONFIG_IGNORE_FILE];
+const nodeModulesPath = path.resolve(process.cwd(), 'node_modules');
 class EConfig {
     constructor() {
         this.projectType = 'js';
@@ -17,25 +18,21 @@ class EConfig {
         this.webpack = {
             dllConfig: {
                 vendors: ['react', 'react-dom', 'invariant'],
+                customDll: [],
+                compileOptions: {},
             },
             disableReactHotLoader: false,
-            /**
-             * 是否启用多线程 false 启用 true 禁用
-             * 控制ts-loader 编译是否开启多线程
-             * @type {boolean}
-             */
+            commonsChunkPlugin: ['common'],
             disableHappyPack: false,
-            cssModules: {
-                enable: false,
-            },
             /**
-             *  ts 处理插件 主要有'ts-loader'|'awesome-typescript-loader'
-             * 默认 'ts-loader'
-            */
+            *  ts 处理插件 主要有'ts-loader'|'awesome-typescript-loader'
+            * 默认 'ts-loader'
+           */
             tsCompilePlugin: {
                 loader: 'ts-loader'
             },
-            plugins: []
+            plugins: [],
+            resolve: {},
         };
         this.init();
     }
