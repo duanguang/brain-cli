@@ -18,3 +18,4 @@ exports.HISTORY_REWRITE_FALL_BACK_REGEX_FUNC = (name) => {
     return new RegExp(`^/((${path}(?=/)|(${path}$)))`);
 };
 exports.URL_PREFIX = `app`;
+exports.nodeModulesPath = path.resolve(process.cwd(), 'node_modules');

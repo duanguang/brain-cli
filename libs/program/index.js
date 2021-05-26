@@ -4,8 +4,7 @@ const server_1 = require("../../server");
 const EConfig_1 = require("../settings/EConfig");
 const webpack_config_1 = require("../../webpack.config");
 const webpack = require("webpack");
-// import ICommand = commander.ICommand;
-function programInit(env) {
+function programInit(env, options) {
     if (env === 'dev') {
         /**
          * 在开发环境中, 允许直接配置config和ignoreConfig并更新指定常量区域
@@ -15,7 +14,7 @@ function programInit(env) {
         //noinspection JSIgnoredPromiseFromCall
         server_1.default();
     }
-    else if (env === 'dist' || env === 'prod' || env === 'test') {
+    else if (env === 'production') {
         const eConfig = EConfig_1.default.getInstance();
         const webpackConfig = webpack_config_1.default(eConfig);
         if (Array.isArray(webpackConfig.pendings)) {

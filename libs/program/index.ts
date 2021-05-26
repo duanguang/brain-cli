@@ -3,9 +3,7 @@ import {configFileList, default as EConfig} from '../settings/EConfig';
 import * as path from 'path';
 import getConfig from '../../webpack.config';
 import webpack = require('webpack');
-import commander = require('commander');
-// import ICommand = commander.ICommand;
-export default function programInit(env: string) {
+export default function programInit(env: string,options?:any) {
     if (env==='dev') {
         /**
          * 在开发环境中, 允许直接配置config和ignoreConfig并更新指定常量区域
@@ -15,7 +13,7 @@ export default function programInit(env: string) {
         //noinspection JSIgnoredPromiseFromCall
         start();
     }
-    else if (env==='dist'||env==='prod'||env==='test') {
+    else if (env==='production') {
         const eConfig = EConfig.getInstance();
         const webpackConfig = getConfig(eConfig);
         if (Array.isArray(webpackConfig.pendings)) {

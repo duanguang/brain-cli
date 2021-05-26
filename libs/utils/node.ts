@@ -9,7 +9,6 @@ import * as path from 'path';
 export function emulateNodeRecursiveLookup(directory: string, relativeFilename: string, previousDirectory?: string): any {
     try {
         const loopUpTarget = path.resolve(directory, relativeFilename);
-        console.log(loopUpTarget);
         return require(loopUpTarget);
     } catch (e) {
         directory = path.dirname(directory);

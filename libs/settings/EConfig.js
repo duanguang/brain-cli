@@ -1,3 +1,4 @@
+
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const path = require("path");
@@ -10,19 +11,44 @@ const defaultEConfig = require(path.resolve(__dirname, `../../${constants_1.PROJ
  * 可选配置列表, 优先级从低到高由左到右
  */
 exports.configFileList = [constants_1.PROJECT_USER_CONFIG_FILE, constants_1.PROJECT_USER_CONFIG_IGNORE_FILE];
+const nodeModulesPath = path.resolve(process.cwd(), 'node_modules');
 class EConfig {
+    constructor() {
+        this.projectType = 'js';
+        this.isTslint = true;
+        this.webpack = {
+            dllConfig: {
+                vendors: ['react', 'react-dom', 'invariant'],
+                customDll: [],
+                compileOptions: {},
+            },
+            disableReactHotLoader: false,
+            commonsChunkPlugin: ['common'],
+            disableHappyPack: false,
+            /**
+            *  ts 处理插件 主要有'ts-loader'|'awesome-typescript-loader'
+            * 默认 'ts-loader'
+           */
+            tsCompilePlugin: {
+                loader: 'ts-loader'
+            },
+            plugins: [],
+            resolve: {},
+        };
+        this.init();
+    }
     static getInstance() {
         if (!EConfig.instance) {
             EConfig.instance = new EConfig();
         }
         return EConfig.instance;
     }
-    constructor() {
-        this.init();
-    }
     init() {
         let finalConfig = this.getFinalConfig();
         EConfig.validateConfig(finalConfig);
+        if (finalConfig.webpack.dllConfig && finalConfig.webpack.dllConfig.vendors && !Array.isArray(finalConfig.webpack.dllConfig.vendors)) {
+            delete this.webpack.dllConfig.vendors;
+        }
         deepAssign(this, finalConfig);
     }
     getFinalConfig() {

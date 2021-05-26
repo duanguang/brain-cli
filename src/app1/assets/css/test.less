@@ -1,0 +1,14 @@
+@import './test1.less';
+@primary-color1          : #337ab7;
+@driver: test;
+:export {
+    primaryColor: @primary-color;
+}
+.test{
+    color: saturate(@primary-color , 5%);
+   /*  color: #colors[primary]; */
+   .bordered {
+    border-top: dotted 1px black;
+    border-bottom: solid 2px black;
+  }
+}

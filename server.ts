@@ -1,5 +1,5 @@
 import startWebpackDevServer from './libs/webpack/webpackDevServer';
-import webpackDllCompiler from './libs/webpack/webpackDllCompiler';
+import webpackDllCompiler, { webpackDllPluginsCompiler } from './libs/webpack/webpackDllCompiler';
 import EConfig from './libs/settings/EConfig';
 import {displayAvailableIPs} from './libs/utils/ip';
 import {warning} from './libs/utils/logs';
@@ -24,12 +24,13 @@ function autoOpenBrowser(open: boolean, ip: string, port: number, targetApp: str
 /**
  * 程序入口点开始方法
  */
-export default async function start() {
+export default async function start(options?:any) {
     try {
         /**
          * 按需创建编译webpack dll manifest文件
          */
         await webpackDllCompiler();
+        await webpackDllPluginsCompiler();
 
         /**
          * 开启webpack dev server

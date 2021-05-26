@@ -11,7 +11,6 @@ const path = require("path");
 function emulateNodeRecursiveLookup(directory, relativeFilename, previousDirectory) {
     try {
         const loopUpTarget = path.resolve(directory, relativeFilename);
-        console.log(loopUpTarget);
         return require(loopUpTarget);
     }
     catch (e) {

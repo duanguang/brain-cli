@@ -1,14 +1,14 @@
+
 import {asSeconds} from '../utils/format';
 import getConfig from '../../webpack.config';
 import EConfig from '../settings/EConfig';
 import { log } from '../utils/logs';
 const webpack = require('webpack');
-
-export default function webpackCompiler() {
+export default function webpackCompiler(options?:any) {
     const webpackConfig = getConfig(EConfig.getInstance());
-    // if (Array.isArray(webpackConfig.pendings)) {
-    //     webpackConfig.pendings.forEach(pending => pending());
-    // }
+    if (Array.isArray(webpackConfig.pendings)) {
+        webpackConfig.pendings.forEach(pending => pending());
+    }
     delete webpackConfig.pendings;
     const webpackCompiler = webpack(webpackConfig);
 

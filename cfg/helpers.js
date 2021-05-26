@@ -4,13 +4,13 @@ const WebpackDllManifest_1 = require("../libs/settings/WebpackDllManifest");
 const path = require("path");
 const { DllReferencePlugin } = require('webpack');
 const glob = require('glob');
-function getDllReferencePlugin() {
+function getDllReferencePlugin(entityName = 'vendor') {
     try {
         const webpackDllManifest = WebpackDllManifest_1.default.getInstance();
         // const vendorsHash = webpackDllManifest.getVendorsHash();
         const distPath = webpackDllManifest.distPath;
         // const manifest = require(path.join(distPath, vendorsHash + `.json`));
-        const manifest = require(path.join(distPath, 'vendor.dll' + `.json`));
+        const manifest = require(path.join(distPath, `${entityName}.dll` + `.json`));
         return new DllReferencePlugin({
             context: process.cwd(),
             manifest

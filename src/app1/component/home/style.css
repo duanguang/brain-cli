@@ -1,0 +1,5 @@
+@value colors: '../../assets/css/style1.css';
+@value valueBlue, valueRed, valueGreen from colors;
+.style{
+    color :valueRed
+}
