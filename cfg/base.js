@@ -126,73 +126,33 @@ function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPa
                 canPrint: true,
             }));
         }
-        return [
-            {
-                test: /\.css$/,
-                use: generateLoaders(),
-                // use: ExtractTextPlugin.extract(
-                //     {
-                //         fallback: 'style-loader',
-                //         use: [
-                //           { loader: 'css-loader' },
-                //         ]
-                //       }),
-                include: [nodeModulesPath]
-            },
+        const loaders = [
             {
                 test: /\.less/,
-                use: generateLoaders(CSS_MODULE_OPTION, 'less-loader', postcss_loader),
-                // use:ExtractTextPlugin.extract(
-                //     {
-                //         fallback: 'style-loader',
-                //         use: [
-                //             {loader:`css-loader`,options:CSS_MODULE_OPTION},'less-loader',postcss_loader
-                //         ]
-                //       }),
-                include: [path.resolve(nodeModulesPath, 'basics-widget')]
-            },
-            {
-                test: /\.less/,
-                use: generateLoaders(null, 'less-loader'),
-                // use:ExtractTextPlugin.extract(
-                //     {
-                //         fallback: 'style-loader',
-                //         use: [
-                //             {loader:`css-loader`},'less-loader',postcss_loader
-                //         ]
-                //       }),
-                include: [path.resolve(nodeModulesPath, 'antd'), nodeModulesPath]
+                use: generateLoaders(null, {
+                    loader: 'less-loader',
+                    options: { javascriptEnabled: true },
+                }),
+                include: [path.resolve(nodeModulesPath, 'antd')],
             },
             {
                 test: new RegExp(`^(?!.*\\.modules).*\\.css`),
                 use: generateLoaders(null, null, postcss_loader),
-                // use:ExtractTextPlugin.extract(
-                //     {
-                //         fallback: 'style-loader',
-                //         use: [
-                //             {loader:`css-loader`,options:CSS_MODULE_OPTION},postcss_loader
-                //         ]
-                //       }),
-                exclude: [nodeModulesPath]
+                exclude: [nodeModulesPath],
+                include: path.join(process.cwd(), './src'),
             },
             {
                 /* test: /\.css$/, */
                 test: new RegExp(`^(.*\\.modules).*\\.css`),
                 use: generateLoaders(CSS_MODULE_OPTION, null, postcss_loader),
-                exclude: [nodeModulesPath]
+                exclude: [nodeModulesPath],
+                include: path.join(process.cwd(), './src'),
             },
             {
                 test: new RegExp(`^(?!.*\\.modules).*\\.less`),
-                use: generateLoaders(null, 'less-loader', postcss_loader),
-                // use:ExtractTextPlugin.extract(
-                //     {
-                //         fallback: 'style-loader',
-                //         use: [
-                //             {loader:`css-loader`,options:CSS_MODULE_OPTION},'less-loader',postcss_loader
-                //         ]
-                //       }
-                // ),
-                exclude: [nodeModulesPath]
+                use: generateLoaders(null, postcss_loader, { loader: 'less-loader', options: { javascriptEnabled: true } }),
+                exclude: [nodeModulesPath],
+                include: path.join(process.cwd(), './src'),
             },
             {
                 /* test: /\.less/, */
