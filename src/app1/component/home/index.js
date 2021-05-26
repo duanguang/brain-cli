@@ -50,7 +50,7 @@ export default class HomeManage extends React.Component {
                 棒谷用户体验中心创立于2018年6月28日，为全球首家跨境电商用户体验中心，
               </p>
               <p className={'test bg'}>
-                我们愿景是成为全球TOP级别客户满意的公司
+                我们愿景是成为全球TOP级别客户满意的公司1
               </p>
             </div>
             <div className={styles.design}>
