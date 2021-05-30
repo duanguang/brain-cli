@@ -391,6 +391,11 @@ tsCompilePlugin: {
 },
 ```
 ## changeLog webpack4.x
+## v1.1.0
+- deprecate: 废弃部分不合适的参数配置 **disableHappyPack** , **cssModules**
+- chore: 优化多进程由强制开启变成可以自由控制
+- fix: 修复版本更新探测代码无法生效
+- chore: 优化控制台输出信息
 ## v1.0.8-alpha.6(2020-12-01)
 - feat: 新增webpack 配置文件输出属性output支持自定义library及libraryTarget
 - feat: 新增webpack dll 配置文件输出属性output支持自定义libraryTarget及其他属性 
