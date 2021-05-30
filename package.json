@@ -1,7 +1,7 @@
 {
   "name": "brain-cli",
   "license": "MIT",
-  "version": "1.0.8-alpha.7",
+  "version": "1.1.0",
   "description": "A command line tool used to run  projects",
   "scripts": {
     "clean": "rimraf dist/*",
@@ -91,7 +91,7 @@
     "open": "0.0.5",
     "optimize-css-assets-webpack-plugin": "^5.0.3",
     "postcss-loader": "^3.0.0",
-    "postcss-plugin-px2rem":"^0.8.1",
+    "postcss-plugin-px2rem": "^0.8.1",
     "progress-bar-webpack-plugin": "^1.12.1",
     "raw-loader": "^4.0.0",
     "react-hot-loader": "^4.12.10",
