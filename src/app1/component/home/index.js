@@ -40,7 +40,7 @@ export default class HomeManage extends React.Component {
         <section className={styles.container}>
           <section className={styles.content}>
             <div className={styles.title}>
-              我们不仅仅是设计师{process.env.environment}
+              我们不仅仅是设计1-5{process.env.environment}
             </div>
             <div className={styles.slogan}>
               <p className="style">
@@ -50,7 +50,7 @@ export default class HomeManage extends React.Component {
                 棒谷用户体验中心创立于2018年6月28日，为全球首家跨境电商用户体验中心，
               </p>
               <p className={'test bg'}>
-                我们愿景是成为全球TOP级别客户满意的公司1
+                我们愿景是成为全球TOP级别客户满意的公司
               </p>
             </div>
             <div className={styles.design}>

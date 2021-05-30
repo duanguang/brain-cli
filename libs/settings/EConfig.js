@@ -23,7 +23,9 @@ class EConfig {
             },
             disableReactHotLoader: false,
             commonsChunkPlugin: ['common'],
-            disableHappyPack: false,
+            happyPack: {
+                open: false,
+            },
             /**
             *  ts 处理插件 主要有'ts-loader'|'awesome-typescript-loader'
             * 默认 'ts-loader'

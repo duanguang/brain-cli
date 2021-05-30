@@ -12,12 +12,8 @@ module.exports = {
   publicPath: '/public/',
   devServer: {
     noInfo: true,
+    https: false,
     proxy: {
-      // '/cia-j': {
-      //     target: 'http://192.168.1.181:8081',
-      //         onProxyReq: (proxyReq, req, res) => {
-      //         }
-      // },
       // '/main': {
       //     target: 'https://uat-scm.hoolinks.com/',
       //     //changeOrigin: true,
@@ -52,16 +48,13 @@ module.exports = {
     dllConfig: {
       /* vendors: { value: ['react'],externalUrl:'http://localhost:8001/public/test/'}, */
       vendors: ['react'],
-      customDll: [{ key: 'framework',value: ['invariant','react-dom'],externalUrl: '' }],
+      /* customDll: [{ key: 'framework',value: ['invariant','react-dom'],externalUrl: '' }],
       compileOptions: {
         externalUrl:'http://localhost:8001/public/test/'
-      }
-    /* framework:['react','react-dom'] */ // 支持自定义dll 包
-      /* framework:{cdn:'https://hoolinks1.com',FrameList:['react','react-dom']} */
+      } */
     },
     disableReactHotLoader: false,
     commonsChunkPlugin: ['common','vendor'],
-    disableHappyPack: false,
     plugins: [
       new ProgressBarPlugin({
         summary: false,
@@ -106,6 +99,7 @@ module.exports = {
     
       cacheDirectory: true,
       plugins: [
+        /* 'babel-plugin-legion-hmr', */
         'add-module-exports',
         '@babel/plugin-transform-runtime',
         ["@babel/plugin-proposal-decorators", { "legacy": true }],
@@ -116,7 +110,7 @@ module.exports = {
         //         {libraryName: "antd", style: true}
         //     ]
         // ]
-        ['import', { libraryName: 'antd', style: true }],
+        ['import',{ libraryName: 'antd',style: true }],
       ]
     }
   },

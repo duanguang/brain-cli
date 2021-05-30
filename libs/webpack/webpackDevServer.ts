@@ -11,7 +11,7 @@ const {name: projectName,apps} = eConfig;
  */
 export default function startWebpackDevServer(options?:any) {
   return new Promise((resolve, reject) => {
-    const { server } = eConfig;
+    const { server = '0.0.0.0' } = eConfig;
     const config = webpackConfig(eConfig);
     webpackDevServer.addDevServerEntrypoints(config, config.devServer);
     new webpackDevServer(webpackCompiler(), config.devServer).listen(
@@ -22,7 +22,6 @@ export default function startWebpackDevServer(options?:any) {
           reject(err);
         }
         log(`监听本地 ${server}:${eConfig.defaultPort}`);
-        log(`server: http://localhost:${eConfig.defaultPort}/${URL_PREFIX}/${projectName}/${apps.length?apps[0]:''}`);
         //console.log(`监听本地 ${server}:${eConfig.defaultPort}`);
         resolve();
       }

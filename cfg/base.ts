@@ -8,22 +8,20 @@ import {
 } from '../libs/constants/constants';
 import * as webpack from 'webpack';
 import htmlWebpackPlugins from '../libs/webpack/plugins/htmlWebpackPlugin';
-import { warning, log } from '../libs/utils/logs';
 import { isDev } from '../libs/utils/env';
 import LegionExtractStaticFilePlugin from '../libs/webpack/plugins/LegionExtractStaticFilePlugin';
 import { getApps } from '../libs/webpack/entries/getEntries';
 import { merge } from '../libs/utils/objects';
+import { happyPackToJsPlugin, happyPackToTsPlugin } from '../libs/webpack/happy-pack-conf';
+import { getJSXLoadersed, getTsLoadersed } from '../libs/webpack/javaScriptLoader';
 const nodeModulesPath = path.resolve(process.cwd(), 'node_modules');
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
-const HtmlWebpackHarddiskPlugin = require('html-webpack-harddisk-plugin');
 const OptimizeCssAssetsPlugin = require('optimize-css-assets-webpack-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const BundleAnalyzerPlugin = require('webpack-bundle-analyzer')
   .BundleAnalyzerPlugin;
 const SpritesmithPlugin = require('webpack-spritesmith');
 const express = require('express');
-const MiniCssExtractPlugin = require('mini-css-extract-plugin');
-const UglifyJSPlugin = require('uglifyjs-webpack-plugin');
 const TerserPlugin = require('terser-webpack-plugin');
 const Optimization = {
   runtimeChunk: false,
@@ -39,11 +37,6 @@ const Optimization = {
     },
   },
 };
-// const ProgressBarPlugin = require('progress-bar-webpack-plugin');
-// const chalk = require('chalk');
-const HappyPack = require('happypack'),
-  os = require('os'),
-  happyThreadPool = HappyPack.ThreadPool({ size: os.cpus().length });
 const entries = getApps();
 export default function getBaseConfig({
   name,
@@ -66,12 +59,9 @@ export default function getBaseConfig({
     disableReactHotLoader,
     commonsChunkPlugin,
     plugins,
-    disableHappyPack,
-    tsCompilePlugin,
     output,
   } = webpackConfig;
   const NewOptimization = merge(Optimization, webpackConfig.optimization);
-  const DisableReactHotLoader = disableReactHotLoader || false; //默认启用热加载
   const { noInfo, proxy,before,stats, 
     contentBase,historyApiFallback,
     headers = {},hot,port, ...serverProps
@@ -258,112 +248,6 @@ export default function getBaseConfig({
       },
     ];
   }
-  function getTsLoaders() {
-    if (tsCompilePlugin.loader === 'ts-loader') {
-      return {
-        loader: require.resolve('ts-loader'),
-        options: {
-          ...{
-            // disable type checker - we will use it in fork plugin
-            transpileOnly: true,
-            happyPackMode: true,
-          },
-          ...(tsCompilePlugin.option || {}),
-        },
-      };
-    }
-  }
-  function getJSXLoaders() {
-    const loaders = [];
-    if (__DEV__) {
-      if (!DisableReactHotLoader) {
-        loaders.push({
-          test: /\.(jsx|js)?$/,
-          // loader: 'react-hot',
-          loader: 'babel-loader',
-          include: [path.join(process.cwd(), './src')],
-          exclude: [nodeModulesPath], //优化构建效率
-          options: {
-            // This is a feature of `babel-loader` for webpack (not Babel itself).
-            // It enables caching results in ./node_modules/.cache/babel-loader/
-            // directory for faster rebuilds.
-            cacheDirectory: true,
-            plugins: ['react-hot-loader/babel'],
-          },
-        });
-        if (
-          webpackConfig.extend &&
-          typeof webpackConfig.extend === 'function'
-        ) {
-          webpackConfig.extend &&
-            webpackConfig.extend(loaders, {
-              isDev: __DEV__,
-              loaderType: 'HotLoader',
-              projectType,
-            });
-        }
-      } else {
-        babel.query.plugins.push('babel-plugin-legion-hmr');
-      }
-    }
-    loaders.push({
-      test: /\.(jsx|js)?$/,
-      /* loader: `babel-loader`,
-            query: babel.query, */
-      include: [
-        path.join(process.cwd(), 'node_modules/basics-widget'),
-        path.join(process.cwd(), './src'),
-      ],
-      loader: 'happypack/loader?id=js',
-      exclude: [nodeModulesPath],
-    });
-    if (webpackConfig.extend && typeof webpackConfig.extend === 'function') {
-      webpackConfig.extend &&
-        webpackConfig.extend(loaders, {
-          isDev: __DEV__,
-          loaderType: 'JsLoader',
-          projectType,
-        });
-    }
-    if (projectType === 'ts') {
-      if (
-        tsCompilePlugin &&
-        tsCompilePlugin.option &&
-        tsCompilePlugin.option.getCustomTransformers
-      ) {
-        // 解决多线程下ts-loader 编译插件无法被执行问题
-        loaders.push({
-          test: /\.(ts|tsx)$/,
-          include: [path.join(process.cwd(), './src')],
-          use: [
-            {
-              loader: 'babel-loader',
-              query: babel.query,
-            },
-            getTsLoaders(),
-          ],
-          exclude: [nodeModulesPath],
-        });
-      } else {
-        loaders.push({
-          test: /\.(ts|tsx)$/,
-          include: [path.join(process.cwd(), './src')],
-          loader: 'happypack/loader?id=ts',
-          exclude: [nodeModulesPath],
-        });
-      }
-      if (webpackConfig.extend && typeof webpackConfig.extend === 'function') {
-        webpackConfig.extend &&
-          webpackConfig.extend(loaders, {
-            isDev: __DEV__,
-            loaderType: 'TsLoader',
-            projectType,
-          });
-      }
-    }
-    return loaders;
-  }
-
   function getFileResourcesLoaders() {
     return [
       {
@@ -523,36 +407,8 @@ export default function getBaseConfig({
       // 雪碧图设置
       ...SpritesmithPlugins,
       ...plugins,
-      new HappyPack({
-        id: 'js',
-        threads: os.cpus().length - 1,
-        /* threadPool: happyThreadPool, */
-        use: [
-          {
-            loader: `babel-loader`,
-            query: babel.query,
-          },
-        ],
-      }),
-      new HappyPack({
-        id: 'ts',
-        threads: os.cpus().length - 1,
-        /* threadPool: happyThreadPool, */
-        use: [
-          {
-            loader: 'babel-loader',
-            query: babel.query,
-          },
-          {
-            loader: require.resolve('ts-loader'),
-            options: {
-              // disable type checker - we will use it in fork plugin
-              transpileOnly: true,
-              happyPackMode: true,
-            },
-          },
-        ],
-      }),
+      ...happyPackToJsPlugin(),
+      ...happyPackToTsPlugin(),
       ...(isDev()
         ? []
         : [
@@ -624,7 +480,8 @@ export default function getBaseConfig({
   }
   config.module = {
     rules: [
-      ...getJSXLoaders(),
+      ...getJSXLoadersed(),
+      ...getTsLoadersed(),
       ...getCssLoaders(),
       ...getImageLoaders(),
       ...getJsonLoaders(),
