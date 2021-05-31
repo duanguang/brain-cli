@@ -2,7 +2,6 @@ import {isDev} from '../../utils/env';
 import EConfig from '../../settings/EConfig';
 import * as path from 'path';
 import * as fs from 'fs';
-import {WORKING_DIRECTORY} from '../../constants/constants';
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const minify = require('html-minifier').minify;
 const {apps, htmlWebpackPlugin: {title},webpack:{commonsChunkPlugin}} = EConfig.getInstance();

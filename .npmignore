@@ -115,3 +115,4 @@ static
 .7z
 .history
 .webpack_cache
+*.ts
