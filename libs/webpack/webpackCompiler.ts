@@ -2,7 +2,10 @@
 import {asSeconds} from '../utils/format';
 import getConfig from '../../webpack.config';
 import EConfig from '../settings/EConfig';
-import { log } from '../utils/logs';
+import { log, logAppRunning } from '../utils/logs';
+import { URL_PREFIX } from '../constants/constants';
+import { chkUpdateNotifier } from '../utils/update-notifier';
+import { displayAvailableIPs, getAvailableIPs } from '../utils/ip';
 const webpack = require('webpack');
 export default function webpackCompiler(options?:any) {
     const webpackConfig = getConfig(EConfig.getInstance());
@@ -11,7 +14,8 @@ export default function webpackCompiler(options?:any) {
     }
     delete webpackConfig.pendings;
     const webpackCompiler = webpack(webpackConfig);
-
+    const {name: projectName,apps, defaultPort,devServer:{https},server} = EConfig.getInstance();
+    const projectUrl=`${URL_PREFIX}/${projectName}/${apps.length ? apps[0] : ''}`
     let bundleStartTime;
 
     webpackCompiler.plugin('compile', () => {
@@ -22,7 +26,9 @@ export default function webpackCompiler(options?:any) {
 
     webpackCompiler.plugin('done', () => {
         const timeSpent = Date.now() - bundleStartTime;
-        log(`打包完成, 耗时 ${asSeconds(timeSpent)} s. ${new Date()}`)
+        log(`打包完成, 耗时 ${asSeconds(timeSpent)} s. ${new Date()}`);
+        logAppRunning({ port: defaultPort,projectUrl,https,server });
+        chkUpdateNotifier();
         //console.info(`打包完成, 耗时 ${asSeconds(timeSpent)} s. ${new Date()}`);
     });
     return webpackCompiler;
