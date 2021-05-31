@@ -5,18 +5,20 @@ import {displayAvailableIPs} from './libs/utils/ip';
 import {warning} from './libs/utils/logs';
 import {URL_PREFIX} from './libs/constants/constants';
 const openBrowser = require('open');
+
+
 // const config = require('./webpack.config');
 // const {port} = config;
 
 function autoOpenBrowser(open: boolean, ip: string, port: number, targetApp: string) {
-    const {name: projectName} = EConfig.getInstance();
+    const {name: projectName,devServer:{https}} = EConfig.getInstance();
     if (open) {
         if (!targetApp) {
             warning(`忽略自动打开浏览器功能:`);
             warning(`请提供指定需要app name作为相对路径`);
         }
         else {
-            openBrowser(`http://${ip}:${port}/${URL_PREFIX}/${projectName}/${targetApp}`);
+            openBrowser(`${https?'https':'http'}://${ip}:${port}/${URL_PREFIX}/${projectName}/${targetApp}`);
         }
     }
 }

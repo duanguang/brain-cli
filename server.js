@@ -19,14 +19,14 @@ const openBrowser = require('open');
 // const config = require('./webpack.config');
 // const {port} = config;
 function autoOpenBrowser(open, ip, port, targetApp) {
-    const { name: projectName } = EConfig_1.default.getInstance();
+    const { name: projectName, devServer: { https } } = EConfig_1.default.getInstance();
     if (open) {
         if (!targetApp) {
             logs_1.warning(`忽略自动打开浏览器功能:`);
             logs_1.warning(`请提供指定需要app name作为相对路径`);
         }
         else {
-            openBrowser(`http://${ip}:${port}/${constants_1.URL_PREFIX}/${projectName}/${targetApp}`);
+            openBrowser(`${https ? 'https' : 'http'}://${ip}:${port}/${constants_1.URL_PREFIX}/${projectName}/${targetApp}`);
         }
     }
 }

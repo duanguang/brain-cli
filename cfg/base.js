@@ -20,17 +20,16 @@ const env_1 = require("../libs/utils/env");
 const LegionExtractStaticFilePlugin_1 = require("../libs/webpack/plugins/LegionExtractStaticFilePlugin");
 const getEntries_1 = require("../libs/webpack/entries/getEntries");
 const objects_1 = require("../libs/utils/objects");
+const happy_pack_conf_1 = require("../libs/webpack/happy-pack-conf");
+const javaScriptLoader_1 = require("../libs/webpack/javaScriptLoader");
 const nodeModulesPath = path.resolve(process.cwd(), 'node_modules');
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
-const HtmlWebpackHarddiskPlugin = require('html-webpack-harddisk-plugin');
 const OptimizeCssAssetsPlugin = require('optimize-css-assets-webpack-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const BundleAnalyzerPlugin = require('webpack-bundle-analyzer')
     .BundleAnalyzerPlugin;
 const SpritesmithPlugin = require('webpack-spritesmith');
 const express = require('express');
-const MiniCssExtractPlugin = require('mini-css-extract-plugin');
-const UglifyJSPlugin = require('uglifyjs-webpack-plugin');
 const TerserPlugin = require('terser-webpack-plugin');
 const Optimization = {
     runtimeChunk: false,
@@ -46,16 +45,12 @@ const Optimization = {
         },
     },
 };
-// const ProgressBarPlugin = require('progress-bar-webpack-plugin');
-// const chalk = require('chalk');
-const HappyPack = require('happypack'), os = require('os'), happyThreadPool = HappyPack.ThreadPool({ size: os.cpus().length });
 const entries = getEntries_1.getApps();
 function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPath, apps, server, babel, webpack: webpackConfig, htmlWebpackPlugin, projectType, isTslint, }) {
     const __DEV__ = env_1.isDev();
     publicPath += name + '/';
-    const { disableReactHotLoader, commonsChunkPlugin, plugins, disableHappyPack, tsCompilePlugin, output, } = webpackConfig;
+    const { disableReactHotLoader, commonsChunkPlugin, plugins, output, } = webpackConfig;
     const NewOptimization = objects_1.merge(Optimization, webpackConfig.optimization);
-    const DisableReactHotLoader = disableReactHotLoader || false; //默认启用热加载
     const { noInfo, proxy, before, stats, contentBase, historyApiFallback, headers = {}, hot, port } = devServer, serverProps = __rest(devServer, ["noInfo", "proxy", "before", "stats", "contentBase", "historyApiFallback", "headers", "hot", "port"]);
     const webpackDevEntries = [
     /* 'react-hot-loader/patch',  */
@@ -215,106 +210,6 @@ function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPa
             },
         ];
     }
-    function getTsLoaders() {
-        if (tsCompilePlugin.loader === 'ts-loader') {
-            return {
-                loader: require.resolve('ts-loader'),
-                options: Object.assign({
-                    // disable type checker - we will use it in fork plugin
-                    transpileOnly: true,
-                    happyPackMode: true,
-                }, (tsCompilePlugin.option || {})),
-            };
-        }
-    }
-    function getJSXLoaders() {
-        const loaders = [];
-        if (__DEV__) {
-            if (!DisableReactHotLoader) {
-                loaders.push({
-                    test: /\.(jsx|js)?$/,
-                    // loader: 'react-hot',
-                    loader: 'babel-loader',
-                    include: [path.join(process.cwd(), './src')],
-                    exclude: [nodeModulesPath],
-                    options: {
-                        // This is a feature of `babel-loader` for webpack (not Babel itself).
-                        // It enables caching results in ./node_modules/.cache/babel-loader/
-                        // directory for faster rebuilds.
-                        cacheDirectory: true,
-                        plugins: ['react-hot-loader/babel'],
-                    },
-                });
-                if (webpackConfig.extend &&
-                    typeof webpackConfig.extend === 'function') {
-                    webpackConfig.extend &&
-                        webpackConfig.extend(loaders, {
-                            isDev: __DEV__,
-                            loaderType: 'HotLoader',
-                            projectType,
-                        });
-                }
-            }
-            else {
-                babel.query.plugins.push('babel-plugin-legion-hmr');
-            }
-        }
-        loaders.push({
-            test: /\.(jsx|js)?$/,
-            /* loader: `babel-loader`,
-                  query: babel.query, */
-            include: [
-                path.join(process.cwd(), 'node_modules/basics-widget'),
-                path.join(process.cwd(), './src'),
-            ],
-            loader: 'happypack/loader?id=js',
-            exclude: [nodeModulesPath],
-        });
-        if (webpackConfig.extend && typeof webpackConfig.extend === 'function') {
-            webpackConfig.extend &&
-                webpackConfig.extend(loaders, {
-                    isDev: __DEV__,
-                    loaderType: 'JsLoader',
-                    projectType,
-                });
-        }
-        if (projectType === 'ts') {
-            if (tsCompilePlugin &&
-                tsCompilePlugin.option &&
-                tsCompilePlugin.option.getCustomTransformers) {
-                // 解决多线程下ts-loader 编译插件无法被执行问题
-                loaders.push({
-                    test: /\.(ts|tsx)$/,
-                    include: [path.join(process.cwd(), './src')],
-                    use: [
-                        {
-                            loader: 'babel-loader',
-                            query: babel.query,
-                        },
-                        getTsLoaders(),
-                    ],
-                    exclude: [nodeModulesPath],
-                });
-            }
-            else {
-                loaders.push({
-                    test: /\.(ts|tsx)$/,
-                    include: [path.join(process.cwd(), './src')],
-                    loader: 'happypack/loader?id=ts',
-                    exclude: [nodeModulesPath],
-                });
-            }
-            if (webpackConfig.extend && typeof webpackConfig.extend === 'function') {
-                webpackConfig.extend &&
-                    webpackConfig.extend(loaders, {
-                        isDev: __DEV__,
-                        loaderType: 'TsLoader',
-                        projectType,
-                    });
-            }
-        }
-        return loaders;
-    }
     function getFileResourcesLoaders() {
         return [
             {
@@ -455,36 +350,8 @@ function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPa
             // 雪碧图设置
             ...SpritesmithPlugins,
             ...plugins,
-            new HappyPack({
-                id: 'js',
-                threads: os.cpus().length - 1,
-                /* threadPool: happyThreadPool, */
-                use: [
-                    {
-                        loader: `babel-loader`,
-                        query: babel.query,
-                    },
-                ],
-            }),
-            new HappyPack({
-                id: 'ts',
-                threads: os.cpus().length - 1,
-                /* threadPool: happyThreadPool, */
-                use: [
-                    {
-                        loader: 'babel-loader',
-                        query: babel.query,
-                    },
-                    {
-                        loader: require.resolve('ts-loader'),
-                        options: {
-                            // disable type checker - we will use it in fork plugin
-                            transpileOnly: true,
-                            happyPackMode: true,
-                        },
-                    },
-                ],
-            }),
+            ...happy_pack_conf_1.happyPackToJsPlugin(),
+            ...happy_pack_conf_1.happyPackToTsPlugin(),
             ...(env_1.isDev()
                 ? []
                 : [
@@ -537,7 +404,8 @@ function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPa
     }
     config.module = {
         rules: [
-            ...getJSXLoaders(),
+            ...javaScriptLoader_1.getJSXLoadersed(),
+            ...javaScriptLoader_1.getTsLoadersed(),
             ...getCssLoaders(),
             ...getImageLoaders(),
             ...getJsonLoaders(),

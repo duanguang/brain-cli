@@ -47,6 +47,18 @@ interface extendConfig{
        execution:(cssModule,loader,LoaderOptions)=>any
     }
 }
+interface IHappyPack{
+    /** 代表开启几个子进程去处理这一类型的文件，默认是3个，类型必须是整数。 */
+    threads?: Number;
+    /** 是否允许 HappyPack 输出日志，默认是 true。 */
+    verbose?: Boolean;
+    /** 代表共享进程池，即多个 HappyPack 实例都使用同一个共享进程池中的子进程去处理任务，以防止资源占用过多。 */
+    threadPool?: any;
+    /** 开启webpack --profile ,仍然希望HappyPack产生输出。 */
+    verboseWhenProfiling?: boolean;
+    /** 启用debug 用于故障排查。默认 false。 */
+    debug?: boolean;
+}
 interface IWebpack{
     dllConfig: IDllConfig;
 
@@ -59,14 +71,16 @@ interface IWebpack{
     disableReactHotLoader: boolean;
 
     commonsChunkPlugin?:string[],
-    /**
-     * 是否禁用多线程
-     *
-     * @type {boolean}
-     * @memberof IWebpack
-     */
-    disableHappyPack: boolean;
 
+    /** 多线程配置参数 */
+    happyPack?: {
+        open: boolean;
+        /** js 线程配置 */
+        procJs?: IHappyPack;
+        /** ts 线程配置 */
+        procTs?: IHappyPack;
+        procStyle?: IHappyPack;
+    }
     /**
      * 插件信息
      *
@@ -113,7 +127,8 @@ export default class EConfig {
     public isTslint:boolean = true
     public devServer: {
         noInfo: boolean,
-        proxy: Object
+        proxy: Object,
+        https?: boolean
     } & {
         [k: string]: any
     };
@@ -132,7 +147,9 @@ export default class EConfig {
         },
         disableReactHotLoader: false,
         commonsChunkPlugin:['common'],
-        disableHappyPack:false,
+        happyPack: {
+            open:false,
+        },
          /** 
          *  ts 处理插件 主要有'ts-loader'|'awesome-typescript-loader' 
          * 默认 'ts-loader'

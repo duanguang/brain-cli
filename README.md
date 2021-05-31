@@ -84,7 +84,9 @@ module.exports = {
        vendors: ['react','react-dom','invariant'],
     },
     disableReactHotLoader: false,
-    disableHappyPack: false,
+    happyPack: {
+      open:false,
+    },
     commonsChunkPlugin: ['common', 'vendor'],
     plugins: [
       new ProgressBarPlugin({
@@ -203,11 +205,7 @@ module.exports = {
 首先它是一个函数，执行会抛出底层loaders等数据，当默认loaders不满足使用时，可以传入此配置用于扩展增强 
 
 ```ts
-function (loaders:[], { isDev, /*
-'HotLoader' | 'JsLoader' | 'TsLoader' | 'StyleLoader'
-*/loaderType,/*'ts' | 'js'*/ projectType, 
-/* 
-{
+interface ITransform{
   readonly cssModule: {
     modules: boolean;
     importLoaders: number;
@@ -216,29 +214,32 @@ function (loaders:[], { isDev, /*
   readonly LoaderOptions: postcss_loader,
   execution:(cssModule,loader,currLoader)=>loader.use
 }
-*/
-transform })
+interface IOptions{
+  isDev:boolean;
+  loaderType:'HotLoader' | 'JsLoader' | 'TsLoader' | 'StyleLoader';
+  projectType:'ts' | 'js';
+  transform:ITransform
+}
+function (loaders:[], options:IOptions={
+  isDev,loaderType,projectType,transform
+})
 
 // 例如
 function (loaders,{ isDev, loaderType, projectType, transform }){
   const nodeModulesPath=path.resolve('../../', 'node_modules')
    if (loaderType === 'JsLoader') {
-      loaders.push({
-        test: /\.(jsx|js)?$/,
-        include: [
-          path.resolve(nodeModulesPath, 'legions-pro-design'),
-        ],
-        loader: 'happypack/loader?id=js',
-      });
+     if (loaders.length) {
+            loaders[0].include = [...loaders[0].include,
+             path.resolve(nodeModulesPath, 'legions-pro-design'),
+            ]
+      }
     }
     if (loaderType === 'TsLoader' && projectType === 'ts') {
-      loaders.push({
-        test: /\.(ts|tsx)$/,
-        include: [
-          path.resolve(nodeModulesPath, 'legions-pro-design'),
-        ],
-        loader: 'happypack/loader?id=ts',
-      });
+      if (loaders.length) {
+            loaders[0].include = [...loaders[0].include,
+               path.resolve(nodeModulesPath, 'legions-pro-design'),
+            ]
+          }
     }
     if (loaderType === 'StyleLoader' && transform) {
       const newLoaders = [
@@ -328,7 +329,73 @@ option: {
 },
 ```
 
+#### config.webpack.[happyPack](https://github.com/amireh/happypack)
+> 1.配置信息
+```ts
+interface IHappyPack{
+    /** 代表开启几个子进程去处理这一类型的文件，默认是3个，类型必须是整数。 */
+    threads?: Number;
+    /** 是否允许 HappyPack 输出日志，默认是 true。 */
+    verbose?: Boolean;
+    /** 代表共享进程池，即多个 HappyPack 实例都使用同一个共享进程池中的子进程去处理任务，以防止资源占用过多。 */
+    threadPool?: any;
+    /** 开启webpack --profile ,仍然希望HappyPack产生输出。 */
+    verboseWhenProfiling?: boolean;
+    /** 启用debug 用于故障排查。默认 false。 */
+    debug?: boolean;
+}
+{
+  open:false // 是否开启多线程
+  /** js 线程配置 */
+  procJs?: IHappyPack;
+  /** ts 线程配置 */
+  procTs?: IHappyPack;
+}
+```
+> 2.开启多线程时，如果是编译ts,tsx 文件，默认使用ts-loader, 这时多进程下存在使用插件无法生效[问题](https://github.com/Igorbek/typescript-plugin-styled-components#forked-process-configuration)
+```ts
+const {
+    createTransformer,
+    createTransformerReactJsxProps,
+  } = require('ts-plugin-legions');
+// 2. create a transformer;
+// the factory additionally accepts an options object which described below
+
+// 3. create getCustomTransformer function
+const getCustomTransformers = () => ({ before: [createTransformer([
+    {
+      libraryName: 'legions/store',
+      bindings: ['StoreModules'],
+    },
+  ]),
+  createTransformerReactJsxProps({
+    components: [
+      { name: 'LegionsProTable', props: 'uniqueUid', value: '' },
+      { name: 'LegionsProForm', props: 'uniqueUid' },
+      { name: 'LegionsProTabsForm', props: 'uniqueUid' },
+      { name: 'LegionsProTabsForm', props: 'uniqueUid' },
+      { name: 'LegionsProConditions', props: 'uniqueUid' },
+      { name: 'HLDataImport', props: 'uniqueUid' },
+    ],
+  }),] });
+
+// 4. export getCustomTransformers
+module.exports = getCustomTransformers;
+// webpack.ts-transformers.js
+
+
+tsCompilePlugin: {
+  option: {
+    getCustomTransformers:path.join(__dirname, './webpack.ts-transformers.js'),
+  },
+},
+```
 ## changeLog webpack4.x
+## v1.1.0
+- deprecate: 废弃部分不合适的参数配置 **disableHappyPack** , **cssModules**
+- chore: 优化多进程由强制开启变成可以自由控制
+- fix: 修复版本更新探测代码无法生效
+- chore: 优化控制台输出信息
 ## v1.0.8-alpha.6(2020-12-01)
 - feat: 新增webpack 配置文件输出属性output支持自定义library及libraryTarget
 - feat: 新增webpack dll 配置文件输出属性output支持自定义libraryTarget及其他属性 

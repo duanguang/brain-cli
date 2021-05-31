@@ -40,7 +40,7 @@ export default class HomeManage extends React.Component {
         <section className={styles.container}>
           <section className={styles.content}>
             <div className={styles.title}>
-              我们不仅仅是设计师{process.env.environment}
+              我们不仅仅是设计1-5{process.env.environment}
             </div>
             <div className={styles.slogan}>
               <p className="style">

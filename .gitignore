@@ -111,3 +111,4 @@ dist
 .7z
 .history
 .webpack_cache
+test.js
