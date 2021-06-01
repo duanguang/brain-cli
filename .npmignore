@@ -95,6 +95,10 @@ jspm_packages
 # custom
 bower_components/
 dist
+src
+gif
+static
+.cache
 .idea/dictionaries/allen.xml
 .idea/dictionaries/sheailun.xml
 .idea/e-cli.iml
@@ -111,7 +115,5 @@ dist
 .7z
 .history
 .webpack_cache
-src
-static
 test
 *.ts
