@@ -39,7 +39,7 @@ export const getTsLoadersed = () => {
       test: /\.(ts|tsx)$/,
       include: [path.join(process.cwd(), './src')],
       loader: 'happypack/loader?id=ts',
-      exclude: [nodeModulesPath],
+      exclude: [],
     });
   } else {
     // 解决多线程下ts-loader 编译插件无法被执行问题
@@ -53,7 +53,7 @@ export const getTsLoadersed = () => {
         },
         tsloaderPlugin(),
       ],
-      exclude: [nodeModulesPath],
+      exclude: [],
     });
   }
   if (hasWebpackExtend()) {
@@ -91,7 +91,7 @@ export const getJSXLoadersed = () => {
       test: /\.(jsx|js)?$/,
       include: [path.join(process.cwd(), './src')],
       loader: 'happypack/loader?id=js',
-      exclude: [nodeModulesPath],
+      exclude: [],
     });
   } else {
     loaders.push({
@@ -103,7 +103,7 @@ export const getJSXLoadersed = () => {
           query: babel.query,
         },
       ],
-      exclude: [nodeModulesPath],
+      exclude: [],
     });
   }
   if (hasWebpackExtend()) {

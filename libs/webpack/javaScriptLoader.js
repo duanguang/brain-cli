@@ -43,7 +43,7 @@
                 test: /\.(ts|tsx)$/,
                 include: [path.join(process.cwd(), './src')],
                 loader: 'happypack/loader?id=ts',
-                exclude: [nodeModulesPath],
+                exclude: [],
             });
         }
         else {
@@ -58,7 +58,7 @@
                     },
                     exports.tsloaderPlugin(),
                 ],
-                exclude: [nodeModulesPath],
+                exclude: [],
             });
         }
         if (hasWebpackExtend()) {
@@ -96,7 +96,7 @@
                 test: /\.(jsx|js)?$/,
                 include: [path.join(process.cwd(), './src')],
                 loader: 'happypack/loader?id=js',
-                exclude: [nodeModulesPath],
+                exclude: [],
             });
         }
         else {
@@ -109,7 +109,7 @@
                         query: babel.query,
                     },
                 ],
-                exclude: [nodeModulesPath],
+                exclude: [],
             });
         }
         if (hasWebpackExtend()) {
