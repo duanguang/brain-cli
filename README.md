@@ -376,6 +376,8 @@ tsCompilePlugin: {
 
 
 ## changeLog
+## v0.3.30
+- fix: 修正ts-loader,js-loader等配置中exclude配置优先级跟include冲突问题
 ## v0.3.29
 - deprecate: 废弃部分不合适的参数配置 **disableHappyPack** , **cssModules**
 - chore: 优化多进程由强制开启变成可以自由控制
