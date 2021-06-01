@@ -20,7 +20,7 @@
 - 支持对指定入口文件进行编译，打包
 - 支持多套环境配置文件切换
 - 支持typescript
-![alt tag](/gif/WX20170607-095219@2x.png)
+
 
 ## 常用命令介绍
 
@@ -50,11 +50,6 @@ module.exports = {
   devServer: {
     noInfo: true,
     proxy: {
-      // '/cia-j': {
-      //     target: 'http://192.168.1.181:8081',
-      //         onProxyReq: (proxyReq, req, res) => {
-      //         }
-      // },
       // '/main': {
       //     target: 'https://xxx.com/',
       //     //changeOrigin: true,
@@ -88,16 +83,9 @@ module.exports = {
   webpack: {
     dllConfig: {
        vendors: ['react','react-dom','invariant'],
-       /* vendors: {cdn:'https://hoolinks.com',FrameList:['react','react-dom','invariant']}, */
-    /* framework:['react','react-dom'] */ // 支持自定义dll 包
-      /* framework:{cdn:'https://hoolinks1.com',FrameList:['react','react-dom']} */
     },
     disableReactHotLoader: false,
     commonsChunkPlugin: ['react', 'react-dom', 'invariant'],
-    disableHappyPack: false,
-    cssModules: {
-      enable: true // 默认为 false，如需使用 css modules 功能，则设为 true
-    },
     plugins: [
       new ProgressBarPlugin({
         summary: false,
@@ -112,18 +100,20 @@ module.exports = {
   babel: {
     query: {
       presets: ['es2015', 'stage-2', 'react'],
-      cacheDirectory: true,
+      cacheDirectory: '.webpack_cache',
       plugins: [
         'add-module-exports',
         'transform-runtime',
-        'transform-decorators-legacy'
-        // [
-        //     "import",
-        //     [
-        //         {libraryName: "@kad/e-antd"},
-        //         {libraryName: "antd", style: true}
-        //     ]
-        // ]
+        'transform-decorators-legacy',
+        [
+            'import',
+            [
+              {
+                libraryName: 'antd',
+                style: true,
+              },
+            ],
+          ],
       ]
     }
   },
@@ -136,23 +126,267 @@ module.exports = {
 #### webpack dll build
 - brain-cli dll
 
+### 配置参数
+
+#### config.webpack.dllConfig
+支持默认配置及自定义文件
+
+1. vendors
+  ```md
+  默认值 ['react'],如果需要配置复杂信息，则可以由数组变成对象
+  {
+    externalUrl: ''; //可选参数 当设置了此值，则index.html dll 文件url变成外部链接
+    value:[],// 需要打包到dll 文件的库
+    options: {
+      libraryTarget: 'umd' | 'var' | 'commonjs2' | 'commonjs' | 'amd' | 'window' | 'global' | 'this', // dll文件模块输出模式
+      //当使用了 libraryTarget: "umd"，设置：true 会对 UMD 的构建过程中的 AMD 模块进行命名。否则就使用匿名的 define。
+      umdNamedDefine?: boolean;
+
+      // globalObject为改变全局指向
+        globalObject?:'this'
+    }, // 可选参数
+  }
+  ```
+2. customDll(自定义dll文件)
+   ```md
+   [
+     {
+       key: '' // dll 文件名称
+       externalUrl?: '' // 当设置了此值，则index.html dll 文件url变成外部链接
+       value: [],// 需要打包到dll 文件的库
+       options?:{
+          libraryTarget: 'umd' | 'var' | 'commonjs2' | 'commonjs' | 'amd' | 'window' | 'global' | 'this', // dll文件模块输出模式
+          //当使用了 libraryTarget: "umd"，设置：true 会对 UMD 的构建过程中的 AMD 模块进行命名。否则就使用匿名的 define。
+          umdNamedDefine?: boolean;
+
+          // globalObject为改变全局指向
+          globalObject?:'this'
+       }
+     }
+   ]
+   ```
+3. compileOptions(全局生效配置)
+   ```md
+   当在dllConfig,配置了该参数，即可生效到所有dll 文件，等同于配置了options参数，当dll 文件指定了自身局部配置数据，则生效局部数据
+   {
+          libraryTarget: 'umd' | 'var' | 'commonjs2' | 'commonjs' | 'amd' | 'window' | 'global' | 'this', // dll文件模块输出模式
+          //当使用了 libraryTarget: "umd"，设置：true 会对 UMD 的构建过程中的 AMD 模块进行命名。否则就使用匿名的 define。
+          umdNamedDefine?: boolean;
+
+          // globalObject为改变全局指向
+          globalObject?:'this'
+       }
+   ```
+
+
+#### config.webpack.extend
+首先它是一个函数，执行会抛出底层loaders等数据，当默认loaders不满足使用时，可以传入此配置用于扩展增强 
+
+```ts
+interface ITransform{
+  readonly cssModule: {
+    modules: boolean;
+    importLoaders: number;
+    localIdentName: string;
+  },
+  readonly LoaderOptions: postcss_loader,
+  execution:(cssModule,loader,currLoader)=>loader.use
+}
+interface IOptions{
+  isDev:boolean;
+  loaderType:'HotLoader' | 'JsLoader' | 'TsLoader' | 'StyleLoader';
+  projectType:'ts' | 'js';
+  transform:ITransform
+}
+function (loaders:[], options:IOptions={
+  isDev,loaderType,projectType,transform
+})
+
+// 例如
+function (loaders,{ isDev, loaderType, projectType, transform }){
+  const nodeModulesPath=path.resolve('../../', 'node_modules')
+   if (loaderType === 'JsLoader') {
+     if (loaders.length) {
+            loaders[0].include = [...loaders[0].include,
+             path.resolve(nodeModulesPath, 'legions-pro-design'),
+            ]
+      }
+    }
+    if (loaderType === 'TsLoader' && projectType === 'ts') {
+      if (loaders.length) {
+            loaders[0].include = [...loaders[0].include,
+               path.resolve(nodeModulesPath, 'legions-pro-design'),
+            ]
+          }
+    }
+    if (loaderType === 'StyleLoader' && transform) {
+      const newLoaders = [
+          {
+            test: /\.css$/,
+            use: transform.execution(null, null, null),
+            exclude: [
+              path.resolve(nodeModulesPath, 'legions-pro-design'),
+            ],
+            include: [path.resolve(nodeModulesPath)],
+          },
+          {
+            test: new RegExp(`^(?!.*\\.modules).*\\.css`),
+            use: transform.execution(null, null, transform.LoaderOptions),
+            include: [
+              path.resolve(nodeModulesPath, 'legions-pro-design'),
+            ],
+          },
+          {
+            test: new RegExp(`^(.*\\.modules).*\\.css`),
+            use: transform.execution(
+              transform.cssModule,
+              null,
+              transform.LoaderOptions
+            ),
+
+            include: [
+              path.resolve(nodeModulesPath, 'legions-pro-design'),
+            ],
+          },
+          {
+            test:  /\.less/,
+            use: transform.execution(null, transform.LoaderOptions,'less-loader'),
+            include: [
+              path.resolve(nodeModulesPath, 'legions-pro-design'),
+            ],
+          },
+          {
+            /* test: /\.less/, */
+            test: new RegExp(`^(.*\\.modules).*\\.less`),
+            use: transform.execution(transform.cssModule,transform.LoaderOptions, 'less-loader'),
+            include: [
+              path.resolve(nodeModulesPath, 'legions-pro-design'),
+              path.resolve(process.cwd(), './src'),
+            ],
+          },
+          {
+            test: /\.less/,
+            use: transform.execution(null, 'less-loader'),
+            include: [
+              path.resolve(nodeModulesPath, 'antd'),
+              path.resolve(process.cwd(), 'src')
+            ],
+        },
+      ];
+      loaders.splice(0,loaders.length); // 清空css loaders,重新定义
+      loaders.push({oneOf: newLoaders});
+    }
+}
+```
+#### config.webpack.[tsCompilePlugin](https://github.com/TypeStrong/ts-loader#loader-options)
+```ts
+option: {
+  getCustomTransformers: () => ({ // 示例， 可根据ts-loader options 文档去进行自由配置
+    before: [
+      createTransformer(),
+      createTransformerReactJsxProps({
+        components: [
+          { name: 'LegionsProTable', props: 'uniqueUid', value: '' },
+          { name: 'LegionsProForm', props: 'uniqueUid' },
+          { name: 'LegionsProTabsForm', props: 'uniqueUid' },
+          { name: 'LegionsProDataImport', props: 'uniqueUid' },
+          { name: 'LegionsProConditions', props: 'uniqueUid' },
+        ],
+      }),
+    ],
+  }),
+},
+```
+
+#### config.webpack.[happyPack](https://github.com/amireh/happypack)
+> 1.配置信息
+```ts
+interface IHappyPack{
+    /** 代表开启几个子进程去处理这一类型的文件，默认是3个，类型必须是整数。 */
+    threads?: Number;
+    /** 是否允许 HappyPack 输出日志，默认是 true。 */
+    verbose?: Boolean;
+    /** 代表共享进程池，即多个 HappyPack 实例都使用同一个共享进程池中的子进程去处理任务，以防止资源占用过多。 */
+    threadPool?: any;
+    /** 开启webpack --profile ,仍然希望HappyPack产生输出。 */
+    verboseWhenProfiling?: boolean;
+    /** 启用debug 用于故障排查。默认 false。 */
+    debug?: boolean;
+}
+{
+  open:false // 是否开启多线程
+  /** js 线程配置 */
+  procJs?: IHappyPack;
+  /** ts 线程配置 */
+  procTs?: IHappyPack;
+}
+```
+> 2.开启多线程时，如果是编译ts,tsx 文件，默认使用ts-loader, 这时多进程下存在使用插件无法生效[问题](https://github.com/Igorbek/typescript-plugin-styled-components#forked-process-configuration)
+```ts
+const {
+    createTransformer,
+    createTransformerReactJsxProps,
+  } = require('ts-plugin-legions');
+// 2. create a transformer;
+// the factory additionally accepts an options object which described below
+
+// 3. create getCustomTransformer function
+const getCustomTransformers = () => ({ before: [createTransformer([
+    {
+      libraryName: 'legions/store',
+      bindings: ['StoreModules'],
+    },
+  ]),
+  createTransformerReactJsxProps({
+    components: [
+      { name: 'LegionsProTable', props: 'uniqueUid', value: '' },
+      { name: 'LegionsProForm', props: 'uniqueUid' },
+      { name: 'LegionsProTabsForm', props: 'uniqueUid' },
+      { name: 'LegionsProTabsForm', props: 'uniqueUid' },
+      { name: 'LegionsProConditions', props: 'uniqueUid' },
+      { name: 'HLDataImport', props: 'uniqueUid' },
+    ],
+  }),] });
+
+// 4. export getCustomTransformers
+module.exports = getCustomTransformers;
+// webpack.ts-transformers.js
+
+
+tsCompilePlugin: {
+  option: {
+    getCustomTransformers:path.join(__dirname, './webpack.ts-transformers.js'),
+  },
+},
+```
+
 ## changeLog
+## v1.1.1
+- deprecate: 废弃部分不合适的参数配置 **disableHappyPack** , **cssModules**
+- chore: 优化多进程由强制开启变成可以自由控制
+- fix: 修复版本更新探测代码无法生效
+- chore: 优化控制台输出信息
+- chore: 升级typescript版本至4.x
+## v1.0.8-alpha.6(2020-12-01)
+- feat: 新增webpack 配置文件输出属性output支持自定义library及libraryTarget
+- feat: 新增webpack dll 配置文件输出属性output支持自定义libraryTarget及其他属性 
+- feat: 新增webpack dll  插件支持自定义
+- fix: 修复file-loader 插件通过require 引入文件及样式引入文件,404问题
+- 升级webpack 版本4.x
+
+
+## changeLog
+## v0.4.0
+- deprecate: 废弃部分不合适的参数配置 **disableHappyPack** , **cssModules**
+- chore: 优化多进程由强制开启变成可以自由控制
+- fix: 修复版本更新探测代码无法生效
+- chore: 优化控制台输出信息
 ##  v0.3.28-beta.3 (2020-12-01)
 - feat: 新增webpack dll 配置文件输出属性output支持自定义libraryTarget及其他属性 
 - feat: 新增webpack dll  插件支持自定义
 
 ##  v0.3.28-beta.1 （2020-11-13）
 - feat: 新增webpack 配置文件输出属性output支持自定义library及libraryTarget
-
-## v0.3.27
-- feat: 新增dll 文件支持指定资源发布路径，默认没有指定情况下，去相对或者模块cdn参数值
-## v0.3.20
-- fix: 修复开启多线程，在linux系统环境loader名称大小写问题
-## v0.3.15
-- feat: 增加资源可指定cdn及css modules 启用，可以指定文件类型进行css modules
-## v0.3.13
-- chore: 调整按需加载文件路径，增加本地静态资源读取能力，可读取static文件
-- chore: 添加tslint,及可以自定义环境变量
 ## License
 [MIT](LICENSE)
 
