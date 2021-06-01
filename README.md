@@ -376,7 +376,7 @@ tsCompilePlugin: {
 
 
 ## changeLog
-## v0.4.0
+## v0.3.28
 - deprecate: 废弃部分不合适的参数配置 **disableHappyPack** , **cssModules**
 - chore: 优化多进程由强制开启变成可以自由控制
 - fix: 修复版本更新探测代码无法生效
