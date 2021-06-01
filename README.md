@@ -378,11 +378,11 @@ tsCompilePlugin: {
 ## changeLog
 ## v0.3.30
 - fix: 修正ts-loader,js-loader等配置中exclude配置优先级跟include冲突问题
-## v0.3.29
 - deprecate: 废弃部分不合适的参数配置 **disableHappyPack** , **cssModules**
 - chore: 优化多进程由强制开启变成可以自由控制
 - fix: 修复版本更新探测代码无法生效
 - chore: 优化控制台输出信息
+
 ##  v0.3.28-beta.3 (2020-12-01)
 - feat: 新增webpack dll 配置文件输出属性output支持自定义libraryTarget及其他属性 
 - feat: 新增webpack dll  插件支持自定义
