@@ -1,4 +1,3 @@
-import YoLegion from 'generator-brain-cli';
 const path = require('path');
 
 /*: IExtraWrite[]*/
@@ -8,7 +7,3 @@ const eConfig = [
         relativePath: '.e-config.js'
     }
 ];
-
-export default function init() {
-    YoLegion('init', eConfig);
-}

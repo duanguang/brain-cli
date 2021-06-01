@@ -1,5 +1,5 @@
 import startWebpackDevServer from './libs/webpack/webpackDevServer';
-import webpackDllCompiler from './libs/webpack/webpackDllCompiler';
+import webpackDllCompiler, { webpackDllPluginsCompiler } from './libs/webpack/webpackDllCompiler';
 import EConfig from './libs/settings/EConfig';
 import {displayAvailableIPs} from './libs/utils/ip';
 import {warning} from './libs/utils/logs';
@@ -9,14 +9,14 @@ const openBrowser = require('open');
 // const {port} = config;
 
 function autoOpenBrowser(open: boolean, ip: string, port: number, targetApp: string) {
-    const {name: projectName} = EConfig.getInstance();
+    const { name: projectName,devServer: { https }} = EConfig.getInstance();
     if (open) {
         if (!targetApp) {
             warning(`忽略自动打开浏览器功能:`);
             warning(`请提供指定需要app name作为相对路径`);
         }
         else {
-            openBrowser(`http://${ip}:${port}/${URL_PREFIX}/${projectName}/${targetApp}`);
+            openBrowser(`${https?'https':'http'}://${ip}:${port}/${URL_PREFIX}/${projectName}/${targetApp}`);
         }
     }
 }
@@ -24,12 +24,13 @@ function autoOpenBrowser(open: boolean, ip: string, port: number, targetApp: str
 /**
  * 程序入口点开始方法
  */
-export default async function start(cmd?:{smp:'true'|'false',cssModules:'true'|'false'}) {
+export default async function start(cmd?:{smp:'true'|'false'}) {
     try {
         /**
          * 按需创建编译webpack dll manifest文件
          */
         await webpackDllCompiler();
+        await webpackDllPluginsCompiler();
 
         /**
          * 开启webpack dev server

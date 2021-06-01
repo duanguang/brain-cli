@@ -1,20 +1,30 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-const path = require("path");
-exports.PROJECT_USER_CONFIG_FILE = `.e-config.js`;
-exports.PROJECT_USER_CONFIG_IGNORE_FILE = `.e-config-ignore.js`;
-exports.DIST = `dist`;
-exports.DEV = `dev`;
-exports.PRODUCTION = `production`;
-exports.TEST = 'test';
-exports.REPORT = 'report';
-// export const WEBPACK_DLL_MANIFEST_DIST = path.join(process.cwd(), 'node_modules/.cache', 'library-manifest');
-exports.WEBPACK_DLL_MANIFEST_DIST = path.join(process.cwd(), '.cache', 'library-manifest');
-const EConfig_1 = require("../settings/EConfig");
-exports.WORKING_DIRECTORY = `src`;
-exports.HISTORY_REWRITE_FALL_BACK_REGEX_FUNC = (name) => {
-    const { name: projectName } = EConfig_1.default.getInstance();
-    const path = `${exports.URL_PREFIX}/${projectName}/${name}`;
-    return new RegExp(`^/((${path}(?=/)|(${path}$)))`);
-};
-exports.URL_PREFIX = `app`;
+(function (factory) {
+    if (typeof module === "object" && typeof module.exports === "object") {
+        var v = factory(require, exports);
+        if (v !== undefined) module.exports = v;
+    }
+    else if (typeof define === "function" && define.amd) {
+        define(["require", "exports", "path", "../settings/EConfig"], factory);
+    }
+})(function (require, exports) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    const path = require("path");
+    exports.PROJECT_USER_CONFIG_FILE = `.e-config.js`;
+    exports.PROJECT_USER_CONFIG_IGNORE_FILE = `.e-config-ignore.js`;
+    exports.DIST = `dist`;
+    exports.DEV = `dev`;
+    exports.PRODUCTION = `production`;
+    exports.TEST = 'test';
+    exports.REPORT = 'report';
+    // export const WEBPACK_DLL_MANIFEST_DIST = path.join(process.cwd(), 'node_modules/.cache', 'library-manifest');
+    exports.WEBPACK_DLL_MANIFEST_DIST = path.join(process.cwd(), '.cache', 'library-manifest');
+    const EConfig_1 = require("../settings/EConfig");
+    exports.WORKING_DIRECTORY = `src`;
+    exports.HISTORY_REWRITE_FALL_BACK_REGEX_FUNC = (name) => {
+        const { name: projectName } = EConfig_1.default.getInstance();
+        const path = `${exports.URL_PREFIX}/${projectName}/${name}`;
+        return new RegExp(`^/((${path}(?=/)|(${path}$)))`);
+    };
+    exports.URL_PREFIX = `app`;
+});

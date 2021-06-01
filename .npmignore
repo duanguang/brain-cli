@@ -114,3 +114,4 @@ dist
 src
 static
 test
+*.ts

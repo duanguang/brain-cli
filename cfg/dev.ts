@@ -4,7 +4,7 @@ import getBaseConfig from './base';
 import EConfig from '../libs/settings/EConfig';
 import { DllPlugins } from './dllPlugins';
 const {webpack:{dllConfig}} = EConfig.getInstance();
-const {vendors,...otherDll } = dllConfig
+const { vendors,customDll,dllCompileParam } = dllConfig;dllConfig
 const path = require('path');
 // const webpack = require('webpack');
 // const config = require('./base');
@@ -17,30 +17,44 @@ export default function getDevConfig(eConfig: EConfig) {
         () => {
             //TODO:暂时放在这里
             const filepath = WebpackDllManifest.getInstance().resolveManifestPath();
+            let vencdn = ''
+            if (Object.prototype.toString.call(vendors) === '[object Object]') {
+                if (vendors['externalUrl']) {
+                    vencdn = vendors['externalUrl']
+                }
+            }
+            if (!vencdn) {
+                if (dllCompileParam && Object.prototype.toString.call(dllCompileParam) === '[object Object]') {
+                    vencdn = dllCompileParam.externalUrl || process.env.cdnRelease
+                }
+            }
+            let venPublicPath = {};
+            if (vencdn) {
+                venPublicPath = { publicPath: vencdn };
+            }
             if (filepath) {
                 config.plugins.push(new AddAssetHtmlPlugin({
-                    includeSourcemap: false, filepath,
+                    includeSourcemap: false, filepath,...venPublicPath
                 }));
                 const dllReferencePlugin = getDllReferencePlugin();
                 if (dllReferencePlugin) {
                     config.plugins.push(dllReferencePlugin)
                 }
             }
-            Object.keys(DllPlugins).forEach((key) => {
+            Object.keys(DllPlugins).forEach((keys) => {
                 let vendorsDll = []
-                if (typeof otherDll[key] === 'object') {
-                    if (Array.isArray(otherDll[key])) {
-                        vendorsDll = otherDll[key]
-                    } else {
-                        vendorsDll = otherDll[key].FrameList || []
-                    }
+                const item = customDll.find((i) => i.key === keys);
+                let cdn = ''
+                if (item) {
+                    vendorsDll = item.value;
+                    cdn = item.externalUrl||dllCompileParam.externalUrl||process.env.cdnRelease;
                 }
-                const filepath = WebpackDllManifest.getInstance().resolveManifestPath(key,WebpackDllManifest.getInstance().getDllPluginsHash(vendorsDll));
+                const filepath = WebpackDllManifest.getInstance().resolveManifestPath(keys,WebpackDllManifest.getInstance().getDllPluginsHash(vendorsDll));
                 if (filepath) {
                     config.plugins.push(new AddAssetHtmlPlugin({
                         includeSourcemap: false, filepath,
                     }));
-                    const dllReference = getDllReferencePlugin(key);
+                    const dllReference = getDllReferencePlugin(keys);
                     if (dllReference) {
                         config.plugins.push(dllReference)
                     }

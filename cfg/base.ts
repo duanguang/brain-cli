@@ -13,6 +13,8 @@ import * as invariant from 'invariant';
 import { isDev } from '../libs/utils/env';
 import LegionExtractStaticFilePlugin from '../libs/webpack/plugins/LegionExtractStaticFilePlugin';
 import { getApps } from '../libs/webpack/entries/getEntries';
+import { getJSXLoadersed, getTsLoadersed } from '../libs/webpack/javaScriptLoader';
+import { happyPackToJsPlugin, happyPackToTsPlugin } from '../libs/webpack/happy-pack-conf';
 const nodeModulesPath = path.resolve(process.cwd(), 'node_modules');
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const HtmlWebpackHarddiskPlugin = require('html-webpack-harddisk-plugin');
@@ -48,13 +50,10 @@ export default function getBaseConfig({
   const {
     disableReactHotLoader,
     commonsChunkPlugin,
-    cssModules,
     plugins,
-    disableHappyPack,
     tsCompilePlugin,
     output,
   } = webpackConfig;
-  const DisableReactHotLoader = disableReactHotLoader || false; //默认启用热加载
   let CommonsChunkPlugin = { name: 'common', value: ['invariant'] };
   if (
     commonsChunkPlugin &&
@@ -65,7 +64,10 @@ export default function getBaseConfig({
       ...new Set(commonsChunkPlugin.concat(CommonsChunkPlugin.value)),
     ];
   }
-  const { noInfo, proxy } = devServer;
+  const { noInfo, proxy,before,stats, 
+    contentBase,historyApiFallback,
+    headers = {},hot,port, ...serverProps
+  } = devServer;
   const webpackDevEntries = [
     `webpack-dev-server/client?http://${server}:${defaultPort}`,
     `webpack/hot/only-dev-server`,
@@ -114,19 +116,23 @@ export default function getBaseConfig({
         plugins: [require('autoprefixer')({ browsers: browsers })],
       },
     };
-    if (px2rem) {
-      postcss_loader.options.plugins.push(require('px2rem')(px2rem));
+    if (px2rem&&Object.getOwnPropertyNames(px2rem).length) {
+      postcss_loader.options.plugins.push(require('postcss-plugin-px2rem')(px2rem));
     }
-    function generateLoaders(cssModule?, loader?: string, loaderOptions?) {
+    function generateLoaders(cssModule?:{
+      modules: boolean,
+      importLoaders: number,
+      localIdentName: string,
+    }, loader?: string| { loader: string; options: any }, currLoader?) {
       let style: any = [{ loader: 'css-loader' }];
-      if (cssModule && cssModules.enable) {
+      if (cssModule) {
         style[0] = Object.assign(style[0], { options: cssModule });
       }
       if (loader) {
         style.push(loader);
       }
-      if (loaderOptions) {
-        style.push(loaderOptions);
+      if (currLoader) {
+        style.push(currLoader);
       }
       if (__DEV__) {
         let styles = ['style-loader', ...style];
@@ -156,64 +162,27 @@ export default function getBaseConfig({
       );
     }
     const loaders = [
-      /* {
-      test: /\.css$/,
-      use: generateLoaders(),
-      // use: ExtractTextPlugin.extract(
-      //     {
-      //         fallback: 'style-loader',
-      //         use: [
-      //           { loader: 'css-loader' },
-
-      //         ]
-      //       }),
-      include: [nodeModulesPath]
-    }, */
-      {
-        test: /\.less/,
-        use: generateLoaders(CSS_MODULE_OPTION, 'less-loader', postcss_loader),
-        // use:ExtractTextPlugin.extract(
-        //     {
-        //         fallback: 'style-loader',
-        //         use: [
-        //             {loader:`css-loader`,options:CSS_MODULE_OPTION},'less-loader',postcss_loader
-        //         ]
-        //       }),
-        include: [path.resolve(nodeModulesPath, 'basics-widget')],
-      },
       {
         test: /\.less/,
         use: generateLoaders(null, 'less-loader'),
-        // use:ExtractTextPlugin.extract(
-        //     {
-        //         fallback: 'style-loader',
-        //         use: [
-        //             {loader:`css-loader`},'less-loader',postcss_loader
-        //         ]
-        //       }),
         include: [path.resolve(nodeModulesPath, 'antd')],
       },
       {
         test: new RegExp(`^(?!.*\\.modules).*\\.css`),
         use: generateLoaders(null, null, postcss_loader),
-        // use:ExtractTextPlugin.extract(
-        //     {
-        //         fallback: 'style-loader',
-        //         use: [
-        //             {loader:`css-loader`,options:CSS_MODULE_OPTION},postcss_loader
-        //         ]
-        //       }),
         exclude: [nodeModulesPath],
+        include:  path.join(process.cwd(), './src'),
       },
       {
         /* test: /\.css$/, */
         test: new RegExp(`^(.*\\.modules).*\\.css`),
         use: generateLoaders(CSS_MODULE_OPTION, null, postcss_loader),
         exclude: [nodeModulesPath],
+        include:  path.join(process.cwd(), './src'),
       },
       {
         test: new RegExp(`^(?!.*\\.modules).*\\.less`),
-        use: generateLoaders(null, 'less-loader', postcss_loader),
+        use: generateLoaders(null,postcss_loader, 'less-loader', ),
         // use:ExtractTextPlugin.extract(
         //     {
         //         fallback: 'style-loader',
@@ -223,33 +192,15 @@ export default function getBaseConfig({
         //       }
         // ),
         exclude: [nodeModulesPath],
+        include:  path.join(process.cwd(), './src'),
       },
       {
         /* test: /\.less/, */
         test: new RegExp(`^(.*\\.modules).*\\.less`),
-        use: generateLoaders(CSS_MODULE_OPTION, 'less-loader', postcss_loader),
+        use: generateLoaders(CSS_MODULE_OPTION, postcss_loader,'less-loader'),
         exclude: [nodeModulesPath],
+        include:  path.join(process.cwd(), './src'),
       },
-      /* {
-      test: new RegExp(`^(?!.*\\.modules).*\\.css`),
-      use: generateLoaders(null, null, postcss_loader),
-      include: [path.join(process.cwd(), 'node_modules/hoolinks-legion-design')]
-    },
-    {
-      test: new RegExp(`^(.*\\.modules).*\\.css`),
-      use: generateLoaders(CSS_MODULE_OPTION, null, postcss_loader),
-      include: [path.join(process.cwd(), 'node_modules/hoolinks-legion-design')]
-    },
-    {
-      test: new RegExp(`^(?!.*\\.modules).*\\.less`),
-      use: generateLoaders(null, 'less-loader', postcss_loader),
-      include: [path.join(process.cwd(), 'node_modules/hoolinks-legion-design')]
-    },
-    {
-        test: new RegExp(`^(.*\\.modules).*\\.less`),
-        use: generateLoaders(CSS_MODULE_OPTION, 'less-loader', postcss_loader),
-        include: [path.join(process.cwd(), 'node_modules/hoolinks-legion-design')]
-      } */
     ];
     if (webpackConfig.extend && typeof webpackConfig.extend === 'function') {
       // @ts-ignore
@@ -304,141 +255,6 @@ export default function getBaseConfig({
         loader: `url-loader?limit=${imageInLineSize}&name=fonts/[hash:8].[name].[ext]`,
       },
     ];
-  }
-  function getTsLoaders() {
-    if (tsCompilePlugin.loader === 'ts-loader') {
-      return {
-        loader: require.resolve('ts-loader'),
-        options: {
-          ...{
-            // disable type checker - we will use it in fork plugin
-            transpileOnly: true,
-            happyPackMode: true,
-          },
-          ...(tsCompilePlugin.option || {}),
-        },
-      };
-    }
-  }
-  function getJSXLoaders() {
-    const loaders = [];
-    if (__DEV__) {
-      if (!DisableReactHotLoader) {
-        // if (!__DEV__) {
-        //     warning(`please turn off the disableReactHotLoader option. it's not supposed to be on in production stage`);
-        //     warning(`skip react-hot-loader`);
-        // }
-        loaders.push({
-          test: /\.(jsx|js)?$/,
-          // loader: 'react-hot',
-          loader: 'react-hot-loader!babel-loader',
-          include: [path.join(process.cwd(), './src')],
-          exclude: [nodeModulesPath], //优化构建效率
-        });
-        /* loaders.push({
-                    test: /\.(jsx|js)?$/,
-                    // loader: 'react-hot',
-                    loader: 'react-hot-loader!babel-loader',
-                    include: [path.join(process.cwd(), 'node_modules/hoolinks-legion-design')]
-        }); */
-        if (
-          webpackConfig.extend &&
-          typeof webpackConfig.extend === 'function'
-        ) {
-          webpackConfig.extend &&
-            webpackConfig.extend(loaders, {
-              isDev: __DEV__,
-              loaderType: 'HotLoader',
-              projectType,
-            });
-        }
-      } else {
-        babel.query.plugins.push('babel-plugin-legion-hmr');
-      }
-    }
-    loaders.push({
-      test: /\.(jsx|js)?$/,
-      /* loader: `babel-loader`,
-            query: babel.query, */
-      include: [
-        path.join(process.cwd(), 'node_modules/basics-widget'),
-        path.join(process.cwd(), './src'),
-      ],
-      loader: 'happypack/loader?id=js',
-      exclude: [nodeModulesPath],
-    });
-    /* loaders.push({
-      test: /\.(jsx|js)?$/,
-      include: [
-          path.join(process.cwd(), 'node_modules/hoolinks-legion-design'),
-      ],
-      loader: 'happypack/loader?id=js',
-    }); */
-    if (webpackConfig.extend && typeof webpackConfig.extend === 'function') {
-      webpackConfig.extend &&
-        webpackConfig.extend(loaders, {
-          isDev: __DEV__,
-          loaderType: 'JsLoader',
-          projectType,
-        });
-    }
-    if (projectType === 'ts') {
-      if (
-        tsCompilePlugin &&
-        tsCompilePlugin.option &&
-        tsCompilePlugin.option.getCustomTransformers
-      ) {
-        // 解决多线程下ts-loader 编译插件无法被执行问题
-        loaders.push({
-          test: /\.(ts|tsx)$/,
-          include: [path.join(process.cwd(), './src')],
-          use: [
-            {
-              loader: 'babel-loader',
-              query: babel.query,
-            },
-            getTsLoaders(),
-          ],
-          exclude: [nodeModulesPath],
-        });
-      } else {
-        loaders.push({
-          test: /\.(ts|tsx)$/,
-          include: [path.join(process.cwd(), './src')],
-          /* use: [
-            {
-              loader: 'babel-loader',
-              query: babel.query
-            },
-            {
-              loader: require.resolve('ts-loader'),
-              options: {
-                // disable type checker - we will use it in fork plugin
-                  transpileOnly: true,
-                  happyPackMode: true
-              }
-            }
-          ], */
-          loader: 'happypack/loader?id=ts',
-          exclude: [nodeModulesPath],
-        });
-      }
-
-      if (webpackConfig.extend && typeof webpackConfig.extend === 'function') {
-        webpackConfig.extend &&
-          webpackConfig.extend(loaders, {
-            isDev: __DEV__,
-            loaderType: 'TsLoader',
-            projectType,
-          });
-      }
-      /* loaders.push({
-        test: /\.(ts|tsx)$/,
-        include: [path.join(process.cwd(), 'node_modules/hoolinks-legion-design')],
-        loader: 'happypack/loader?id=ts',
-      }); */
-    }
-    return loaders;
   }
 
   function getFileResourcesLoaders() {
@@ -579,14 +395,14 @@ export default function getBaseConfig({
     },
     devtool: __DEV__ && 'cheap-module-source-map',
     resolve: {
-      alias: {},
+      ...webpackConfig.resolve,
       extensions: ['.web.js', '.js', '.json', '.ts', '.tsx', '.jsx'], //自动扩展文件后缀
       //modulesDirectories: ['src', 'node_modules', path.join(__dirname, '../node_modules')],
       modules: [
-        'src',
-        'node_modules',
         path.join(process.cwd(), `src`),
         path.join(process.cwd(), `node_modules`),
+        'src',
+        'node_modules',
       ],
     },
     module: {
@@ -597,10 +413,6 @@ export default function getBaseConfig({
       // 雪碧图设置
       ...SpritesmithPlugins,
       ...plugins,
-      // new webpack.optimize.CommonsChunkPlugin({
-      //     name: CommonsChunkPlugin.name,
-      //     filename: 'common/js/core.js',
-      // }),
       new webpack.optimize.CommonsChunkPlugin({
         name: CommonsChunkPlugin.name,
         minChunks: function (module) {
@@ -627,47 +439,14 @@ export default function getBaseConfig({
             : 'common/js/manifest.js',
       }),
 
-      new HappyPack({
-        id: 'js',
-        threads: os.cpus().length - 1,
-        /* threadPool: happyThreadPool, */
-        use: [
-          {
-            loader: `babel-loader`,
-            query: babel.query,
-          },
-        ],
-      }),
+      ...happyPackToJsPlugin(),
       //如果有单独提取css文件的话
-      // new HappyPack({
-      //    id: 'lessHappy',
-      //    loaders: ['style','css','less']
-      //     // loaders: [ 'style-loader', 'css-loader', 'less-loader' ]
-      // }),
       /* new HappyPack({
         id: 'tslint',
         threads:os.cpus().length-1,
         use: [ 'tslint-loader' ],
       }) */
-      new HappyPack({
-        id: 'ts',
-        threads: os.cpus().length - 1,
-        /* threadPool: happyThreadPool, */
-        use: [
-          {
-            loader: 'babel-loader',
-            query: babel.query,
-          },
-          {
-            loader: require.resolve('ts-loader'),
-            options: {
-              // disable type checker - we will use it in fork plugin
-              transpileOnly: true,
-              happyPackMode: true,
-            },
-          },
-        ],
-      }),
+      ...happyPackToTsPlugin(),
       new HtmlWebpackHarddiskPlugin(),
       new webpack.DefinePlugin({
         'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || DEV),
@@ -680,6 +459,7 @@ export default function getBaseConfig({
   };
   if (__DEV__) {
     config.devServer = {
+      ...serverProps,
       stats: { colors: true },
       contentBase: [`./${WORKING_DIRECTORY}/`],
       historyApiFallback: {
@@ -690,6 +470,7 @@ export default function getBaseConfig({
       },
       headers: {
         'Access-Control-Allow-Origin': '*',
+        ...headers,
       },
       hot: true,
       port: defaultPort,
@@ -698,7 +479,8 @@ export default function getBaseConfig({
       proxy: proxy,
       inline: false,
       before: function (app) {
-        app.use(path.posix.join(`/static`), express.static('./static')); // 代理静态资源
+        app.use(path.posix.join(`/static`),express.static('./static')); // 代理静态资源
+        before && before(app);
       },
       //progress: true,
     };
@@ -760,7 +542,8 @@ export default function getBaseConfig({
   }
   config.module = {
     rules: [
-      ...getJSXLoaders(),
+      ...getJSXLoadersed(),
+      ...getTsLoadersed(),
       ...getCssLoaders(),
       ...getImageLoaders(),
       ...getJsonLoaders(),

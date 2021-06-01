@@ -6,7 +6,7 @@ import { getDllReferencePlugin } from './helpers';
 import { DllPlugins } from './dllPlugins';
 const AddAssetHtmlPlugin = require('add-asset-html-webpack-plugin');
 const {webpack:{dllConfig}} = EConfig.getInstance();
-const {vendors,dllCompileParam,...otherDll } = dllConfig
+const {vendors,dllCompileParam,customDll } = dllConfig
 const path = require('path')
 export default function getDistConfig(eConfig: EConfig) {
     const config = getBaseConfig(eConfig);
@@ -17,13 +17,15 @@ export default function getDistConfig(eConfig: EConfig) {
             if (filepath) {
                 let publicPath = path.posix.join('../','common/js')
                 let cdn = ''
-                if (typeof vendors === 'object' && !Array.isArray(vendors)) {
-                    if (vendors.cdn) {
-                        cdn = vendors.cdn
+                if (typeof vendors === 'object') {
+                    if (!Array.isArray(vendors)) {
+                        if (vendors.externalUrl) {
+                            cdn = vendors.externalUrl
+                        }
                     }
                 }
-                if (cdn || process.env.cdnRelease) {
-                    publicPath = `${cdn||process.env.cdnRelease}/common/js`
+                if (cdn) {
+                    publicPath = `${cdn}/common/js`
                 }
                 config.plugins.push(new AddAssetHtmlPlugin({
                     includeSourcemap: false, filepath,
@@ -38,21 +40,16 @@ export default function getDistConfig(eConfig: EConfig) {
                 }
             }
             Object.keys(DllPlugins).forEach((key) => {
-                let vendorsDll = []
-                let publicPath = path.posix.join('../','common/js')
-                let cdn =''
-                if (typeof otherDll[key] === 'object') {
-                    if (Array.isArray(otherDll[key])) {
-                        vendorsDll = otherDll[key]
-                    } else {
-                        vendorsDll = otherDll[key].FrameList || []
-                        if (otherDll[key].cdn) {
-                            cdn = otherDll[key].cdn
-                        }
-                    }
-                    if (cdn || process.env.cdnRelease) {
-                        publicPath = `${cdn||process.env.cdnRelease}/common/js`
-                    }
+                let vendorsDll = [];
+                let publicPath = path.posix.join('../','common/js');
+                let cdn = '';
+                const item = customDll.find((i) => i.key === key);
+                if (item) {
+                    vendorsDll = item.value;
+                    cdn = item.externalUrl;
+                }
+                if (cdn || process.env.cdnRelease) {
+                    publicPath = `${cdn||process.env.cdnRelease}/common/js`
                 }
                 const filepath = WebpackDllManifest.getInstance().resolveManifestPath(key,WebpackDllManifest.getInstance().getDllPluginsHash(vendorsDll));
                 if (filepath) {

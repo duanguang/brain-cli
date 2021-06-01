@@ -7,7 +7,7 @@ import commander = require('commander');
 const SpeedMeasurePlugin = require("speed-measure-webpack-plugin");
 const smp = new SpeedMeasurePlugin();
 // import ICommand = commander.ICommand;
-export default function programInit(env: string,cmd?:{smp:'true'|'false',cssModules:'true'|'false'}) {
+export default function programInit(env: string,cmd?:{smp:'true'|'false'}) {
     if (env==='dev') {
         /**
          * 在开发环境中, 允许直接配置config和ignoreConfig并更新指定常量区域
@@ -19,14 +19,6 @@ export default function programInit(env: string,cmd?:{smp:'true'|'false',cssModu
     }
     else if (env==='production') {
         const eConfig = EConfig.getInstance();
-        if (cmd.cssModules !== undefined) {
-            if (cmd.cssModules === 'true') {
-              eConfig.webpack.cssModules.enable = true
-            }
-            if (cmd.cssModules === 'false') {
-              eConfig.webpack.cssModules.enable = false
-            }
-        }
         const webpackConfig = getConfig(eConfig);
         if (Array.isArray(webpackConfig.pendings)) {
             webpackConfig.pendings.forEach(pending => pending());

@@ -2,7 +2,7 @@ import * as path from 'path';
 import {PROJECT_USER_CONFIG_FILE, PROJECT_USER_CONFIG_IGNORE_FILE} from '../constants/constants';
 import * as invariant from 'invariant';
 import {requireBabelify} from '../utils/requireBabelify';
-
+import * as webpack from 'webpack';
 const deepAssign = require('deep-assign');
 const defaultEConfig = require(path.resolve(__dirname, `../../${PROJECT_USER_CONFIG_FILE}`));
 
@@ -13,10 +13,32 @@ export const configFileList = [PROJECT_USER_CONFIG_FILE, PROJECT_USER_CONFIG_IGN
  interface ICommonsChunkPlugin{
      name:string,
      value:Array<string>
- }
- 
- interface ICssModules{
-    enable:boolean
+}
+export interface IDllConfigType{
+    externalUrl?: string;
+    value: string[];
+    options?: IDllCompileOptions;
+}
+export interface ICustomDllType extends IDllConfigType{
+    key: string;
+}
+export interface IDllCompileOptions{
+    output?: {
+        libraryTarget?: 'umd' | 'var' | 'commonjs2' | 'commonjs' | 'amd' | 'window' | 'global' | 'this',
+        //当使用了 libraryTarget: "umd"，设置：true 会对 UMD 的构建过程中的 AMD 模块进行命名。否则就使用匿名的 define。
+        umdNamedDefine?: boolean;
+        // globalObject为改变全局指向
+        globalObject?:'this'
+    },
+    plugins?: [];
+    externalUrl?: string;
+}
+ interface IDllConfig{
+    /** 默认dll 文件 */
+    vendors: string[] | IDllConfigType
+    /** 自定义dll */
+    customDll?: ICustomDllType[]
+    dllCompileParam: IDllCompileOptions
 }
 interface extendConfig{
     isDev: boolean,
@@ -25,8 +47,20 @@ interface extendConfig{
     transform?: {
        readonly cssModule: Object,
        readonly LoaderOptions: Object,
-       execution:(cssModule,loader,LoaderOptions)=>any
+       execution:(cssModule,loader,currLoader)=>any
     }
+}
+interface IHappyPack{
+    /** 代表开启几个子进程去处理这一类型的文件，默认是3个，类型必须是整数。 */
+    threads?: Number;
+    /** 是否允许 HappyPack 输出日志，默认是 true。 */
+    verbose?: Boolean;
+    /** 代表共享进程池，即多个 HappyPack 实例都使用同一个共享进程池中的子进程去处理任务，以防止资源占用过多。 */
+    threadPool?: any;
+    /** 开启webpack --profile ,仍然希望HappyPack产生输出。 */
+    verboseWhenProfiling?: boolean;
+    /** 启用debug 用于故障排查。默认 false。 */
+    debug?: boolean;
 }
 export default class EConfig {
     public name: string;
@@ -39,7 +73,10 @@ export default class EConfig {
     public isTslint:boolean = true
     public devServer: {
         noInfo: boolean,
-        proxy: Object
+        proxy: Object,
+        https?: boolean
+    } & {
+        [k: string]: any
     };
     public postcss: {
         autoprefixer: {
@@ -49,29 +86,19 @@ export default class EConfig {
     };
 
     public webpack: {
-        dllConfig: {
-            vendors: string[] | { cdn?: string; FrameList: string[] };
-            dllCompileParam: {
-                output?: {
-                    libraryTarget?: 'umd' | 'var' | 'commonjs2' | 'commonjs' | 'amd' | 'window' | 'global' | 'this',
-                    //当使用了 libraryTarget: "umd"，设置：true 会对 UMD 的构建过程中的 AMD 模块进行命名。否则就使用匿名的 define。
-                    umdNamedDefine?: boolean;
-                    // globalObject为改变全局指向
-                    globalObject?:'this'
-                },
-                plugins?: [];
-            }
-        },
+        dllConfig: IDllConfig,
         disableReactHotLoader: boolean,
         commonsChunkPlugin?: ICommonsChunkPlugin,
         
-        /**
-         * 是否启用多线程 false 启用 true 禁用
-         * 控制ts-loader 编译是否开启多线程
-         * @type {boolean}
-         */
-        disableHappyPack:boolean,//是否禁用多线程,
-        cssModules: ICssModules,
+       /** 多线程配置参数 */
+        happyPack?: {
+            open: boolean;
+            /** js 线程配置 */
+            procJs?: IHappyPack;
+            /** ts 线程配置 */
+            procTs?: IHappyPack;
+            procStyle?: IHappyPack;
+        },
         /**
          * ts 处理插件
          */
@@ -79,10 +106,8 @@ export default class EConfig {
             loader: 'ts-loader',
             option?:any
         },
-        output: {
-            library?: (name:string)=>string|string;
-            libraryTarget?: 'umd'|'var',
-        }
+        output: webpack.Output
+        resolve?: webpack.Resolve;
         /**
          *
          * 扩展loader加载器
@@ -92,6 +117,7 @@ export default class EConfig {
     } = {
         dllConfig: {
             vendors: ['react','react-dom','invariant'],
+            customDll:[],
             dllCompileParam:{},
         },
         disableReactHotLoader: false,
@@ -100,14 +126,10 @@ export default class EConfig {
          * 控制ts-loader 编译是否开启多线程
          * @type {boolean}
          */
-        disableHappyPack:false,
-        cssModules: {
-            enable: false, // 默认为 false，如需使用 css modules 功能，则设为 true
-            // config: {
-            //   namingPattern: 'module', // 转换模式，取值为 global/module，下文详细说明
-            //   generateScopedName: '[name]__[local]___[hash:base64:5]'
-            // }
-            },
+        happyPack: {
+            open:false,
+        },
+        resolve:{},
         /** 
          *  ts 处理插件 主要有'ts-loader'|'awesome-typescript-loader' 
          * 默认 'ts-loader'

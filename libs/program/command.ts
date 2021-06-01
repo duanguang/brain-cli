@@ -65,17 +65,13 @@ export class Command {
         '--smp [value]',
         'Whether to enable  Compile time statistics module'
       )
-      .option(
-        '--cssModules [value]',
-        'Whether to enable cssModules'
-      )
       .description('start webpack dev server for develoment mode')
       .action(options => {
         let env = 'dev';
         this.setProcessEnv(env);
         this.setApps(options);
         log(`当前编译环境为: ${process.env.NODE_ENV} [${this.env[env]}]`);
-        programInit(env,{smp:options['smp'],cssModules:options['cssModules']});
+        programInit(env,{smp:options['smp']});
       });
   }
   start() {

@@ -11,12 +11,8 @@ module.exports = {
   publicPath: '/public/',
   devServer: {
     noInfo: true,
+    https:false,
     proxy: {
-      // '/cia-j': {
-      //     target: 'http://192.168.1.181:8081',
-      //         onProxyReq: (proxyReq, req, res) => {
-      //         }
-      // },
       // '/main': {
       //     target: 'https://uat-scm.hoolinks.com/',
       //     //changeOrigin: true,
@@ -49,16 +45,20 @@ module.exports = {
   },
   webpack: {
     dllConfig: {
-       vendors: ['react','react-dom','invariant'],
-       /* vendors: {cdn:'https://hoolinks.com',FrameList:['react','react-dom','invariant']}, */
-    /* framework:['react','react-dom'] */ // 支持自定义dll 包
-      /* framework:{cdn:'https://hoolinks1.com',FrameList:['react','react-dom']} */
+      vendors: {
+        value: ['react','react-dom','invariant'],externalUrl:''
+      },
+      customDll: [{ key: 'framework',value: ['babel-polyfill'],externalUrl: '' }],
+      /* dllCompileParam:{
+        output:{
+          libraryTarget: 'umd',
+        },
+      }, */
     },
     disableReactHotLoader: false,
-    commonsChunkPlugin: ['react', 'react-dom', 'invariant'],
-    disableHappyPack: false,
-    cssModules: {
-      enable: true // 默认为 false，如需使用 css modules 功能，则设为 true
+    commonsChunkPlugin: ['react','react-dom','invariant'],
+    happyPack: {
+      open:false,
     },
     plugins: [
       new ProgressBarPlugin({
