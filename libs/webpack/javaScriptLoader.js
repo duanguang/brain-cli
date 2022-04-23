@@ -66,7 +66,7 @@
         if (hasWebpackExtend()) {
             extend(loaders, {
                 isDev: __DEV__,
-                loaderType: 'tsLoader',
+                type: 'ts_loader',
             });
         }
         return loaders;
@@ -94,7 +94,7 @@
                 if (hasWebpackExtend()) {
                     extend(hotLoader, {
                         isDev: __DEV__,
-                        loaderType: 'hotLoader',
+                        type: 'hot_loader',
                     });
                 }
             }
@@ -121,7 +121,7 @@
         if (hasWebpackExtend()) {
             extend(loaders, {
                 isDev: __DEV__,
-                loaderType: 'jsLoader',
+                type: 'js_loader',
             });
         }
         return [...hotLoader, ...loaders];

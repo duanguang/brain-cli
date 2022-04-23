@@ -40,7 +40,7 @@ interface IDllConfig{
 }
 interface extendConfig{
     isDev: boolean,
-    loaderType: 'hotLoader' | 'jsLoader' | 'tsLoader' | 'styleLoader',
+    type: 'hot_loader' | 'js_loader' | 'ts_loader' | 'style_loader'|'module_rule',
     transform?: {
         /** 内部css modules 默认值 */
         readonly cssModule: Object,
@@ -111,22 +111,15 @@ interface IWebpack{
         loader: 'ts-loader',
         option?:any
     },
-        /**
-         *
-         * 扩展loader加载器
-         */
+    /**
+     *
+     * 扩展loader加载器
+     */
     extend?: (loaders: any[],config: extendConfig) => void;
-
     css?: {
-        /** css modules  loader include */
-        css_modules_include: string[];
-        /** not css modules  loader include */
-        un_css_modules_include: string[];
+        /**  loader include */
+        loader_include: string[];
     };
-    /** ts loader 加载器include配置  */
-    tsInclude?: string[];
-    /** js loader 加载器include配置 */
-    jsInclude?:string[]
 }
 const nodeModulesPath = path.resolve(process.cwd(), 'node_modules');
 export default class EConfig {
@@ -178,7 +171,8 @@ export default class EConfig {
             presets: string[],
             cacheDirectory: boolean,
             plugins: any[]
-        }
+        },
+        loader_include:[]
     };
 
     public htmlWebpackPlugin: {

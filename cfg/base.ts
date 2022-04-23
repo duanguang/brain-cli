@@ -60,8 +60,6 @@ export default function getBaseConfig({
     plugins,
     output,
     css,
-    tsInclude,
-    jsInclude,
   } = webpackConfig;
   const NewOptimization = merge(Optimization, webpackConfig.optimization);
   const { noInfo, proxy,before,stats, 
@@ -163,14 +161,14 @@ export default function getBaseConfig({
         test: new RegExp(`^(?!.*\\.modules).*\\.css`),
         use: generateLoaders(null, null, postcss_loader),
         // exclude: [nodeModulesPath],
-        include:  [path.join(process.cwd(), './src')].concat(css?.un_css_modules_include||[]),
+        include:  [path.join(process.cwd(), './src')].concat(css?.loader_include||[]),
       },
       {
         /* test: /\.css$/, */
         test: new RegExp(`^(.*\\.modules).*\\.css`),
         use: generateLoaders(CSS_MODULE_OPTION, null, postcss_loader),
         // exclude: [nodeModulesPath],
-        include:  [path.join(process.cwd(), './src')].concat(css?.css_modules_include||[]),
+        include:  [path.join(process.cwd(), './src')].concat(css?.loader_include||[]),
       },
       {
         test: new RegExp(`^(?!.*\\.modules).*\\.less`),
@@ -180,7 +178,7 @@ export default function getBaseConfig({
           { loader: 'less-loader', options: { javascriptEnabled: true } },
         ),
         // exclude: [nodeModulesPath],
-        include:  [path.join(process.cwd(), './src')].concat(css?.un_css_modules_include||[]),
+        include:  [path.join(process.cwd(), './src')].concat(css?.loader_include||[]),
       },
       {
         /* test: /\.less/, */
@@ -191,16 +189,14 @@ export default function getBaseConfig({
           { loader: 'less-loader', options: { javascriptEnabled: true } },
         ),
         // exclude: [nodeModulesPath],
-        include:  [path.join(process.cwd(), './src')].concat(css?.css_modules_include||[]),
+        include:  [path.join(process.cwd(), './src')].concat(css?.loader_include||[]),
       },
     ];
     if (webpackConfig.extend && typeof webpackConfig.extend === 'function') {
-      // @ts-ignore
       webpackConfig.extend &&
         webpackConfig.extend(loaders, {
-          // @ts-ignore
           isDev: __DEV__,
-          loaderType: 'styleLoader',
+          type: 'style_loader',
           transform: {
             cssModule: CSS_MODULE_OPTION,
             postcss_loader: postcss_loader,
@@ -481,17 +477,24 @@ export default function getBaseConfig({
   }
   config.module = {
     rules: [
-      ...getJSXLoadersed(jsInclude),
-      ...getTsLoadersed(tsInclude),
+      ...getJSXLoadersed(babel?.loader_include||[]),
+      ...getTsLoadersed(babel?.loader_include||[]),
       ...getCssLoaders(css),
       ...getImageLoaders(),
       ...getJsonLoaders(),
       ...getFontLoaders(),
       ...getFileResourcesLoaders(),
-      ...getTslintLoaders(),
       ...getTemplateJspLoaders(),
+      ...getTslintLoaders(),
     ],
     //noParse: []
   };
+  if (webpackConfig.extend && typeof webpackConfig.extend === 'function') {
+    webpackConfig.extend &&
+      webpackConfig.extend(config?.module?.rule||[], {
+        isDev: __DEV__,
+        type: 'module_rule',
+      });
+  }
   return config;
 }

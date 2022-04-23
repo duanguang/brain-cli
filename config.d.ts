@@ -5,11 +5,14 @@ export interface IDllConfigType {
 }
 export namespace eWebpackConfig {
     interface dllConfigType {
+        /** 当设置了此值，则 index.html dll 文件 url 变成外部链接 */
         externalUrl?: string;
+        /** 需要打包到 dll 文件的库 */
         value: string[];
         options?: dllCompileOptions;
     }
     interface customDllType extends dllConfigType {
+        /** dll 文件名称 */
         key: string;
     }
     interface dllCompileOptions {
@@ -21,18 +24,24 @@ export namespace eWebpackConfig {
             globalObject?: 'this'
         },
         plugins?: [];
+        /** 当设置了此值，则 index.html dll 文件 url 变成外部链接 */
         externalUrl?: string;
     }
     interface dllConfig {
-        /** 默认dll 文件 */
+        /** 默认dll 文件，需要打到dll 文件的JS库 */
         vendors: string[] | dllConfigType
         /** 自定义dll */
         customDll?: customDllType[]
+        /** 全局生效配置
+         * 
+         * 当在 dllConfig,配置了该参数，即可生效到所有 dll 文件，等同于配置了 options 参数，当 dll 文件指定了自身局部配置数据，则生效局部数据
+         */
         compileOptions: dllCompileOptions
     }
     interface extendConfig {
         isDev: boolean,
-        loaderType: 'hotLoader' | 'jsLoader' | 'tsLoader' | 'styleLoader',
+        /** 加载器类型 */
+        type: 'hot_loader' | 'js_loader' | 'ts_loader' | 'style_loader'|'module_rule',
         transform?: {
             /** 内部css modules 默认值 */
             readonly cssModule: Object,
@@ -58,7 +67,7 @@ export namespace eWebpackConfig {
         dllConfig: dllConfig
         /*** 是否禁用热加载 */
         disableReactHotLoader: boolean;
-
+        /** 默认值common 正常情况下，无需关注，主要会把node_modules下文件打到此模块 */
         commonsChunkPlugin?: string[];
 
         /** 多线程配置参数 */
@@ -90,23 +99,19 @@ export namespace eWebpackConfig {
             option?: any
         },
         /**
-      *
-      * 扩展loader加载器
-      */
+         *
+         * 扩展loader加载器
+         * 
+         * 如果config.type ==='module_rule' 则loader 参数值指向module.rule 数组加载器
+         */
         extend?: (loaders: any[],config: extendConfig) => void;
         css?: {
-            /** css modules  loader include */
-            css_modules_include: string[];
-            /** not css modules  loader include */
-            un_css_modules_include: string[];
+            /**  loader include */
+            loader_include: string[];
         };
-        /** ts loader 加载器include配置  */
-        tsInclude?: string[];
-        /** js loader 加载器include配置 */
-        jsInclude?: string[]
     }
 }
-declare class config {
+export declare class config {
     /** 应用名称，通常使用package.json.name */
     name: string;
     /** 浏览器中自动打开启动服务页面,默认true */
@@ -130,15 +135,20 @@ declare class config {
         /** postcss-plugin-px2rem 插件配置 */
         px2rem: any;
     }
-    webpack: config;
+    webpack: eWebpackConfig.config;
     htmlWebpackPlugin: {
         /** 页面标题 */
         title: string
     };
     /** babel 插件配置，直接谷歌查询babel.query 文档 */
-    babel: any;
+    babel: {
+        /** 直接谷歌查询babel.query 文档 */
+        query: any;
+        /** js ts loader 加载器 include会注入到ts loader 及js loader */
+        loader_include:string[]
+    };
     /** 在编译运行时指定需要的模块入口 */
     apps: string[]
 }
-export declare const eConfig: config;
+export declare function eConfig(params: config): config
 export { };

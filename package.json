@@ -1,7 +1,7 @@
 {
   "name": "brain-cli",
   "license": "MIT",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "description": "A command line tool used to run  projects",
   "scripts": {
     "clean": "rimraf dist/*",
@@ -116,5 +116,6 @@
   "main": "index.js",
   "bin": {
     "brain-cli": "./bin/index.js"
-  }
+  },
+  "typings": "config.d.ts"
 }

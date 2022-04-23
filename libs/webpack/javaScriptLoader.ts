@@ -2,7 +2,7 @@ import EConfig from '../settings/EConfig';
 import { isDev } from '../utils/env';
 import * as path from 'path';
 const {
-  webpack: { happyPack, disableReactHotLoader, tsCompilePlugin, extend },
+  webpack:{ happyPack, disableReactHotLoader, tsCompilePlugin, extend},
   babel,
 } = EConfig.getInstance();
 const __DEV__ = isDev();
@@ -58,7 +58,7 @@ export const getTsLoadersed = (include:string[]=[]) => {
   if (hasWebpackExtend()) {
     extend(loaders, {
       isDev: __DEV__,
-      loaderType: 'tsLoader',
+      type: 'ts_loader',
     });
   }
   return loaders;
@@ -85,7 +85,7 @@ export const getJSXLoadersed = (include:string[]=[]) => {
       if (hasWebpackExtend()) {
         extend(hotLoader, {
           isDev: __DEV__,
-          loaderType: 'hotLoader',
+          type: 'hot_loader',
         });
       }
     }
@@ -111,7 +111,7 @@ export const getJSXLoadersed = (include:string[]=[]) => {
   if (hasWebpackExtend()) {
     extend(loaders, {
       isDev: __DEV__,
-      loaderType: 'jsLoader',
+      type: 'js_loader',
     });
   }
   return [...hotLoader,...loaders];
