@@ -5,7 +5,6 @@ module.exports = {
   name: 'test',
   open: true,
   defaultPort: 8001,
-  projectType: 'ts',
   server: '0.0.0.0',
   imageInLineSize: 8192,
   isTslint: true,

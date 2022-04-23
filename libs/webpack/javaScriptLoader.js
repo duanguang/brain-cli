@@ -13,7 +13,7 @@
     const EConfig_1 = require("../settings/EConfig");
     const env_1 = require("../utils/env");
     const path = require("path");
-    const { webpack: { happyPack, disableReactHotLoader, tsCompilePlugin, extend }, babel, projectType, } = EConfig_1.default.getInstance();
+    const { webpack: { happyPack, disableReactHotLoader, tsCompilePlugin, extend }, babel, } = EConfig_1.default.getInstance();
     const __DEV__ = env_1.isDev();
     const DisableReactHotLoader = disableReactHotLoader || false; //默认启用热加载
     const nodeModulesPath = path.resolve(process.cwd(), 'node_modules');
@@ -38,21 +38,21 @@
         };
     };
     exports.tsloaderPlugin = tsloaderPlugin;
-    const getTsLoadersed = () => {
+    const getTsLoadersed = (include = []) => {
         const loaders = [];
         if (happyPack && happyPack.open) {
             loaders.push({
                 test: /\.(ts|tsx)$/,
-                include: [path.join(process.cwd(), './src')],
+                include: [path.join(process.cwd(), './src')].concat(include),
                 loader: 'happypack/loader?id=ts',
-                exclude: [nodeModulesPath],
+                // exclude: [nodeModulesPath],
             });
         }
         else {
             // 解决多线程下ts-loader 编译插件无法被执行问题
             loaders.push({
                 test: /\.(ts|tsx)$/,
-                include: [path.join(process.cwd(), './src')],
+                include: [path.join(process.cwd(), './src')].concat(include),
                 use: [
                     {
                         loader: 'babel-loader',
@@ -60,20 +60,19 @@
                     },
                     exports.tsloaderPlugin(),
                 ],
-                exclude: [nodeModulesPath],
+                // exclude: [nodeModulesPath],
             });
         }
         if (hasWebpackExtend()) {
             extend(loaders, {
                 isDev: __DEV__,
-                loaderType: 'TsLoader',
-                projectType,
+                loaderType: 'tsLoader',
             });
         }
         return loaders;
     };
     exports.getTsLoadersed = getTsLoadersed;
-    const getJSXLoadersed = () => {
+    const getJSXLoadersed = (include = []) => {
         const loaders = [];
         const hotLoader = [];
         if (__DEV__) {
@@ -82,7 +81,7 @@
                     test: /\.(jsx|js)?$/,
                     // loader: 'react-hot',
                     loader: 'babel-loader',
-                    include: [path.join(process.cwd(), './src')],
+                    include: [path.join(process.cwd(), './src')].concat(include),
                     exclude: [nodeModulesPath],
                     options: {
                         // This is a feature of `babel-loader` for webpack (not Babel itself).
@@ -95,8 +94,7 @@
                 if (hasWebpackExtend()) {
                     extend(hotLoader, {
                         isDev: __DEV__,
-                        loaderType: 'HotLoader',
-                        projectType,
+                        loaderType: 'hotLoader',
                     });
                 }
             }
@@ -104,29 +102,26 @@
         if (happyPack && happyPack.open) {
             loaders.push({
                 test: /\.(jsx|js)?$/,
-                include: [path.join(process.cwd(), './src')],
+                include: [path.join(process.cwd(), './src')].concat(include),
                 loader: 'happypack/loader?id=js',
-                exclude: [nodeModulesPath],
             });
         }
         else {
             loaders.push({
                 test: /\.(jsx|js)?$/,
-                include: [path.join(process.cwd(), './src')],
+                include: [path.join(process.cwd(), './src')].concat(include),
                 use: [
                     {
                         loader: `babel-loader`,
                         query: babel.query,
                     },
                 ],
-                exclude: [nodeModulesPath],
             });
         }
         if (hasWebpackExtend()) {
             extend(loaders, {
                 isDev: __DEV__,
-                loaderType: 'JsLoader',
-                projectType,
+                loaderType: 'jsLoader',
             });
         }
         return [...hotLoader, ...loaders];

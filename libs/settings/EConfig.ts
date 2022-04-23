@@ -2,6 +2,7 @@ import * as path from 'path';
 import {PROJECT_USER_CONFIG_FILE, PROJECT_USER_CONFIG_IGNORE_FILE} from '../constants/constants';
 import * as invariant from 'invariant';
 import { requireBabelify } from '../utils/requireBabelify';
+//@ts-ignore
 import { OptimizationOptions,ResolveOptions} from 'webpack/declarations/WebpackOptions'
 const deepAssign = require('deep-assign');
 const defaultEConfig = require(path.resolve(__dirname, `../../${PROJECT_USER_CONFIG_FILE}`));
@@ -39,12 +40,14 @@ interface IDllConfig{
 }
 interface extendConfig{
     isDev: boolean,
-    loaderType: 'HotLoader' | 'JsLoader' | 'TsLoader' | 'StyleLoader',
-    projectType: 'ts' | 'js',
+    loaderType: 'hotLoader' | 'jsLoader' | 'tsLoader' | 'styleLoader',
     transform?: {
-       readonly cssModule: Object,
-       readonly LoaderOptions: Object,
-       execution:(cssModule,loader,LoaderOptions)=>any
+        /** 内部css modules 默认值 */
+        readonly cssModule: Object,
+        /** 内部默认postcss_loader加载器参数 */
+        readonly postcss_loader: Object,
+       /** 内部通用生成loader use 值函数 */
+       execution:(cssModule,loader,postcss_loader)=>any
     }
 }
 interface IHappyPack{
@@ -112,8 +115,18 @@ interface IWebpack{
          *
          * 扩展loader加载器
          */
-    extend?: (loaders: any[],config: extendConfig) => void,
-    
+    extend?: (loaders: any[],config: extendConfig) => void;
+
+    css?: {
+        /** css modules  loader include */
+        css_modules_include: string[];
+        /** not css modules  loader include */
+        un_css_modules_include: string[];
+    };
+    /** ts loader 加载器include配置  */
+    tsInclude?: string[];
+    /** js loader 加载器include配置 */
+    jsInclude?:string[]
 }
 const nodeModulesPath = path.resolve(process.cwd(), 'node_modules');
 export default class EConfig {
@@ -123,7 +136,6 @@ export default class EConfig {
     public server: string;
     public imageInLineSize: number;
     public publicPath: string;
-    public projectType :'ts' | 'js'='js';
     public isTslint:boolean = true
     public devServer: {
         noInfo: boolean,

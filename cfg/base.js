@@ -55,10 +55,10 @@ var __rest = (this && this.__rest) || function (s, e) {
         },
     };
     const entries = getEntries_1.getApps();
-    function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPath, apps, server, babel, webpack: webpackConfig, htmlWebpackPlugin, projectType, isTslint, }) {
+    function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPath, apps, server, babel, webpack: webpackConfig, htmlWebpackPlugin, isTslint, }) {
         const __DEV__ = env_1.isDev();
         publicPath += name + '/';
-        const { disableReactHotLoader, commonsChunkPlugin, plugins, output, } = webpackConfig;
+        const { disableReactHotLoader, commonsChunkPlugin, plugins, output, css, tsInclude, jsInclude, } = webpackConfig;
         const NewOptimization = objects_1.merge(Optimization, webpackConfig.optimization);
         const { noInfo, proxy, before, stats, contentBase, historyApiFallback, headers = {}, hot, port } = devServer, serverProps = __rest(devServer, ["noInfo", "proxy", "before", "stats", "contentBase", "historyApiFallback", "headers", "hot", "port"]);
         const webpackDevEntries = [
@@ -77,7 +77,8 @@ var __rest = (this && this.__rest) || function (s, e) {
             entity = Object.assign(entity, chunk);
             return entity;
         }
-        function getCssLoaders() {
+        function getCssLoaders(css) {
+            var _a, _b, _c, _d;
             const CSS_MODULE_QUERY = `?modules&importLoaders=1&localIdentName=[local]-[hash:base64:6]`;
             const CSS_MODULE_OPTION = {
                 modules: true,
@@ -138,33 +139,33 @@ var __rest = (this && this.__rest) || function (s, e) {
                         loader: 'less-loader',
                         options: { javascriptEnabled: true },
                     }),
-                    include: [path.resolve(nodeModulesPath, 'antd')],
+                    include: [path.resolve(nodeModulesPath, 'antd'), /antd/],
                 },
                 {
                     test: new RegExp(`^(?!.*\\.modules).*\\.css`),
                     use: generateLoaders(null, null, postcss_loader),
-                    exclude: [nodeModulesPath],
-                    include: path.join(process.cwd(), './src'),
+                    // exclude: [nodeModulesPath],
+                    include: [path.join(process.cwd(), './src')].concat(((_a = css === null || css === void 0 ? void 0 : css.css) === null || _a === void 0 ? void 0 : _a.unmodules) || []),
                 },
                 {
                     /* test: /\.css$/, */
                     test: new RegExp(`^(.*\\.modules).*\\.css`),
                     use: generateLoaders(CSS_MODULE_OPTION, null, postcss_loader),
-                    exclude: [nodeModulesPath],
-                    include: path.join(process.cwd(), './src'),
+                    // exclude: [nodeModulesPath],
+                    include: [path.join(process.cwd(), './src')].concat(((_b = css === null || css === void 0 ? void 0 : css.css) === null || _b === void 0 ? void 0 : _b.modules) || []),
                 },
                 {
                     test: new RegExp(`^(?!.*\\.modules).*\\.less`),
                     use: generateLoaders(null, postcss_loader, { loader: 'less-loader', options: { javascriptEnabled: true } }),
-                    exclude: [nodeModulesPath],
-                    include: path.join(process.cwd(), './src'),
+                    // exclude: [nodeModulesPath],
+                    include: [path.join(process.cwd(), './src')].concat(((_c = css === null || css === void 0 ? void 0 : css.less) === null || _c === void 0 ? void 0 : _c.unmodules) || []),
                 },
                 {
                     /* test: /\.less/, */
                     test: new RegExp(`^(.*\\.modules).*\\.less`),
                     use: generateLoaders(CSS_MODULE_OPTION, postcss_loader, { loader: 'less-loader', options: { javascriptEnabled: true } }),
-                    exclude: [nodeModulesPath],
-                    include: path.join(process.cwd(), './src'),
+                    // exclude: [nodeModulesPath],
+                    include: [path.join(process.cwd(), './src')].concat(((_d = css === null || css === void 0 ? void 0 : css.less) === null || _d === void 0 ? void 0 : _d.modules) || []),
                 },
             ];
             if (webpackConfig.extend && typeof webpackConfig.extend === 'function') {
@@ -173,11 +174,10 @@ var __rest = (this && this.__rest) || function (s, e) {
                     webpackConfig.extend(loaders, {
                         // @ts-ignore
                         isDev: __DEV__,
-                        loaderType: 'StyleLoader',
-                        projectType,
+                        loaderType: 'styleLoader',
                         transform: {
                             cssModule: CSS_MODULE_OPTION,
-                            LoaderOptions: postcss_loader,
+                            postcss_loader: postcss_loader,
                             execution: generateLoaders,
                         },
                     });
@@ -417,9 +417,9 @@ var __rest = (this && this.__rest) || function (s, e) {
         }
         config.module = {
             rules: [
-                ...javaScriptLoader_1.getJSXLoadersed(),
-                ...javaScriptLoader_1.getTsLoadersed(),
-                ...getCssLoaders(),
+                ...javaScriptLoader_1.getJSXLoadersed(jsInclude),
+                ...javaScriptLoader_1.getTsLoadersed(tsInclude),
+                ...getCssLoaders(css),
                 ...getImageLoaders(),
                 ...getJsonLoaders(),
                 ...getFontLoaders(),

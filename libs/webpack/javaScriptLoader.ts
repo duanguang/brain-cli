@@ -4,7 +4,6 @@ import * as path from 'path';
 const {
   webpack: { happyPack, disableReactHotLoader, tsCompilePlugin, extend },
   babel,
-  projectType,
 } = EConfig.getInstance();
 const __DEV__ = isDev();
 const DisableReactHotLoader = disableReactHotLoader || false; //默认启用热加载
@@ -32,20 +31,20 @@ export const tsloaderPlugin = () => {
     },
   };
 };
-export const getTsLoadersed = () => {
+export const getTsLoadersed = (include:string[]=[]) => {
   const loaders = [];
   if (happyPack && happyPack.open) {
     loaders.push({
       test: /\.(ts|tsx)$/,
-      include: [path.join(process.cwd(), './src')],
+      include: [path.join(process.cwd(), './src')].concat(include),
       loader: 'happypack/loader?id=ts',
-      exclude: [nodeModulesPath],
+      // exclude: [nodeModulesPath],
     });
   } else {
     // 解决多线程下ts-loader 编译插件无法被执行问题
     loaders.push({
       test: /\.(ts|tsx)$/,
-      include: [path.join(process.cwd(), './src')],
+      include: [path.join(process.cwd(), './src')].concat(include),
       use: [
         {
           loader: 'babel-loader',
@@ -53,19 +52,18 @@ export const getTsLoadersed = () => {
         },
         tsloaderPlugin(),
       ],
-      exclude: [nodeModulesPath],
+      // exclude: [nodeModulesPath],
     });
   }
   if (hasWebpackExtend()) {
     extend(loaders, {
       isDev: __DEV__,
-      loaderType: 'TsLoader',
-      projectType,
+      loaderType: 'tsLoader',
     });
   }
   return loaders;
 };
-export const getJSXLoadersed = () => {
+export const getJSXLoadersed = (include:string[]=[]) => {
     const loaders = [];
     const hotLoader = [];
   if (__DEV__) {
@@ -74,7 +72,7 @@ export const getJSXLoadersed = () => {
         test: /\.(jsx|js)?$/,
         // loader: 'react-hot',
         loader: 'babel-loader',
-        include: [path.join(process.cwd(), './src')],
+        include: [path.join(process.cwd(), './src')].concat(include),
         exclude: [nodeModulesPath], //优化构建效率
         options: {
           // This is a feature of `babel-loader` for webpack (not Babel itself).
@@ -87,8 +85,7 @@ export const getJSXLoadersed = () => {
       if (hasWebpackExtend()) {
         extend(hotLoader, {
           isDev: __DEV__,
-          loaderType: 'HotLoader',
-          projectType,
+          loaderType: 'hotLoader',
         });
       }
     }
@@ -96,28 +93,25 @@ export const getJSXLoadersed = () => {
   if (happyPack && happyPack.open) {
     loaders.push({
       test: /\.(jsx|js)?$/,
-      include: [path.join(process.cwd(), './src')],
+      include: [path.join(process.cwd(), './src')].concat(include),
       loader: 'happypack/loader?id=js',
-      exclude: [nodeModulesPath],
     });
   } else {
     loaders.push({
       test: /\.(jsx|js)?$/,
-      include: [path.join(process.cwd(), './src')],
+      include: [path.join(process.cwd(), './src')].concat(include),
       use: [
         {
           loader: `babel-loader`,
           query: babel.query,
         },
       ],
-      exclude: [nodeModulesPath],
     });
   }
   if (hasWebpackExtend()) {
     extend(loaders, {
       isDev: __DEV__,
-      loaderType: 'JsLoader',
-      projectType,
+      loaderType: 'jsLoader',
     });
   }
   return [...hotLoader,...loaders];

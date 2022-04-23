@@ -23,7 +23,6 @@
     const nodeModulesPath = path.resolve(process.cwd(), 'node_modules');
     class EConfig {
         constructor() {
-            this.projectType = 'js';
             this.isTslint = true;
             this.webpack = {
                 dllConfig: {

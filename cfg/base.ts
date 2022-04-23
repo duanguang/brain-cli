@@ -49,7 +49,6 @@ export default function getBaseConfig({
   babel,
   webpack: webpackConfig,
   htmlWebpackPlugin,
-  projectType,
   isTslint,
 }: EConfig) {
   const __DEV__ = isDev();
@@ -60,6 +59,9 @@ export default function getBaseConfig({
     commonsChunkPlugin,
     plugins,
     output,
+    css,
+    tsInclude,
+    jsInclude,
   } = webpackConfig;
   const NewOptimization = merge(Optimization, webpackConfig.optimization);
   const { noInfo, proxy,before,stats, 
@@ -82,7 +84,7 @@ export default function getBaseConfig({
     entity = Object.assign(entity, chunk);
     return entity;
   }
-  function getCssLoaders() {
+  function getCssLoaders(css:EConfig['webpack']['css']) {
     const CSS_MODULE_QUERY = `?modules&importLoaders=1&localIdentName=[local]-[hash:base64:6]`;
     const CSS_MODULE_OPTION = {
       modules: true,
@@ -155,20 +157,20 @@ export default function getBaseConfig({
           loader: 'less-loader',
           options: { javascriptEnabled: true },
         }),
-        include: [path.resolve(nodeModulesPath, 'antd')],
+        include: [path.resolve(nodeModulesPath, 'antd'),/antd/],
       },
       {
         test: new RegExp(`^(?!.*\\.modules).*\\.css`),
         use: generateLoaders(null, null, postcss_loader),
-        exclude: [nodeModulesPath],
-        include:  path.join(process.cwd(), './src'),
+        // exclude: [nodeModulesPath],
+        include:  [path.join(process.cwd(), './src')].concat(css?.un_css_modules_include||[]),
       },
       {
         /* test: /\.css$/, */
         test: new RegExp(`^(.*\\.modules).*\\.css`),
         use: generateLoaders(CSS_MODULE_OPTION, null, postcss_loader),
-        exclude: [nodeModulesPath],
-        include:  path.join(process.cwd(), './src'),
+        // exclude: [nodeModulesPath],
+        include:  [path.join(process.cwd(), './src')].concat(css?.css_modules_include||[]),
       },
       {
         test: new RegExp(`^(?!.*\\.modules).*\\.less`),
@@ -177,8 +179,8 @@ export default function getBaseConfig({
           postcss_loader,
           { loader: 'less-loader', options: { javascriptEnabled: true } },
         ),
-        exclude: [nodeModulesPath],
-        include:  path.join(process.cwd(), './src'),
+        // exclude: [nodeModulesPath],
+        include:  [path.join(process.cwd(), './src')].concat(css?.un_css_modules_include||[]),
       },
       {
         /* test: /\.less/, */
@@ -188,8 +190,8 @@ export default function getBaseConfig({
           postcss_loader,
           { loader: 'less-loader', options: { javascriptEnabled: true } },
         ),
-        exclude: [nodeModulesPath],
-        include:  path.join(process.cwd(), './src'),
+        // exclude: [nodeModulesPath],
+        include:  [path.join(process.cwd(), './src')].concat(css?.css_modules_include||[]),
       },
     ];
     if (webpackConfig.extend && typeof webpackConfig.extend === 'function') {
@@ -198,11 +200,10 @@ export default function getBaseConfig({
         webpackConfig.extend(loaders, {
           // @ts-ignore
           isDev: __DEV__,
-          loaderType: 'StyleLoader',
-          projectType,
+          loaderType: 'styleLoader',
           transform: {
             cssModule: CSS_MODULE_OPTION,
-            LoaderOptions: postcss_loader,
+            postcss_loader: postcss_loader,
             execution: generateLoaders,
           },
         });
@@ -480,9 +481,9 @@ export default function getBaseConfig({
   }
   config.module = {
     rules: [
-      ...getJSXLoadersed(),
-      ...getTsLoadersed(),
-      ...getCssLoaders(),
+      ...getJSXLoadersed(jsInclude),
+      ...getTsLoadersed(tsInclude),
+      ...getCssLoaders(css),
       ...getImageLoaders(),
       ...getJsonLoaders(),
       ...getFontLoaders(),
