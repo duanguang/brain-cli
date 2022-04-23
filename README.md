@@ -346,7 +346,7 @@ tsCompilePlugin: {
 
 ## changeLog webpack4.x
 
-## v1.1.1
+## v1.1.3
 
 - 【chore】优化loader加载器配置结构
 

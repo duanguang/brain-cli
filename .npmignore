@@ -115,4 +115,6 @@ static
 .7z
 .history
 .webpack_cache
-*.ts
+bin/**/*.ts
+cfg/**/*.ts
+libs/**/*.ts
