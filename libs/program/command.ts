@@ -18,25 +18,17 @@ export class Command {
   constructor() {
     this.program = program;
   }
-  setProcessEnv(env: string) {
-    if (env === 'dev') {
-      process.env.environment = DEV;
+  setProcessEnv(env: string,cmd_name: string) {
+    if (cmd_name === 'dev') {
       process.env.NODE_ENV = DEV;
-    } else if (env === 'dist') {
-      process.env.environment = DIST;
-      process.env.NODE_ENV = PRODUCTION;
-    } else if (env === 'prod') {
-      process.env.environment = PRODUCTION;
-      process.env.NODE_ENV = PRODUCTION;
-    } else if (env === 'test') {
-      process.env.environment = TEST;
-      process.env.NODE_ENV = PRODUCTION;
-    } else if (env === 'report') {
-      process.env.environment = REPORT;
-      process.env.NODE_ENV = PRODUCTION;
     } else {
+        process.env.NODE_ENV = PRODUCTION;
+    }
+    if (env === 'prod') {
+      process.env.environment = PRODUCTION;
+    }
+    else {
       process.env.environment = env;
-      process.env.NODE_ENV = PRODUCTION;
     }
   }
   version() {
@@ -60,11 +52,13 @@ export class Command {
   dev() {
     this.program
       .command('dev')
+      .option('--env [value]', 'webpack Build environment')
       .option('--apps [value]','webpack Build a specified app name')
       .description('start webpack dev server for develoment mode')
       .action(options => {
         let env = 'dev';
-        this.setProcessEnv(env);
+        let __env = options['env']||'dev';
+        this.setProcessEnv(__env,options['_name']||'dev');
         this.setApps(options);
         log(`当前编译环境为: ${process.env.NODE_ENV} [${this.env[env]}]`);
         programInit(env);
@@ -73,11 +67,13 @@ export class Command {
   start() {
     this.program
       .command('start')
+      .option('--env [value]', 'webpack Build environment')
       .option('--apps [value]', 'webpack Build a specified app name')
       .description('start webpack dev server for develoment mode')
       .action(options => {
         let env = 'dev';
-        this.setProcessEnv(env);
+        let __env = options['env']||'dev';
+        this.setProcessEnv(__env,'dev');
         this.setApps(options);
         log(`当前编译环境为: ${process.env.NODE_ENV} [${this.env[env]}]`);
         programInit(env);
@@ -113,7 +109,7 @@ export class Command {
       )
       .description('webpack building')
       .action((env = 'prod', options) => {
-        this.setProcessEnv(options.S ? 'report' : env);
+        this.setProcessEnv(options.S ? 'report' : env,options['_name']||'build');
         this.setApps(options);
         process.env.webpackJsonp = options['webpackJsonp']
           ? options['webpackJsonp']

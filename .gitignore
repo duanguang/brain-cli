@@ -112,3 +112,5 @@ dist
 .history
 .webpack_cache
 test.js
+
+*.json

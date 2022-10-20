@@ -37,30 +37,18 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
             };
             this.program = program;
         }
-        setProcessEnv(env) {
-            if (env === 'dev') {
-                process.env.environment = constants_1.DEV;
+        setProcessEnv(env, cmd_name) {
+            if (cmd_name === 'dev') {
                 process.env.NODE_ENV = constants_1.DEV;
             }
-            else if (env === 'dist') {
-                process.env.environment = constants_1.DIST;
+            else {
                 process.env.NODE_ENV = constants_1.PRODUCTION;
             }
-            else if (env === 'prod') {
+            if (env === 'prod') {
                 process.env.environment = constants_1.PRODUCTION;
-                process.env.NODE_ENV = constants_1.PRODUCTION;
-            }
-            else if (env === 'test') {
-                process.env.environment = constants_1.TEST;
-                process.env.NODE_ENV = constants_1.PRODUCTION;
-            }
-            else if (env === 'report') {
-                process.env.environment = constants_1.REPORT;
-                process.env.NODE_ENV = constants_1.PRODUCTION;
             }
             else {
                 process.env.environment = env;
-                process.env.NODE_ENV = constants_1.PRODUCTION;
             }
         }
         version() {
@@ -84,11 +72,13 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         dev() {
             this.program
                 .command('dev')
+                .option('--env [value]', 'webpack Build environment')
                 .option('--apps [value]', 'webpack Build a specified app name')
                 .description('start webpack dev server for develoment mode')
                 .action(options => {
                 let env = 'dev';
-                this.setProcessEnv(env);
+                let __env = options['env'] || 'dev';
+                this.setProcessEnv(__env, options['_name'] || 'dev');
                 this.setApps(options);
                 logs_1.log(`当前编译环境为: ${process.env.NODE_ENV} [${this.env[env]}]`);
                 index_1.default(env);
@@ -97,11 +87,13 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         start() {
             this.program
                 .command('start')
+                .option('--env [value]', 'webpack Build environment')
                 .option('--apps [value]', 'webpack Build a specified app name')
                 .description('start webpack dev server for develoment mode')
                 .action(options => {
                 let env = 'dev';
-                this.setProcessEnv(env);
+                let __env = options['env'] || 'dev';
+                this.setProcessEnv(__env, 'dev');
                 this.setApps(options);
                 logs_1.log(`当前编译环境为: ${process.env.NODE_ENV} [${this.env[env]}]`);
                 index_1.default(env);
@@ -128,7 +120,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
                 .option('--cdn [value]', 'The resource distribution server')
                 .description('webpack building')
                 .action((env = 'prod', options) => {
-                this.setProcessEnv(options.S ? 'report' : env);
+                this.setProcessEnv(options.S ? 'report' : env, options['_name'] || 'build');
                 this.setApps(options);
                 process.env.webpackJsonp = options['webpackJsonp']
                     ? options['webpackJsonp']
