@@ -382,6 +382,12 @@ export default function getBaseConfig({
     devtool: __DEV__ && 'cheap-module-source-map',
     resolve: {
       ...webpackConfig.resolve,
+      alias: {
+        // WP5: UMD 模块别名，解决 Webpack 5 无法识别 UMD 命名导出的问题
+        'legions-nprogress': path.resolve(nodeModulesPath, 'legions-nprogress/dist/legions-nprogress.esm.js'),
+        'legions-utils-tool': path.resolve(nodeModulesPath, 'legions-utils-tool/dist/legions-utils-tool.esm.js'),
+        ...(webpackConfig.resolve?.alias || {}),
+      },
       extensions: ['.web.js', '.js', '.json', '.ts', '.tsx', '.jsx'],
       modules: [
         'src',
@@ -391,6 +397,14 @@ export default function getBaseConfig({
       ],
     },
     mode: isDev() ? 'development' : 'production',
+    // WP5: 跳过第三方库导出不兼容警告（Webpack 5 更严格的 ESM/CJS 互操作检测）
+    ignoreWarnings: [
+      /export .+ was not found in/,
+      /Should not import the named export/,
+      /Module not found.*is not exported under the conditions/,
+      /Replace .* to .*, because spec had been changed/,
+      ...(webpackConfig.ignoreWarnings || []),
+    ],
     optimization: NewOptimization,
     plugins: [
       ...getHtmlWebpackPlugins(),
@@ -411,8 +425,8 @@ export default function getBaseConfig({
               },
             }),
           ]),
-      // WP5: mode 自动设置 process.env.NODE_ENV，不再需要 DefinePlugin 手动定义
       new webpack.DefinePlugin({
+        // 'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || (__DEV__ ? 'development' : 'production')),
         'process.env.environment': '"' + process.env.environment + '"',
         'process.env.apps': '"' + process.env.apps + '"',
         'process.env.webpackJsonp': '"' + process.env.webpackJsonp + '"',

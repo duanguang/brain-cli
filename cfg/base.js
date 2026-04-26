@@ -55,7 +55,7 @@ var __rest = (this && this.__rest) || function (s, e) {
     };
     const entries = (0, getEntries_1.getApps)();
     function getBaseConfig({ name, devServer, imageInLineSize, defaultPort, publicPath, apps, server, babel, webpack: webpackConfig, htmlWebpackPlugin, isTslint, }) {
-        var _a;
+        var _a, _b;
         const __DEV__ = (0, env_1.isDev)();
         publicPath += name + '/';
         const { disableReactHotLoader, commonsChunkPlugin, plugins, output, css, } = webpackConfig;
@@ -343,13 +343,23 @@ var __rest = (this && this.__rest) || function (s, e) {
                 // WP5: 使用更快的 hash 算法
                 hashFunction: 'xxhash64' }),
             devtool: __DEV__ && 'cheap-module-source-map',
-            resolve: Object.assign(Object.assign({}, webpackConfig.resolve), { extensions: ['.web.js', '.js', '.json', '.ts', '.tsx', '.jsx'], modules: [
+            resolve: Object.assign(Object.assign({}, webpackConfig.resolve), { alias: Object.assign({ 
+                    // WP5: UMD 模块别名，解决 Webpack 5 无法识别 UMD 命名导出的问题
+                    'legions-nprogress': path.resolve(nodeModulesPath, 'legions-nprogress/dist/legions-nprogress.esm.js'), 'legions-utils-tool': path.resolve(nodeModulesPath, 'legions-utils-tool/dist/legions-utils-tool.esm.js') }, (((_a = webpackConfig.resolve) === null || _a === void 0 ? void 0 : _a.alias) || {})), extensions: ['.web.js', '.js', '.json', '.ts', '.tsx', '.jsx'], modules: [
                     'src',
                     'node_modules',
                     path.join(process.cwd(), `src`),
                     path.join(process.cwd(), `node_modules`),
                 ] }),
             mode: (0, env_1.isDev)() ? 'development' : 'production',
+            // WP5: 跳过第三方库导出不兼容警告（Webpack 5 更严格的 ESM/CJS 互操作检测）
+            ignoreWarnings: [
+                /export .+ was not found in/,
+                /Should not import the named export/,
+                /Module not found.*is not exported under the conditions/,
+                /Replace .* to .*, because spec had been changed/,
+                ...(webpackConfig.ignoreWarnings || []),
+            ],
             optimization: NewOptimization,
             plugins: [
                 ...getHtmlWebpackPlugins(),
@@ -370,8 +380,8 @@ var __rest = (this && this.__rest) || function (s, e) {
                             },
                         }),
                     ]),
-                // WP5: mode 自动设置 process.env.NODE_ENV，不再需要 DefinePlugin 手动定义
                 new webpack.DefinePlugin({
+                    // 'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || (__DEV__ ? 'development' : 'production')),
                     'process.env.environment': '"' + process.env.environment + '"',
                     'process.env.apps': '"' + process.env.apps + '"',
                     'process.env.webpackJsonp': '"' + process.env.webpackJsonp + '"',
@@ -434,7 +444,7 @@ var __rest = (this && this.__rest) || function (s, e) {
         };
         if (webpackConfig.extend && typeof webpackConfig.extend === 'function') {
             webpackConfig.extend &&
-                webpackConfig.extend(((_a = config === null || config === void 0 ? void 0 : config.module) === null || _a === void 0 ? void 0 : _a.rules) || [], {
+                webpackConfig.extend(((_b = config === null || config === void 0 ? void 0 : config.module) === null || _b === void 0 ? void 0 : _b.rules) || [], {
                     isDev: __DEV__,
                     type: 'module_rule',
                 });
