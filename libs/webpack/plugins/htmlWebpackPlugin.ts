@@ -14,7 +14,7 @@ function htmlWebpackPluginInstance(templatePath: string, filename: string, chunk
         inject: true,
         alwaysWriteToDisk: true,
         chunks: chunks,
-        chunksSortMode: 'dependency',
+        // WP5: chunksSortMode 由 webpack 5 原生处理
         title:title||'webApp'
     });
 }

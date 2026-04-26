@@ -35,5 +35,5 @@
     //     program.outputHelp();
     // }
     //noinspection JSIgnoredPromiseFromCall
-    server_1.default();
+    (0, server_1.default)();
 });

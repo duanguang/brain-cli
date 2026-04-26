@@ -18,18 +18,17 @@ export default function webpackCompiler(options?:any) {
     const projectUrl=`${URL_PREFIX}/${projectName}/${apps.length ? apps[0] : ''}`
     let bundleStartTime;
 
-    webpackCompiler.plugin('compile', () => {
-        log('打包中...')
-        //console.info('打包中...');
+    // WP5: 使用 hooks API 替代 plugin() 方法
+    webpackCompiler.hooks.compile.tap('brain-cli', () => {
+        log('打包中...');
         bundleStartTime = Date.now();
     });
 
-    webpackCompiler.plugin('done', () => {
+    webpackCompiler.hooks.done.tap('brain-cli', () => {
         const timeSpent = Date.now() - bundleStartTime;
         log(`打包完成, 耗时 ${asSeconds(timeSpent)} s. ${new Date()}`);
         logAppRunning({ port: defaultPort,projectUrl,https,server });
         chkUpdateNotifier();
-        //console.info(`打包完成, 耗时 ${asSeconds(timeSpent)} s. ${new Date()}`);
     });
     return webpackCompiler;
 }

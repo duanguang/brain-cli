@@ -20,7 +20,7 @@
     const { vendors, customDll } = dllConfig;
     const path = require('path');
     function getDistConfig(eConfig) {
-        const config = base_1.default(eConfig);
+        const config = (0, base_1.default)(eConfig);
         config.pendings = [
             () => {
                 //TODO:暂时放在这里
@@ -50,7 +50,7 @@
                     
                         publicPath,
                     })); */
-                    const dllReferencePlugin = helpers_1.getDllReferencePlugin();
+                    const dllReferencePlugin = (0, helpers_1.getDllReferencePlugin)();
                     if (dllReferencePlugin) {
                         config.plugins.push(dllReferencePlugin);
                     }
@@ -79,7 +79,7 @@
                             outputPath: 'common/js',
                             publicPath,
                         });
-                        const dllReference = helpers_1.getDllReferencePlugin(key);
+                        const dllReference = (0, helpers_1.getDllReferencePlugin)(key);
                         if (dllReference) {
                             config.plugins.push(dllReference);
                         }

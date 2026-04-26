@@ -38,17 +38,17 @@
                     });
                     function writeLog() {
                         if (envApps.length === ignore.length) {
-                            logs_1.warning(`当前无匹配应用  打包范围为[全部app]...`);
+                            (0, logs_1.warning)(`当前无匹配应用  打包范围为[全部app]...`);
                         }
                         if (ignore.length > 0) {
-                            logs_1.warning(`无匹配应用[${ignore.join(',')}]...`);
+                            (0, logs_1.warning)(`无匹配应用[${ignore.join(',')}]...`);
                         }
                     }
                     if (entriesList.length === apps.length || entriesList.length === 0) {
-                        logs_1.log(`打包范围为[全部app]...`);
+                        (0, logs_1.log)(`打包范围为[全部app]...`);
                     }
                     else {
-                        logs_1.log(`打包应用[${entriesList.join(',')}]...`);
+                        (0, logs_1.log)(`打包应用[${entriesList.join(',')}]...`);
                     }
                     writeLog();
                     entries = entriesList.length > 0 ? entriesList : apps;
@@ -63,7 +63,7 @@
     function getEntries(entries) {
         let appEntry = {};
         entries.forEach(item => {
-            appEntry[`${item}`] = helpers_1.getEntry(`${item}.js`);
+            appEntry[`${item}`] = (0, helpers_1.getEntry)(`${item}.js`);
         });
         return appEntry;
     }

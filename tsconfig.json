@@ -2,6 +2,17 @@
   "compilerOptions": {
     "module": "umd",
     "target": "es6",
-    "moduleResolution":"Node"
-  }
+    "moduleResolution": "node",
+    "rootDir": ".",
+    "skipLibCheck": true
+  },
+  "include": [
+    "cfg/**/*.ts",
+    "libs/**/*.ts",
+    "*.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "src"
+  ]
 }

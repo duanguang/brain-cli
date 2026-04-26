@@ -80,8 +80,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
                 let __env = options['env'] || 'dev';
                 this.setProcessEnv(__env, options['_name'] || 'dev');
                 this.setApps(options);
-                logs_1.log(`当前编译环境为: ${process.env.NODE_ENV} [${this.env[env]}]`);
-                index_1.default(env);
+                (0, logs_1.log)(`当前编译环境为: ${process.env.NODE_ENV} [${this.env[env]}]`);
+                (0, index_1.default)(env);
             });
         }
         start() {
@@ -95,8 +95,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
                 let __env = options['env'] || 'dev';
                 this.setProcessEnv(__env, 'dev');
                 this.setApps(options);
-                logs_1.log(`当前编译环境为: ${process.env.NODE_ENV} [${this.env[env]}]`);
-                index_1.default(env);
+                (0, logs_1.log)(`当前编译环境为: ${process.env.NODE_ENV} [${this.env[env]}]`);
+                (0, index_1.default)(env);
             });
         }
         dll() {
@@ -107,8 +107,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
                 /**
                  * 按需创建编译webpack dll manifest文件
                  */
-                yield webpackDllCompiler_1.default();
-                yield webpackDllCompiler_1.webpackDllPluginsCompiler();
+                yield (0, webpackDllCompiler_1.default)();
+                yield (0, webpackDllCompiler_1.webpackDllPluginsCompiler)();
             }));
         }
         build() {
@@ -128,8 +128,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
                 process.env.cdnRelease = options['cdn']
                     ? options['cdn']
                     : '';
-                logs_1.log(`当前编译环境为: ${process.env.NODE_ENV} [${this.env[env] || env}]`);
-                index_1.default(process.env.NODE_ENV, options);
+                (0, logs_1.log)(`当前编译环境为: ${process.env.NODE_ENV} [${this.env[env] || env}]`);
+                (0, index_1.default)(process.env.NODE_ENV, options);
             });
         }
         command() {

@@ -2,11 +2,11 @@ import EConfig from '../settings/EConfig';
 import { isDev } from '../utils/env';
 import * as path from 'path';
 const {
-  webpack:{ happyPack, disableReactHotLoader, tsCompilePlugin, extend},
+  webpack:{ disableReactHotLoader, tsCompilePlugin, extend},
   babel,
 } = EConfig.getInstance();
 const __DEV__ = isDev();
-const DisableReactHotLoader = disableReactHotLoader || false; //默认启用热加载
+const DisableReactHotLoader = disableReactHotLoader || false;
 const nodeModulesPath = path.resolve(process.cwd(), 'node_modules');
 function hasWebpackExtend() {
   if (extend && typeof extend === 'function') {
@@ -23,9 +23,8 @@ export const tsloaderPlugin = () => {
     loader: require.resolve('ts-loader'),
     options: {
       ...{
-        // disable type checker - we will use it in fork plugin
         transpileOnly: true,
-        happyPackMode: true,
+        // WP5: 移除 happyPackMode，不再使用 HappyPack
       },
       ...(tsCompileOption || {}),
     },
@@ -33,28 +32,18 @@ export const tsloaderPlugin = () => {
 };
 export const getTsLoadersed = (include:string[]=[]) => {
   const loaders = [];
-  if (happyPack && happyPack.open) {
-    loaders.push({
-      test: /\.(ts|tsx)$/,
-      include: [path.join(process.cwd(), './src')].concat(include),
-      loader: 'happypack/loader?id=ts',
-      // exclude: [nodeModulesPath],
-    });
-  } else {
-    // 解决多线程下ts-loader 编译插件无法被执行问题
-    loaders.push({
-      test: /\.(ts|tsx)$/,
-      include: [path.join(process.cwd(), './src')].concat(include),
-      use: [
-        {
-          loader: 'babel-loader',
-          query: babel.query,
-        },
-        tsloaderPlugin(),
-      ],
-      // exclude: [nodeModulesPath],
-    });
-  }
+  // WP5: 统一使用 babel-loader + ts-loader，不再区分 HappyPack 模式
+  loaders.push({
+    test: /\.(ts|tsx)$/,
+    include: [path.join(process.cwd(), './src')].concat(include),
+    use: [
+      {
+        loader: 'babel-loader',
+        options: babel.query,
+      },
+      tsloaderPlugin(),
+    ],
+  });
   if (hasWebpackExtend()) {
     extend(loaders, {
       isDev: __DEV__,
@@ -70,14 +59,10 @@ export const getJSXLoadersed = (include:string[]=[]) => {
     if (!DisableReactHotLoader) {
         hotLoader.push({
         test: /\.(jsx|js)?$/,
-        // loader: 'react-hot',
         loader: 'babel-loader',
         include: [path.join(process.cwd(), './src')].concat(include),
-        exclude: [nodeModulesPath], //优化构建效率
+        exclude: [nodeModulesPath],
         options: {
-          // This is a feature of `babel-loader` for webpack (not Babel itself).
-          // It enables caching results in ./node_modules/.cache/babel-loader/
-          // directory for faster rebuilds.
           cacheDirectory: true,
           plugins: ['react-hot-loader/babel'],
         },
@@ -90,24 +75,17 @@ export const getJSXLoadersed = (include:string[]=[]) => {
       }
     }
   }
-  if (happyPack && happyPack.open) {
-    loaders.push({
-      test: /\.(jsx|js)?$/,
-      include: [path.join(process.cwd(), './src')].concat(include),
-      loader: 'happypack/loader?id=js',
-    });
-  } else {
-    loaders.push({
-      test: /\.(jsx|js)?$/,
-      include: [path.join(process.cwd(), './src')].concat(include),
-      use: [
-        {
-          loader: `babel-loader`,
-          query: babel.query,
-        },
-      ],
-    });
-  }
+  // WP5: 统一使用 babel-loader，不再区分 HappyPack 模式
+  loaders.push({
+    test: /\.(jsx|js)?$/,
+    include: [path.join(process.cwd(), './src')].concat(include),
+    use: [
+      {
+        loader: `babel-loader`,
+        options: babel.query,
+      },
+    ],
+  });
   if (hasWebpackExtend()) {
     extend(loaders, {
       isDev: __DEV__,

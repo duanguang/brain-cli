@@ -12,11 +12,10 @@ import { isDev } from '../libs/utils/env';
 import LegionExtractStaticFilePlugin from '../libs/webpack/plugins/LegionExtractStaticFilePlugin';
 import { getApps } from '../libs/webpack/entries/getEntries';
 import { merge } from '../libs/utils/objects';
-import { happyPackToJsPlugin, happyPackToTsPlugin } from '../libs/webpack/happy-pack-conf';
 import { getJSXLoadersed, getTsLoadersed } from '../libs/webpack/javaScriptLoader';
 const nodeModulesPath = path.resolve(process.cwd(), 'node_modules');
-const ExtractTextPlugin = require('extract-text-webpack-plugin');
-const OptimizeCssAssetsPlugin = require('optimize-css-assets-webpack-plugin');
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+const CssMinimizerWebpackPlugin = require('css-minimizer-webpack-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const BundleAnalyzerPlugin = require('webpack-bundle-analyzer')
   .BundleAnalyzerPlugin;
@@ -62,7 +61,7 @@ export default function getBaseConfig({
     css,
   } = webpackConfig;
   const NewOptimization = merge(Optimization, webpackConfig.optimization);
-  const { noInfo, proxy,before,stats, 
+  const { noInfo, proxy,before,stats,
     contentBase,historyApiFallback,
     headers = {},hot,port, ...serverProps
   } = devServer;
@@ -85,27 +84,28 @@ export default function getBaseConfig({
   function getCssLoaders(css:EConfig['webpack']['css']) {
     const CSS_MODULE_QUERY = `?modules&importLoaders=1&localIdentName=[local]-[hash:base64:6]`;
     const CSS_MODULE_OPTION = {
-      modules: true,
+      modules: {
+        localIdentName: `[local]-[hash:base64:6]`,
+      },
       importLoaders: 1,
-      localIdentName: `[local]-[hash:base64:6]`,
     };
     let browsers = EConfig.getInstance().postcss.autoprefixer.browsers;
     let px2rem = EConfig.getInstance().postcss.px2rem;
     const postcss_loader = {
       loader: 'postcss-loader',
       options: {
-        ident: 'postcss',
-        plugins: [require('autoprefixer')({ browsers: browsers })],
+        postcssOptions: {
+          plugins: [require('autoprefixer')({ overrideBrowserslist: browsers })],
+        },
       },
     };
     if (px2rem&&Object.getOwnPropertyNames(px2rem).length) {
-      postcss_loader.options.plugins.push(require('postcss-plugin-px2rem')(px2rem));
+      postcss_loader.options.postcssOptions.plugins.push(require('postcss-plugin-px2rem')(px2rem));
     }
     function generateLoaders(
       cssModule?: {
-        modules: boolean,
+        modules: object,
         importLoaders: number,
-        localIdentName: string,
       },
       loader?: string | { loader: string; options: any },
       loaderOptions?
@@ -126,48 +126,39 @@ export default function getBaseConfig({
         let styles = ['style-loader', ...style];
         return styles;
       }
-      return ExtractTextPlugin.extract({
-        fallback: 'style-loader',
-        use: style,
-        /* publicPath: '/', */
-      });
+      // WP5: 使用 MiniCssExtractPlugin 替代 ExtractTextPlugin
+      return [MiniCssExtractPlugin.loader, ...style];
     }
     if (!__DEV__) {
       config.plugins.push(
-        new ExtractTextPlugin({
-          filename: '[name]/styles/[name].[hash:8].bundle.css',
-          allChunks: true,
+        new MiniCssExtractPlugin({
+          filename: '[name]/styles/[name].[contenthash:8].bundle.css',
+          chunkFilename: 'common/styles/[name].[contenthash:8].bundle.css',
         })
       );
-      config.plugins.push(
-        new OptimizeCssAssetsPlugin({
-          assetNameRegExp: /\.optimize\.css$/g,
-          cssProcessor: require('cssnano'),
-          cssProcessorOptions: { discardComments: { removeAll: true } },
-          canPrint: true,
-        })
-      );
+      // WP5: 使用 CssMinimizerWebpackPlugin 替代 OptimizeCssAssetsPlugin
+      config.optimization.minimizer = [
+        ...(config.optimization.minimizer || []),
+        new CssMinimizerWebpackPlugin(),
+      ];
     }
     const loaders = [
       {
         test: /\.less/,
         use: generateLoaders(null, {
           loader: 'less-loader',
-          options: { javascriptEnabled: true },
+          options: { lessOptions: { javascriptEnabled: true } },
         }),
         include: [path.resolve(nodeModulesPath, 'antd'),/antd/],
       },
       {
         test: new RegExp(`^(?!.*\\.modules).*\\.css`),
         use: generateLoaders(null, null, postcss_loader),
-        // exclude: [nodeModulesPath],
         include:  [path.join(process.cwd(), './src')].concat(css?.loader_include||[]),
       },
       {
-        /* test: /\.css$/, */
         test: new RegExp(`^(.*\\.modules).*\\.css`),
         use: generateLoaders(CSS_MODULE_OPTION, null, postcss_loader),
-        // exclude: [nodeModulesPath],
         include:  [path.join(process.cwd(), './src')].concat(css?.loader_include||[]),
       },
       {
@@ -175,20 +166,17 @@ export default function getBaseConfig({
         use: generateLoaders(
           null,
           postcss_loader,
-          { loader: 'less-loader', options: { javascriptEnabled: true } },
+          { loader: 'less-loader', options: { lessOptions: { javascriptEnabled: true } } },
         ),
-        // exclude: [nodeModulesPath],
         include:  [path.join(process.cwd(), './src')].concat(css?.loader_include||[]),
       },
       {
-        /* test: /\.less/, */
         test: new RegExp(`^(.*\\.modules).*\\.less`),
         use: generateLoaders(
           CSS_MODULE_OPTION,
           postcss_loader,
-          { loader: 'less-loader', options: { javascriptEnabled: true } },
+          { loader: 'less-loader', options: { lessOptions: { javascriptEnabled: true } } },
         ),
-        // exclude: [nodeModulesPath],
         include:  [path.join(process.cwd(), './src')].concat(css?.loader_include||[]),
       },
     ];
@@ -206,58 +194,74 @@ export default function getBaseConfig({
     }
     return loaders;
   }
+  // WP5: 原生支持 JSON，无需 json-loader
   function getJsonLoaders() {
-    return [
-      {
-        test: /\.json$/,
-        type: 'javascript/auto',
-        loader: 'json-loader',
-      },
-    ];
+    return [];
   }
+  // WP5: 使用 Asset Modules 替代 file-loader/url-loader
   function getImageLoaders() {
     if (__DEV__) {
       return [
         {
           test: /\.(png|jpe?g|gif)$/,
-          loaders: [`file-loader?esModule=${false}`],
+          type: 'asset/resource' as const,
+          generator: {
+            emit: false,
+          },
         },
       ];
     }
     return [
       {
         test: /\.(png|jpe?g|gif)$/,
-        //loader: `url-loader?limit=${8192}&name=${path.posix.join('common', 'images/[hash:8].[name].[ext]')}`,
-        loaders: [
-          `file-loader?limit=${imageInLineSize}&name=common/images/[hash:8].[name].[ext]&esModule=${false}`,
-          //optimizationLevel似乎没什么用
-          //`image-webpack?{optipng:{optimizationLevel:7}, pngquant:{quality: "65-90", speed: 4}, mozjpeg: {quality: 65}}`
-        ],
+        type: 'asset' as const,
+        parser: {
+          dataUrlCondition: {
+            maxSize: imageInLineSize,
+          },
+        },
+        generator: {
+          filename: 'common/images/[hash:8].[name].[ext]',
+        },
       },
     ];
   }
 
+  // WP5: 使用 Asset modules 替代 url-loader
   function getFontLoaders() {
     return [
       {
         test: /\.(woff|woff2|svg|eot|ttf)$/,
-        loader: `url-loader?limit=${imageInLineSize}&name=fonts/[hash:8].[name].[ext]`,
+        type: 'asset' as const,
+        parser: {
+          dataUrlCondition: {
+            maxSize: imageInLineSize,
+          },
+        },
+        generator: {
+          filename: 'fonts/[hash:8].[name].[ext]',
+        },
       },
     ];
   }
+  // WP5: 使用 Asset modules 替代 file-loader
   function getFileResourcesLoaders() {
     return [
       {
         test: /\.(mp4|ogg)$/,
-        loader: 'file-loader?&name=others/[name].[ext]',
+        type: 'asset/resource' as const,
+        generator: {
+          filename: 'others/[name].[ext]',
+        },
       },
     ];
   }
+  // WP5: 使用 Asset modules 替代 raw-loader
   function getTemplateJspLoaders() {
     return [
       {
         test: /\.jsp$/,
-        use: 'raw-loader',
+        type: 'asset/source' as const,
         exclude: [nodeModulesPath],
       },
     ];
@@ -269,7 +273,6 @@ export default function getBaseConfig({
           test: /\.ts|tsx$/,
           exclude: /node_modules/,
           enforce: 'pre',
-          /* loader: 'happypack/loader?id=tslint', */
           loader: 'tslint-loader',
         },
       ];
@@ -280,7 +283,6 @@ export default function getBaseConfig({
     if (__DEV__) {
       return htmlWebpackPlugins(null, entries);
     } else {
-      // invariant(apps.length === 1, `在部署环境下仅支持单入口`);
       return htmlWebpackPlugins(null, entries);
     }
   }
@@ -289,10 +291,8 @@ export default function getBaseConfig({
       'I',
       data.sprites.length ? data.sprites[0].image : ''
     );
-    // 注意：此处默认图标使用的是二倍图
     const perSprite = data.sprites
       .map(function (sprite: any) {
-        // background-size: SWpx SHpx;
         return '.w-icon-N { width: SWpx; height: SHpx; }\n.w-icon-N .w-icon, .w-icon-N.w-icon { width: Wpx; height: Hpx; background-position: Xpx Ypx; margin-top: -SHpx; margin-left: -SWpx; } '
           .replace(/N/g,sprite.name)
           //@ts-ignore
@@ -309,18 +309,16 @@ export default function getBaseConfig({
     return shared + '\n' + perSprite;
   };
   const SpritesmithPlugins = apps.map(item => {
-    // 雪碧图设置
     return new SpritesmithPlugin({
       src: {
-        cwd: path.resolve(process.cwd(), `./src/${item}/assets/images/icons/`), // 图标根路径
-        glob: '**/*.png', // 匹配任意 png 图标
+        cwd: path.resolve(process.cwd(), `./src/${item}/assets/images/icons/`),
+        glob: '**/*.png',
       },
       target: {
         image: path.resolve(
           process.cwd(),
           `./src/${item}/assets/css/sprites-generated.png`
-        ), // 生成雪碧图目标路径与名称
-        // 设置生成CSS背景及其定位的文件或方式
+        ),
         css: [
           [
             path.resolve(
@@ -332,61 +330,59 @@ export default function getBaseConfig({
             },
           ],
         ],
-        // css: path.resolve(__dirname, '../src/assets/spritesmith-generated/sprite.less')
       },
       customTemplates: {
         function_based_template: templateFunction,
       },
       apiOptions: {
-        cssImageRef: './sprites-generated.png', // css文件中引用雪碧图的相对位置路径配置
+        cssImageRef: './sprites-generated.png',
       },
       spritesmithOptions: {
         padding: 4,
       },
     });
   });
-  const library = {}; 
-  if (output && typeof output === 'object' && !Array.isArray(output)) { 
-    const libraryArrylist = ['library','libraryTarget']; 
-    libraryArrylist.map((item) => { 
-      if (output.hasOwnProperty(item)) { 
-        if (typeof output[item] === 'string') { 
-          library[item] = output[item]; 
-        } 
-        else if (typeof output[item] === 'function') { 
-          library[item] = output[item](name); 
-        } 
-      } 
-    }) 
-  } 
+  const library = {};
+  if (output && typeof output === 'object' && !Array.isArray(output)) {
+    const libraryArrylist = ['library','libraryTarget'];
+    libraryArrylist.map((item) => {
+      if (output.hasOwnProperty(item)) {
+        if (typeof output[item] === 'string') {
+          library[item] = output[item];
+        }
+        else if (typeof output[item] === 'function') {
+          library[item] = output[item](name);
+        }
+      }
+    })
+  }
   const config: any = {
     entry: getEntries(),
-    //port: defaultPort,
-    //additionalPaths: [],
+    // WP5: 文件系统缓存，替代 DLL 解决内存增长问题
+    cache: {
+      type: 'filesystem',
+      buildDependencies: {
+        config: [__filename],
+      },
+      cacheDirectory: path.resolve(process.cwd(), '.webpack_cache'),
+    },
     output: {
-      ...library, 
-      /**遇到问题： 对于同一个页面功能由不同的同事开发， 都用到了 webpack 以及 CommonsChunkPlugin，最后把打包出来的代码，整合到一起的时候，冲突了。
-       * 问题表现：各自用 webpack 打包代码没有问题，但是加载到页面上时，代码报错且错误难以定位。
-       * 解决方法：在 webpack 的配置选项里使用 output.jsonpFunction。
-       * output.jsonpFunction string 仅用在输出目标为 web，且使用 jsonp 的方式按需加载代码块时。
-一个命名的 JSONP 函数用于异步加载代码块或者把多个初始化代码块合并到一起时使用（如 CommonsChunkPlugin, AggressiveSplittingPlugin）。
-当同一个页面上有多个 webpack 实例（源于不同的编译），需要修改这个函数名。
-如果使用了 output.library 选项，那么这个 library 的命名会自动附加上。
-事实上 webpack 并不在全局命名空间下运行，但是 CommonsChunkPlugin 这样的插件会使用异步 JSONP 的方法按需加载代码块。插件会注册一个全局的函数叫 window.webpackJsonp，所以同一个页面上运行多个源自不同 webpack 打包出来的代码时，可能会引起冲突。
-       */
-      jsonpFunction: process.env.webpackJsonp || `webpackJsonpName`,
+      ...library,
+      // WP5: chunkLoadingGlobal 替代 jsonpFunction
+      chunkLoadingGlobal: process.env.webpackJsonp || 'webpackJsonpName',
       path: path.join(process.cwd(), `${DIST}`),
       filename: __DEV__
         ? `[name]/js/[name].js`
         : `[name]/js/[name].[chunkhash:5].bundle.js`,
       chunkFilename: 'common/js/[name].[chunkhash:5].bundle.js',
-      //chunkFilename:path.posix.join('common', 'js/[name]-[id].[chunkhash:5].bundle.js'),
       publicPath: __DEV__ ? publicPath : process.env.cdnRelease || '../',
+      // WP5: 使用更快的 hash 算法
+      hashFunction: 'xxhash64',
     },
     devtool: __DEV__ && 'cheap-module-source-map',
     resolve: {
       ...webpackConfig.resolve,
-      extensions: ['.web.js', '.js', '.json', '.ts', '.tsx', '.jsx'], //自动扩展文件后缀
+      extensions: ['.web.js', '.js', '.json', '.ts', '.tsx', '.jsx'],
       modules: [
         'src',
         'node_modules',
@@ -394,26 +390,20 @@ export default function getBaseConfig({
         path.join(process.cwd(), `node_modules`),
       ],
     },
-    module: {
-      loaders: [],
-    },
     mode: isDev() ? 'development' : 'production',
     optimization: NewOptimization,
     plugins: [
       ...getHtmlWebpackPlugins(),
-      // 雪碧图设置
       ...SpritesmithPlugins,
       ...plugins,
-      ...happyPackToJsPlugin(),
-      ...happyPackToTsPlugin(),
+      // WP5: 移除 HappyPack，使用原生并行处理
       ...(isDev()
         ? []
         : [
             new TerserPlugin({
-              cache: true,
-              parallel: true, // 开启并行压缩，充分利用cpu
+              parallel: true,
               sourceMap: false,
-              extractComments: false, // 移除注释
+              extractComments: false,
               terserOptions: {
                 compress: {
                   drop_debugger: true,
@@ -422,9 +412,8 @@ export default function getBaseConfig({
               },
             }),
           ]),
-      /* new HtmlWebpackHarddiskPlugin(), */
+      // WP5: mode 自动设置 process.env.NODE_ENV，不再需要 DefinePlugin 手动定义
       new webpack.DefinePlugin({
-        'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || DEV),
         'process.env.environment': '"' + process.env.environment + '"',
         'process.env.apps': '"' + process.env.apps + '"',
         'process.env.webpackJsonp': '"' + process.env.webpackJsonp + '"',
@@ -435,8 +424,14 @@ export default function getBaseConfig({
   if (__DEV__) {
     config.devServer = {
       ...serverProps,
-      stats: 'errors-only',
-      contentBase: [`./${WORKING_DIRECTORY}/`],
+      static: {
+        directory: path.resolve(process.cwd(), WORKING_DIRECTORY),
+      },
+      // WP5: publicPath 移到 devMiddleware
+      devMiddleware: {
+        publicPath: publicPath,
+        stats: 'errors-only',
+      },
       historyApiFallback: {
         rewrites: apps.map((app: string) => ({
           from: HISTORY_REWRITE_FALL_BACK_REGEX_FUNC(app),
@@ -449,14 +444,14 @@ export default function getBaseConfig({
       },
       hot: true,
       port: defaultPort,
-      publicPath: publicPath,
-      noInfo: noInfo,
       proxy: proxy,
-      before: function (app) {
-        app.use(path.posix.join(`/static`),express.static('./static')); // 代理静态资源
-        before && before(app);
+      // WP5 dev-server v4: setupMiddlewares 替代 onBeforeSetupMiddleware
+      setupMiddlewares: function (middlewares, devServer) {
+        if (!devServer) return middlewares;
+        devServer.app.use(path.posix.join(`/static`),express.static('./static'));
+        before && before(devServer.app);
+        return middlewares;
       },
-      //progress: true,
     };
   } else {
     if (process.env.environment === 'report') {
@@ -465,14 +460,19 @@ export default function getBaseConfig({
       );
     }
     config.plugins.push(new LegionExtractStaticFilePlugin());
+    // WP5: CopyWebpackPlugin v11 使用对象格式
     config.plugins.push(
-      new CopyWebpackPlugin([
-        {
-          from: path.join(process.cwd(), `static`),
-          to: 'common',
-          ignore: ['.*'],
-        },
-      ])
+      new CopyWebpackPlugin({
+        patterns: [
+          {
+            from: path.join(process.cwd(), `static`),
+            to: 'common',
+            globOptions: {
+              ignore: ['.*'],
+            },
+          },
+        ],
+      })
     );
   }
   config.module = {
@@ -485,13 +485,11 @@ export default function getBaseConfig({
       ...getFontLoaders(),
       ...getFileResourcesLoaders(),
       ...getTemplateJspLoaders(),
-      ...getTslintLoaders(),
     ],
-    //noParse: []
   };
   if (webpackConfig.extend && typeof webpackConfig.extend === 'function') {
     webpackConfig.extend &&
-      webpackConfig.extend(config?.module?.rule||[], {
+      webpackConfig.extend(config?.module?.rules||[], {
         isDev: __DEV__,
         type: 'module_rule',
       });

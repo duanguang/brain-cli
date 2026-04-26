@@ -1,5 +1,6 @@
-import WebpackDevServer from "webpack-dev-server";
-import { OptimizationOptions,ResolveOptions } from "webpack/declarations/WebpackOptions"
+import type { ResolveOptions as WebpackResolveOptions, Configuration } from "webpack";
+type ResolveOptions = NonNullable<WebpackResolveOptions>;
+type OptimizationOptions = NonNullable<Configuration['optimization']>;
 export interface IDllConfigType {
 
 }
@@ -127,7 +128,7 @@ export declare class config {
     /** devServer.publicPath,默认 /public/*/
     publicPath: string;
     /** 开发服务拓展配置 */
-    devServer: WebpackDevServer.Configuration;
+    devServer: Record<string, any>;
 
     postcss?: {
         /** 参考postcss-loade 插件配置 */

@@ -22,7 +22,7 @@
     // const nodeModulesPath = path.resolve(process.cwd(), 'node_modules');
     const AddAssetHtmlPlugin = require('add-asset-html-webpack-plugin');
     function getDevConfig(eConfig) {
-        const config = base_1.default(eConfig);
+        const config = (0, base_1.default)(eConfig);
         config.pendings = [
             () => {
                 //TODO:暂时放在这里
@@ -44,7 +44,7 @@
                 }
                 if (filepath) {
                     config.plugins.push(new AddAssetHtmlPlugin(Object.assign({ includeSourcemap: false, filepath }, venPublicPath)));
-                    const dllReferencePlugin = helpers_1.getDllReferencePlugin();
+                    const dllReferencePlugin = (0, helpers_1.getDllReferencePlugin)();
                     if (dllReferencePlugin) {
                         config.plugins.push(dllReferencePlugin);
                     }
@@ -64,7 +64,7 @@
                     }
                     if (filepathDll) {
                         config.plugins.push(new AddAssetHtmlPlugin(Object.assign({ includeSourcemap: false, filepath: filepathDll }, publicPath)));
-                        const dllReference = helpers_1.getDllReferencePlugin(keys);
+                        const dllReference = (0, helpers_1.getDllReferencePlugin)(keys);
                         if (dllReference) {
                             config.plugins.push(dllReference);
                         }

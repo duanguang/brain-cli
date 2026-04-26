@@ -22,6 +22,12 @@
     exports.configFileList = [constants_1.PROJECT_USER_CONFIG_FILE, constants_1.PROJECT_USER_CONFIG_IGNORE_FILE];
     const nodeModulesPath = path.resolve(process.cwd(), 'node_modules');
     class EConfig {
+        static getInstance() {
+            if (!EConfig.instance) {
+                EConfig.instance = new EConfig();
+            }
+            return EConfig.instance;
+        }
         constructor() {
             this.isTslint = true;
             this.webpack = {
@@ -47,12 +53,6 @@
             };
             this.init();
         }
-        static getInstance() {
-            if (!EConfig.instance) {
-                EConfig.instance = new EConfig();
-            }
-            return EConfig.instance;
-        }
         init() {
             let finalConfig = this.getFinalConfig();
             EConfig.validateConfig(finalConfig);
@@ -71,7 +71,7 @@
         getConfig(filePath, eConfig) {
             let config = eConfig;
             try {
-                const tempConfig = requireBabelify_1.requireBabelify(filePath);
+                const tempConfig = (0, requireBabelify_1.requireBabelify)(filePath);
                 config = typeof tempConfig === `function` ? tempConfig(eConfig) : tempConfig;
             }
             catch (e) {

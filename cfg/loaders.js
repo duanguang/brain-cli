@@ -15,11 +15,12 @@
     const path = require("path");
     const EConfig_1 = require("../libs/settings/EConfig");
     const ExtractTextPlugin = require('extract-text-webpack-plugin');
-    const __DEV__ = env_1.isDev();
+    const __DEV__ = (0, env_1.isDev)();
     const CSS_MODULE_OPTION = {
-        modules: true,
+        modules: {
+            localIdentName: `[local]-[hash:base64:6]`,
+        },
         importLoaders: 1,
-        localIdentName: `[local]-[hash:base64:6]`,
     };
     let browsers = EConfig_1.default.getInstance().postcss.autoprefixer.browsers;
     let px2rem = EConfig_1.default.getInstance().postcss.px2rem;
@@ -59,7 +60,7 @@
             test: /\.less/,
             use: generateLoaders(null, {
                 loader: 'less-loader',
-                options: { javascriptEnabled: true },
+                options: { lessOptions: { javascriptEnabled: true } },
             }),
             include: [path.resolve(constants_1.nodeModulesPath, 'antd')],
         },
@@ -80,7 +81,7 @@
             test: new RegExp(`^(?!.*\\.modules).*\\.less`),
             use: generateLoaders(null, postcss_loader, {
                 loader: 'less-loader',
-                options: { javascriptEnabled: true },
+                options: { lessOptions: { javascriptEnabled: true } },
             }),
             exclude: [constants_1.nodeModulesPath],
             include: path.join(process.cwd(), './src'),
@@ -90,7 +91,7 @@
             test: new RegExp(`^(.*\\.modules).*\\.less`),
             use: generateLoaders(CSS_MODULE_OPTION, postcss_loader, {
                 loader: 'less-loader',
-                options: { javascriptEnabled: true },
+                options: { lessOptions: { javascriptEnabled: true } },
             }),
             exclude: [constants_1.nodeModulesPath],
             include: path.join(process.cwd(), './src'),

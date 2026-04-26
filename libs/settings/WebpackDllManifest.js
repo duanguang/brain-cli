@@ -16,6 +16,12 @@
     const path = require("path");
     const node_1 = require("../utils/node");
     class WebpackDllManifest {
+        static getInstance() {
+            if (!WebpackDllManifest.instance) {
+                WebpackDllManifest.instance = new WebpackDllManifest();
+            }
+            return WebpackDllManifest.instance;
+        }
         constructor() {
             /*  this.vendors = EConfig.getInstance().webpack.dllConfig.vendors; */
             if (typeof EConfig_1.default.getInstance().webpack.dllConfig.vendors === 'object') {
@@ -29,12 +35,6 @@
             }
             this.distPath = constants_1.WEBPACK_DLL_MANIFEST_DIST;
         }
-        static getInstance() {
-            if (!WebpackDllManifest.instance) {
-                WebpackDllManifest.instance = new WebpackDllManifest();
-            }
-            return WebpackDllManifest.instance;
-        }
         getVendorsHash() {
             const isVendorsExist = this.vendors && this.vendors.length;
             if (!this.hashValue && isVendorsExist) {
@@ -46,7 +46,7 @@
                      */
                     return prev + vendorName + vendorVersion;
                 }, ``);
-                this.hashValue = hash_1.shortHashMd5(identifier);
+                this.hashValue = (0, hash_1.shortHashMd5)(identifier);
             }
             return this.hashValue;
         }
@@ -62,12 +62,12 @@
                      */
                     return prev + vendorName + vendorVersion;
                 }, ``);
-                hashValue = hash_1.shortHashMd5(identifier);
+                hashValue = (0, hash_1.shortHashMd5)(identifier);
             }
             return hashValue;
         }
         static getVendorVersion(vendorName, baseDir = process.cwd()) {
-            const packageJson = node_1.emulateNodeRecursiveLookup(baseDir, `node_modules/${vendorName}/package.json`);
+            const packageJson = (0, node_1.emulateNodeRecursiveLookup)(baseDir, `node_modules/${vendorName}/package.json`);
             let vendorVersion = '';
             if (!packageJson) {
                 console.warn(`vendor[${vendorName}] package not found`);

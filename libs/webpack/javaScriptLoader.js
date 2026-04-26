@@ -13,9 +13,9 @@
     const EConfig_1 = require("../settings/EConfig");
     const env_1 = require("../utils/env");
     const path = require("path");
-    const { webpack: { happyPack, disableReactHotLoader, tsCompilePlugin, extend }, babel, } = EConfig_1.default.getInstance();
-    const __DEV__ = env_1.isDev();
-    const DisableReactHotLoader = disableReactHotLoader || false; //默认启用热加载
+    const { webpack: { disableReactHotLoader, tsCompilePlugin, extend }, babel, } = EConfig_1.default.getInstance();
+    const __DEV__ = (0, env_1.isDev)();
+    const DisableReactHotLoader = disableReactHotLoader || false;
     const nodeModulesPath = path.resolve(process.cwd(), 'node_modules');
     function hasWebpackExtend() {
         if (extend && typeof extend === 'function') {
@@ -31,38 +31,26 @@
         return {
             loader: require.resolve('ts-loader'),
             options: Object.assign({
-                // disable type checker - we will use it in fork plugin
                 transpileOnly: true,
-                happyPackMode: true,
+                // WP5: 移除 happyPackMode，不再使用 HappyPack
             }, (tsCompileOption || {})),
         };
     };
     exports.tsloaderPlugin = tsloaderPlugin;
     const getTsLoadersed = (include = []) => {
         const loaders = [];
-        if (happyPack && happyPack.open) {
-            loaders.push({
-                test: /\.(ts|tsx)$/,
-                include: [path.join(process.cwd(), './src')].concat(include),
-                loader: 'happypack/loader?id=ts',
-                // exclude: [nodeModulesPath],
-            });
-        }
-        else {
-            // 解决多线程下ts-loader 编译插件无法被执行问题
-            loaders.push({
-                test: /\.(ts|tsx)$/,
-                include: [path.join(process.cwd(), './src')].concat(include),
-                use: [
-                    {
-                        loader: 'babel-loader',
-                        query: babel.query,
-                    },
-                    exports.tsloaderPlugin(),
-                ],
-                // exclude: [nodeModulesPath],
-            });
-        }
+        // WP5: 统一使用 babel-loader + ts-loader，不再区分 HappyPack 模式
+        loaders.push({
+            test: /\.(ts|tsx)$/,
+            include: [path.join(process.cwd(), './src')].concat(include),
+            use: [
+                {
+                    loader: 'babel-loader',
+                    options: babel.query,
+                },
+                (0, exports.tsloaderPlugin)(),
+            ],
+        });
         if (hasWebpackExtend()) {
             extend(loaders, {
                 isDev: __DEV__,
@@ -79,14 +67,10 @@
             if (!DisableReactHotLoader) {
                 hotLoader.push({
                     test: /\.(jsx|js)?$/,
-                    // loader: 'react-hot',
                     loader: 'babel-loader',
                     include: [path.join(process.cwd(), './src')].concat(include),
                     exclude: [nodeModulesPath],
                     options: {
-                        // This is a feature of `babel-loader` for webpack (not Babel itself).
-                        // It enables caching results in ./node_modules/.cache/babel-loader/
-                        // directory for faster rebuilds.
                         cacheDirectory: true,
                         plugins: ['react-hot-loader/babel'],
                     },
@@ -99,25 +83,17 @@
                 }
             }
         }
-        if (happyPack && happyPack.open) {
-            loaders.push({
-                test: /\.(jsx|js)?$/,
-                include: [path.join(process.cwd(), './src')].concat(include),
-                loader: 'happypack/loader?id=js',
-            });
-        }
-        else {
-            loaders.push({
-                test: /\.(jsx|js)?$/,
-                include: [path.join(process.cwd(), './src')].concat(include),
-                use: [
-                    {
-                        loader: `babel-loader`,
-                        query: babel.query,
-                    },
-                ],
-            });
-        }
+        // WP5: 统一使用 babel-loader，不再区分 HappyPack 模式
+        loaders.push({
+            test: /\.(jsx|js)?$/,
+            include: [path.join(process.cwd(), './src')].concat(include),
+            use: [
+                {
+                    loader: `babel-loader`,
+                    options: babel.query,
+                },
+            ],
+        });
         if (hasWebpackExtend()) {
             extend(loaders, {
                 isDev: __DEV__,

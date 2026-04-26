@@ -21,11 +21,11 @@
             // program.config && (configFileList[0] = program.config);
             // program.ignoreConfig && (configFileList[1] = program.ignoreConfig);
             //noinspection JSIgnoredPromiseFromCall
-            server_1.default();
+            (0, server_1.default)();
         }
         else if (env === 'production') {
             const eConfig = EConfig_1.default.getInstance();
-            const webpackConfig = webpack_config_1.default(eConfig);
+            const webpackConfig = (0, webpack_config_1.default)(eConfig);
             if (Array.isArray(webpackConfig.pendings)) {
                 webpackConfig.pendings.forEach(pending => pending());
             }

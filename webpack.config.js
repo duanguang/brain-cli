@@ -29,10 +29,10 @@
             switch (env) {
                 case 'production':
                     //return getDistConfig(eConfig);
-                    return dist_1.default(eConfig);
+                    return (0, dist_1.default)(eConfig);
                 case 'dev':
                     // return getDevConfig(eConfig);
-                    return dev_1.default(eConfig);
+                    return (0, dev_1.default)(eConfig);
             }
         };
     }

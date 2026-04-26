@@ -31,8 +31,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         const { name: projectName, devServer: { https } } = EConfig_1.default.getInstance();
         if (open) {
             if (!targetApp) {
-                logs_1.warning(`忽略自动打开浏览器功能:`);
-                logs_1.warning(`请提供指定需要app name作为相对路径`);
+                (0, logs_1.warning)(`忽略自动打开浏览器功能:`);
+                (0, logs_1.warning)(`请提供指定需要app name作为相对路径`);
             }
             else {
                 openBrowser(`${https ? 'https' : 'http'}://${ip}:${port}/${constants_1.URL_PREFIX}/${projectName}/${targetApp}`);
@@ -48,12 +48,12 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
                 /**
                  * 按需创建编译webpack dll manifest文件
                  */
-                yield webpackDllCompiler_1.default();
-                yield webpackDllCompiler_1.webpackDllPluginsCompiler();
+                yield (0, webpackDllCompiler_1.default)();
+                yield (0, webpackDllCompiler_1.webpackDllPluginsCompiler)();
                 /**
                  * 开启webpack dev server
                  */
-                yield webpackDevServer_1.default();
+                yield (0, webpackDevServer_1.default)();
                 /**
                  * 获取配置文件
                  */
@@ -63,7 +63,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
                     /**
                      * 显示可选IP列表
                      */
-                    ip_1.displayAvailableIPs();
+                    (0, ip_1.displayAvailableIPs)();
                     /**
                      * 开启后判断配置文件是否需要自动打开浏览器
                      */

@@ -30,13 +30,13 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         const requireCompile = WebpackDllManifest_1.default.getInstance().isCompileManifestDirty();
         return new Promise((resolve, reject) => {
             if (!dllConfig) {
-                logs_1.log(`ignore webpack dll manifest compile`);
+                (0, logs_1.log)(`ignore webpack dll manifest compile`);
                 //console.info('ignore webpack dll manifest compile');
                 resolve();
                 return;
             }
             if (requireCompile) {
-                logs_1.log(`create webpack dll manifest [vendors]`);
+                (0, logs_1.log)(`create webpack dll manifest [vendors]`);
                 // console.info('create webpack dll manifest');
                 const compiler = webpack(dllConfig);
                 compiler.run((err, stats) => {
@@ -48,7 +48,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
                 });
             }
             else {
-                logs_1.log('skip webpack dll manifest [vendors]');
+                (0, logs_1.log)('skip webpack dll manifest [vendors]');
                 // console.info('skip webpack dll manifest');
                 resolve();
             }
@@ -67,13 +67,13 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
                 const requireCompile = WebpackDllManifest_1.default.getInstance().isCompileManifestDirty(key, WebpackDllManifest_1.default.getInstance().getDllPluginsHash(vendorsDll));
                 const promise = new Promise((resolve, reject) => {
                     if (!dllPlugins_1.DllPlugins[key]) {
-                        logs_1.log(`ignore webpack dll manifest compile`);
+                        (0, logs_1.log)(`ignore webpack dll manifest compile`);
                         //console.info('ignore webpack dll manifest compile');
                         resolve();
                         return;
                     }
                     if (requireCompile) {
-                        logs_1.log(`create webpack dll manifest [${key}]`);
+                        (0, logs_1.log)(`create webpack dll manifest [${key}]`);
                         //console.info('create webpack dll manifest');
                         const compiler = webpack(dllPlugins_1.DllPlugins[key]);
                         compiler.run((err, stats) => {
@@ -85,7 +85,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
                         });
                     }
                     else {
-                        logs_1.log(`skip webpack dll manifest [${key}]`);
+                        (0, logs_1.log)(`skip webpack dll manifest [${key}]`);
                         //console.info('skip webpack dll manifest');
                         resolve();
                     }

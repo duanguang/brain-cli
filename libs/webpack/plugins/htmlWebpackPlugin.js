@@ -21,11 +21,11 @@
             template: templatePath,
             filename: filename,
             //minify: isDev() ? false :minify,
-            hash: !env_1.isDev(),
+            hash: !(0, env_1.isDev)(),
             inject: true,
             alwaysWriteToDisk: true,
             chunks: chunks,
-            chunksSortMode: 'dependency',
+            // WP5: chunksSortMode 由 webpack 5 原生处理
             title: title || 'webApp'
         });
     }
