@@ -114,3 +114,4 @@ dist
 test.js
 
 *.json
+.omc
