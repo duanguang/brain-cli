@@ -8,17 +8,17 @@
     }
 })(function (require, exports) {
     "use strict";
-    /**
-     * @deprecated 此文件已废弃，CSS/Less 加载器配置已迁移到 cfg/base.ts 的 getCssLoaders() 方法中。
-     * WP5 升级后使用 MiniCssExtractPlugin 替代了 ExtractTextPlugin。
-     */
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.loaders = void 0;
     const env_1 = require("../libs/utils/env");
     const constants_1 = require("../libs/constants/constants");
     const path = require("path");
     const EConfig_1 = require("../libs/settings/EConfig");
-    const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+    /**
+     * @deprecated 此文件已废弃，CSS/Less 加载器配置已迁移到 cfg/base.ts 的 getCssLoaders() 方法中。
+     * WP5 升级后使用 MiniCssExtractPlugin 替代了 ExtractTextPlugin，加载器配置在 base.ts 中统一管理。
+     * 保留此文件仅为向后兼容，如需自定义样式加载器，请通过 webpack.extend 配置项扩展。
+     */
     const __DEV__ = (0, env_1.isDev)();
     const CSS_MODULE_OPTION = {
         modules: {
@@ -39,6 +39,7 @@
     if (px2rem && Object.getOwnPropertyNames(px2rem).length) {
         postcss_loader.options.postcssOptions.plugins.push(require('postcss-plugin-px2rem')(px2rem));
     }
+    const MiniCssExtractPlugin = require('mini-css-extract-plugin');
     function generateLoaders(cssModule, loader, loaderOptions) {
         let style = [{ loader: 'css-loader', options: { importLoaders: 1 } }];
         if (cssModule) {

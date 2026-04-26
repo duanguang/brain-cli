@@ -147,7 +147,7 @@ export default function getBaseConfig({
         test: /\.less/,
         use: generateLoaders(null, {
           loader: 'less-loader',
-          options: { lessOptions: { javascriptEnabled: true } },
+          options: { lessOptions: { javascriptEnabled: true, math: 'always' } },
         }),
         include: [path.resolve(nodeModulesPath, 'antd'),/antd/],
       },
@@ -166,7 +166,7 @@ export default function getBaseConfig({
         use: generateLoaders(
           null,
           postcss_loader,
-          { loader: 'less-loader', options: { lessOptions: { javascriptEnabled: true } } },
+          { loader: 'less-loader', options: { lessOptions: { javascriptEnabled: true, math: 'always' } } },
         ),
         include:  [path.join(process.cwd(), './src')].concat(css?.loader_include||[]),
       },
@@ -175,7 +175,7 @@ export default function getBaseConfig({
         use: generateLoaders(
           CSS_MODULE_OPTION,
           postcss_loader,
-          { loader: 'less-loader', options: { lessOptions: { javascriptEnabled: true } } },
+          { loader: 'less-loader', options: { lessOptions: { javascriptEnabled: true, math: 'always' } } },
         ),
         include:  [path.join(process.cwd(), './src')].concat(css?.loader_include||[]),
       },

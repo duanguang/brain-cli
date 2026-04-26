@@ -4,45 +4,50 @@
         if (v !== undefined) module.exports = v;
     }
     else if (typeof define === "function" && define.amd) {
-        define(["require", "exports"], factory);
+        define(["require", "exports", "webpack"], factory);
     }
 })(function (require, exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
+    const webpack_1 = require("webpack");
     /**
+     * LegionExtractStaticFilePlugin
+     *
+     * 将模块级别的静态资源重新定位到对应的 chunk 目录下，
+     * 并清理根目录下的重复资源。
+     *
      * WP5 Migration:
      * - compiler.plugin() → compiler.hooks.compilation.tap()
      * - compilation.plugin('before-chunk-assets') → compilation.hooks.processAssets.tap()
      * - mainTemplate.plugin('asset-path') → Removed (MiniCssExtractPlugin handles CSS placement)
-     * - compiler.plugin('emit') → merged into processAssets
+     * - compilation.plugin('emit') → merged into processAssets
      */
     function LegionExtractStaticFilePlugin(options) {
         this.options = options;
     }
     exports.default = LegionExtractStaticFilePlugin;
     LegionExtractStaticFilePlugin.prototype.apply = function (compiler) {
-        compiler.hooks.compilation.tap('LegionExtractStaticFilePlugin', function (compilation) {
+        compiler.hooks.compilation.tap('LegionExtractStaticFilePlugin', (compilation) => {
             compilation.hooks.processAssets.tap({
                 name: 'LegionExtractStaticFilePlugin',
-                stage: compilation.constructor.PROCESS_ASSETS_STAGE_OPTIMIZE,
-            }, function () {
-                var chunks = Array.from(compilation.chunks);
-                if (!chunks.length) return;
-                var modules = Array.from(compilation.modules);
-                for (var _i = 0; _i < modules.length; _i++) {
-                    var module_1 = modules[_i];
-                    if (!module_1.assets || !Object.keys(module_1.assets).length) continue;
-                    var moduleChunks = module_1.getChunks
-                        ? Array.from(module_1.getChunks())
+                stage: webpack_1.Compilation.PROCESS_ASSETS_STAGE_OPTIMIZE,
+            }, () => {
+                const chunks = [...compilation.chunks];
+                if (!chunks.length)
+                    return;
+                for (const module of compilation.modules) {
+                    if (!module.assets || !Object.keys(module.assets).length)
+                        continue;
+                    const moduleChunks = module.getChunks
+                        ? [...module.getChunks()]
                         : [];
-                    if (!moduleChunks.length) continue;
-                    var assetKeys = Object.keys(module_1.assets);
-                    for (var _a = 0; _a < assetKeys.length; _a++) {
-                        var key = assetKeys[_a];
-                        for (var _b = 0; _b < moduleChunks.length; _b++) {
-                            var chunk = moduleChunks[_b];
+                    if (!moduleChunks.length)
+                        continue;
+                    const assetKeys = Object.keys(module.assets);
+                    for (const key of assetKeys) {
+                        for (const chunk of moduleChunks) {
                             if (chunk.name && key in compilation.assets) {
-                                var newPath = chunk.name + "/" + key;
+                                const newPath = `${chunk.name}/${key}`;
                                 if (!(newPath in compilation.assets)) {
                                     compilation.assets[newPath] = compilation.assets[key];
                                 }
