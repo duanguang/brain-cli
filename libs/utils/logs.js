@@ -16,6 +16,7 @@
     const boxen = importLazy('boxen');
     const pupa = importLazy('pupa');
     const chalks = importLazy('chalk');
+    const pkg = require('../../package.json');
     function warning(message) {
         console.warn(chalk.yellow(`[brain-cli]:${message}`));
     }
@@ -31,6 +32,7 @@ App running at:
 - Network: ${chalks().cyan(`{http}://{ip}:{port}/{projectUrl}`)}
 - Server: ${chalks().cyan(`{http}://{server}:{port}/{projectUrl}`)}
 - docs☆: ${chalks().hex('#FD8EC5')('https://www.npmjs.com/package/brain-cli')}
+- version: ${chalks().cyan(pkg.version)}
 `;
     function logAppRunning(options) {
         const template = options.message || defaultTemplate;

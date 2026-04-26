@@ -28,7 +28,7 @@
         loader: 'postcss-loader',
         options: {
             ident: 'postcss',
-            plugins: [require('autoprefixer')({ browsers: browsers })],
+            plugins: [require('autoprefixer')({ overrideBrowserslist: browsers })],
         },
     };
     if (px2rem && Object.getOwnPropertyNames(px2rem).length) {
