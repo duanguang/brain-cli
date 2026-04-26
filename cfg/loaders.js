@@ -8,13 +8,17 @@
     }
 })(function (require, exports) {
     "use strict";
+    /**
+     * @deprecated 此文件已废弃，CSS/Less 加载器配置已迁移到 cfg/base.ts 的 getCssLoaders() 方法中。
+     * WP5 升级后使用 MiniCssExtractPlugin 替代了 ExtractTextPlugin。
+     */
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.loaders = void 0;
     const env_1 = require("../libs/utils/env");
     const constants_1 = require("../libs/constants/constants");
     const path = require("path");
     const EConfig_1 = require("../libs/settings/EConfig");
-    const ExtractTextPlugin = require('extract-text-webpack-plugin');
+    const MiniCssExtractPlugin = require('mini-css-extract-plugin');
     const __DEV__ = (0, env_1.isDev)();
     const CSS_MODULE_OPTION = {
         modules: {
@@ -27,12 +31,13 @@
     const postcss_loader = {
         loader: 'postcss-loader',
         options: {
-            ident: 'postcss',
-            plugins: [require('autoprefixer')({ overrideBrowserslist: browsers })],
+            postcssOptions: {
+                plugins: [require('autoprefixer')({ overrideBrowserslist: browsers })],
+            },
         },
     };
     if (px2rem && Object.getOwnPropertyNames(px2rem).length) {
-        postcss_loader.options.plugins.push(require('postcss-plugin-px2rem')(px2rem));
+        postcss_loader.options.postcssOptions.plugins.push(require('postcss-plugin-px2rem')(px2rem));
     }
     function generateLoaders(cssModule, loader, loaderOptions) {
         let style = [{ loader: 'css-loader', options: { importLoaders: 1 } }];
@@ -49,11 +54,8 @@
             let styles = ['style-loader', ...style];
             return styles;
         }
-        return ExtractTextPlugin.extract({
-            fallback: 'style-loader',
-            use: style,
-            /* publicPath: '/', */
-        });
+        // WP5: 使用 MiniCssExtractPlugin 替代 ExtractTextPlugin
+        return [MiniCssExtractPlugin.loader, ...style];
     }
     exports.loaders = [
         {
@@ -71,7 +73,6 @@
             include: path.join(process.cwd(), './src'),
         },
         {
-            /* test: /\.css$/, */
             test: new RegExp(`^(.*\\.modules).*\\.css`),
             use: generateLoaders(CSS_MODULE_OPTION, null, postcss_loader),
             exclude: [constants_1.nodeModulesPath],
@@ -87,7 +88,6 @@
             include: path.join(process.cwd(), './src'),
         },
         {
-            /* test: /\.less/, */
             test: new RegExp(`^(.*\\.modules).*\\.less`),
             use: generateLoaders(CSS_MODULE_OPTION, postcss_loader, {
                 loader: 'less-loader',

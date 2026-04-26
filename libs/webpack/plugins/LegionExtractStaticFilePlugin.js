@@ -9,91 +9,49 @@
 })(function (require, exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
+    /**
+     * WP5 Migration:
+     * - compiler.plugin() → compiler.hooks.compilation.tap()
+     * - compilation.plugin('before-chunk-assets') → compilation.hooks.processAssets.tap()
+     * - mainTemplate.plugin('asset-path') → Removed (MiniCssExtractPlugin handles CSS placement)
+     * - compiler.plugin('emit') → merged into processAssets
+     */
     function LegionExtractStaticFilePlugin(options) {
         this.options = options;
     }
     exports.default = LegionExtractStaticFilePlugin;
     LegionExtractStaticFilePlugin.prototype.apply = function (compiler) {
-        const extracts = [];
-        // compilation（'编译器'对'编译ing'这个事件的监听）
-        compiler.plugin('compilation', function (compilation) {
-            compilation.plugin('before-chunk-assets', function () {
-                compilation.mainTemplate.plugin('asset-path', function (path, data) {
-                    if (compilation.name &&
-                        compilation.name.indexOf('extract-text-webpack-plugin') > -1 &&
-                        path === compilation.outputOptions.publicPath) {
-                        return '/';
+        compiler.hooks.compilation.tap('LegionExtractStaticFilePlugin', function (compilation) {
+            compilation.hooks.processAssets.tap({
+                name: 'LegionExtractStaticFilePlugin',
+                stage: compilation.constructor.PROCESS_ASSETS_STAGE_OPTIMIZE,
+            }, function () {
+                var chunks = Array.from(compilation.chunks);
+                if (!chunks.length) return;
+                var modules = Array.from(compilation.modules);
+                for (var _i = 0; _i < modules.length; _i++) {
+                    var module_1 = modules[_i];
+                    if (!module_1.assets || !Object.keys(module_1.assets).length) continue;
+                    var moduleChunks = module_1.getChunks
+                        ? Array.from(module_1.getChunks())
+                        : [];
+                    if (!moduleChunks.length) continue;
+                    var assetKeys = Object.keys(module_1.assets);
+                    for (var _a = 0; _a < assetKeys.length; _a++) {
+                        var key = assetKeys[_a];
+                        for (var _b = 0; _b < moduleChunks.length; _b++) {
+                            var chunk = moduleChunks[_b];
+                            if (chunk.name && key in compilation.assets) {
+                                var newPath = chunk.name + "/" + key;
+                                if (!(newPath in compilation.assets)) {
+                                    compilation.assets[newPath] = compilation.assets[key];
+                                }
+                            }
+                        }
+                        delete compilation.assets[key];
                     }
-                    return path;
-                });
-                if (compilation.chunks &&
-                    compilation.chunks.length > 0 &&
-                    compilation.chunks[0].name) {
-                    const mainTemplate = compilation.mainTemplate;
-                    // mainTemplate.plugin("require-extensions", function (source, chunk, hash) {
-                    //     if (chunk.name) {
-                    //         var buf = [source];
-                    //         buf.push("");
-                    //         buf.push("// __legion_app_name__");
-                    //         buf.push(this.requireFn + ".n = '" + chunk.name + "';");
-                    //         return this.asString(buf);
-                    //     }
-                    //     return source;
-                    // });
-                    compilation.children.forEach(c => {
-                        if (c.name == 'extract-text-webpack-plugin') {
-                            const files = Object.keys(c.assets);
-                            if (files.length > 0) {
-                                c.entries.forEach(e => {
-                                    extracts.push({
-                                        resource: e.resource,
-                                        files: files,
-                                    });
-                                });
-                            }
-                        }
-                    });
-                    compilation.modules.forEach(module => {
-                        extracts.forEach(extract => {
-                            if (extract.resource == module.resource) {
-                                extract.files.forEach(file => {
-                                    module.chunks.forEach(chunk => {
-                                        if (chunk.name) {
-                                            const path = `${chunk.name}/${file}`;
-                                            if (!(path in compilation.assets)) {
-                                                compilation.assets[path] = compilation.assets[file];
-                                            }
-                                        }
-                                    });
-                                });
-                            }
-                        });
-                        if (module.assets && module.chunks.length > 0) {
-                            const keys = Object.keys(module.assets);
-                            if (keys.length > 0) {
-                                keys.forEach(key => {
-                                    module.chunks.forEach(chunk => {
-                                        if (chunk.name) {
-                                            module.assets[`${chunk.name}/${key}`] = module.assets[key];
-                                        }
-                                    });
-                                    delete module.assets[key];
-                                });
-                                // module.dependencies[0].expression += '+ "/" +' + mainTemplate.requireFn + '.n + "/"';//解决资源路径require方式路径错误问题
-                            }
-                        }
-                    });
                 }
             });
-        });
-        // emit（'编译器'对'生成最终资源'这个事件的监听）
-        compiler.plugin('emit', function (compilation, callback) {
-            extracts.forEach(extract => {
-                extract.files.forEach(file => {
-                    delete compilation.assets[file];
-                });
-            });
-            callback();
         });
     };
 });

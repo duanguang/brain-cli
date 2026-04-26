@@ -402,7 +402,6 @@ export default function getBaseConfig({
         : [
             new TerserPlugin({
               parallel: true,
-              sourceMap: false,
               extractComments: false,
               terserOptions: {
                 compress: {
