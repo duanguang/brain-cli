@@ -190,9 +190,12 @@
             entry: getEntries(),
             mode: __DEV__ ? 'development' : 'production',
             devtool: __DEV__ && 'cheap-module-source-map',
-            // Rspack 2.x 持久缓存（experiments.cache 在 2.x 已不存在；默认目录 node_modules/.cache/rspack）
-            // 验证标准 = 任务 11 dev 二次启动明显变快
-            experiments: { newCache: true },
+            // Rspack 2.x 持久缓存（顶层 cache 字段；与 webpack 版 cache: { type: 'filesystem' } 同构；
+            // experiments.newCache 在 2.2.1 仅切换缓存引擎不落盘，已实测排除）
+            cache: {
+                type: 'persistent',
+                buildDependencies: [__filename],
+            },
             output: Object.assign(Object.assign({}, library), { 
                 // qiankun 产物形态（对齐 cfg/base.js）
                 chunkLoadingGlobal: process.env.webpackJsonp || 'webpackJsonpName', path: path.join(process.cwd(), constants_1.DIST), filename: __DEV__
