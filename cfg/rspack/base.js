@@ -18,7 +18,10 @@
     const objects_1 = require("../../libs/utils/objects");
     const javaScriptLoader_1 = require("../../libs/webpack/javaScriptLoader");
     const nodeModulesPath = path.resolve(process.cwd(), 'node_modules');
-    const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+    // CSS 提取用 Rspack 原生 CssExtractRspackPlugin（mini-css-extract-plugin 2.10 在
+    // @rspack/core 2.x 下因 webpack.util.serialization 缺失崩溃，见执行者必读）；
+    // filename/chunkFilename 语义与 MCEP 一致
+    const { CssExtractRspackPlugin } = require('@rspack/core');
     // Rspack 内核：bundler 与核心插件一律取自 @rspack/core，不再 require('webpack')
     const { DefinePlugin } = require('@rspack/core');
     const entries = (0, getEntries_1.getApps)();
@@ -93,10 +96,10 @@
                 if (__DEV__) {
                     return ['style-loader', ...style];
                 }
-                return [MiniCssExtractPlugin.loader, ...style];
+                return [CssExtractRspackPlugin.loader, ...style];
             }
             if (!__DEV__) {
-                config.plugins.push(new MiniCssExtractPlugin({
+                config.plugins.push(new CssExtractRspackPlugin({
                     filename: '[name]/styles/[name].[contenthash:8].bundle.css',
                     chunkFilename: 'common/styles/[name].[contenthash:8].bundle.css',
                 }));

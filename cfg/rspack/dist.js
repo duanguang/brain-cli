@@ -13,7 +13,10 @@
     const base_1 = require("./base");
     const LegionExtractStaticFilePlugin_1 = require("../../libs/webpack/plugins/LegionExtractStaticFilePlugin");
     const { SwcJsMinimizerRspackPlugin, LightningCssMinimizerRspackPlugin } = require('@rspack/core');
-    const CopyWebpackPlugin = require('copy-webpack-plugin');
+    // static→common 拷贝用 Rspack 原生 CopyRspackPlugin（copy-webpack-plugin 11/14 在
+    // @rspack/core 2.x 的 processAssets 阶段崩溃，二分定位实证，见执行者必读）；
+    // patterns 参数语义与 copy-webpack-plugin 一致，webpack 链路继续用 copy-webpack-plugin
+    const { CopyRspackPlugin } = require('@rspack/core');
     const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
     /**
      * Rspack build 配置：
@@ -35,7 +38,7 @@
             new LightningCssMinimizerRspackPlugin(),
         ];
         config.plugins.push(new LegionExtractStaticFilePlugin_1.default());
-        config.plugins.push(new CopyWebpackPlugin({
+        config.plugins.push(new CopyRspackPlugin({
             patterns: [{
                     from: path.join(process.cwd(), 'static'),
                     to: 'common',
