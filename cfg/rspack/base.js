@@ -127,7 +127,7 @@
                     test: /\.less/,
                     use: generateLoaders(null, {
                         loader: 'less-loader',
-                        options: { lessOptions: { javascriptEnabled: true, math: 'always' } },
+                        options: { lessOptions: { javascriptEnabled: true, math: 'always', quietDeprecations: true } },
                     }),
                     include: [path.resolve(nodeModulesPath, 'antd'), /antd/],
                 },
@@ -143,12 +143,12 @@
                 },
                 {
                     test: new RegExp(`^(?!.*\\.modules).*\\.less`),
-                    use: generateLoaders(null, postcss_loader, { loader: 'less-loader', options: { lessOptions: { javascriptEnabled: true, math: 'always' } } }),
+                    use: generateLoaders(null, postcss_loader, { loader: 'less-loader', options: { lessOptions: { javascriptEnabled: true, math: 'always', quietDeprecations: true } } }),
                     include: [path.join(process.cwd(), './src')].concat((css === null || css === void 0 ? void 0 : css.loader_include) || []),
                 },
                 {
                     test: new RegExp(`^(.*\\.modules).*\\.less`),
-                    use: generateLoaders(CSS_MODULE_OPTION, postcss_loader, { loader: 'less-loader', options: { lessOptions: { javascriptEnabled: true, math: 'always' } } }),
+                    use: generateLoaders(CSS_MODULE_OPTION, postcss_loader, { loader: 'less-loader', options: { lessOptions: { javascriptEnabled: true, math: 'always', quietDeprecations: true } } }),
                     include: [path.join(process.cwd(), './src')].concat((css === null || css === void 0 ? void 0 : css.loader_include) || []),
                 },
             ];
