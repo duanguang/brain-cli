@@ -66,12 +66,15 @@
         }
         /**
          * 项目侧透传插件归一化：webpack 包 DefinePlugin 实例 → @rspack/core DefinePlugin
-         * （检测构造名与 values 字段，避免误伤其他同名构造）
+         * （检测构造名；值字段兼容 webpack 新旧版本：5.106 为 definitions，更早为 values）
          */
         function normalizeProjectPlugins(list) {
             return (list || []).map((p) => {
-                if (p && p.constructor && p.constructor.name === 'DefinePlugin' && p.values) {
-                    return new DefinePlugin(p.values);
+                if (p && p.constructor && p.constructor.name === 'DefinePlugin') {
+                    const defs = p.definitions !== undefined ? p.definitions : p.values;
+                    if (defs && Object.keys(defs).length) {
+                        return new DefinePlugin(defs);
+                    }
                 }
                 return p;
             });
