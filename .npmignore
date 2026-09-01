@@ -120,3 +120,7 @@ cfg/**/*.ts
 libs/**/*.ts
 .omc
 .spec-workflow
+
+# v3 工程文档与本地配置不进 npm 包
+docs
+.claude
