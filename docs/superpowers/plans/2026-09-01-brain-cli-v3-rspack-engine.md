@@ -24,9 +24,10 @@
 
 | 开放变量 | 判定标准 |
 |---|---|
-| `SwcJsMinimizerRspackPlugin` minimizerOptions 参数名 | 以安装版 `@rspack/core` d.ts 为准；语义 = drop_console + drop_debugger + 去注释 |
-| `CssMinimizerRspackPlugin` 是否存在 | 任务 1 步骤 3 验证导出；不存在则查 d.ts 中等效导出名 |
-| `experiments.cache` 字段名 | 以安装版 d.ts 为准；验证标准 = dev 二次启动明显变快 |
+| **（已核实 @rspack/core 2.2.1）** `SwcJsMinimizerRspackPlugin` | `minimizerOptions.compress` = TerserCompressOptions，含 `drop_console`/`drop_debugger`（d.ts 已核实）；去注释用 `extractComments: false`（`format.comments` 默认即 false） |
+| **（已核实 2.2.1）** CSS 压缩器 | `CssMinimizerRspackPlugin` **在 2.x 不存在**，等效导出为 `LightningCssMinimizerRspackPlugin`（exports.d.ts:158 已核实）——任务 6 用此名 |
+| **（已核实 2.2.1）** 持久缓存 | `experiments.cache` **在 2.x 不存在**，改为 `experiments: { newCache: true }`（Experiments 类型已核实；底层 PersistentCacheOptions 默认目录 `node_modules/.cache/rspack`）；验证标准 = dev 二次启动明显变快 |
+| **（已核实 2.2.1）** `experiments.css` | 2.0 起 deprecated（需手动加 CSS 规则启用 CSS 支持）——与本计划"显式 loader 链"决策一致，无需开启 |
 | dev 图片规则 `generator.emit: false` | 任务 11 用 demo 图片实测：dev 产物不落盘、页面图片经内存服务可显示 |
 | BundleAnalyzerPlugin（`-s` report） | 兼容则 rspack 可用；不兼容则 report 模式仅 webpack 引擎可用（记录到 README，不算失败） |
 
@@ -436,8 +437,9 @@ rtk git commit -m "feat: CLI dev/start/build 支持 --engine 参数"
             entry: getEntries(),
             mode: __DEV__ ? 'development' : 'production',
             devtool: __DEV__ && 'cheap-module-source-map',
-            // Rspack 持久缓存（字段名以安装版 d.ts 为准；验证标准=任务 11 dev 二次启动明显变快）
-            experiments: { cache: true },
+            // Rspack 2.x 持久缓存（experiments.cache 在 2.x 已不存在；默认目录 node_modules/.cache/rspack）
+            // 验证标准 = 任务 11 dev 二次启动明显变快
+            experiments: { newCache: true },
             output: Object.assign(Object.assign({}, library), { 
                 // qiankun 产物形态（对齐 cfg/base.js）
                 chunkLoadingGlobal: process.env.webpackJsonp || 'webpackJsonpName', path: path.join(process.cwd(), constants_1.DIST), filename: __DEV__
@@ -631,7 +633,7 @@ rtk git commit -m "feat: cfg/rspack/dev.js（devServer 对齐 webpack 版，无 
     const path = require("path");
     const base_1 = require("./base");
     const LegionExtractStaticFilePlugin_1 = require("../libs/webpack/plugins/LegionExtractStaticFilePlugin");
-    const { SwcJsMinimizerRspackPlugin, CssMinimizerRspackPlugin } = require('@rspack/core');
+    const { SwcJsMinimizerRspackPlugin, LightningCssMinimizerRspackPlugin } = require('@rspack/core');
     const CopyWebpackPlugin = require('copy-webpack-plugin');
     const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
     /**
@@ -646,12 +648,12 @@ rtk git commit -m "feat: cfg/rspack/dev.js（devServer 对齐 webpack 版，无 
         config.mode = 'production';
         config.optimization.minimizer = [
             new SwcJsMinimizerRspackPlugin({
+                extractComments: false,
                 minimizerOptions: {
                     compress: { drop_console: true, drop_debugger: true },
                 },
-                format: { comments: false },
             }),
-            new CssMinimizerRspackPlugin(),
+            new LightningCssMinimizerRspackPlugin(),
         ];
         config.plugins.push(new LegionExtractStaticFilePlugin_1.default());
         config.plugins.push(new CopyWebpackPlugin({
@@ -756,7 +758,7 @@ node -e "process.env.NODE_ENV='dev'; const EConfig=require('./libs/settings/ECon
 node -e "process.env.NODE_ENV='dev'; process.env.BRAIN_ENGINE='webpack'; const EConfig=require('./libs/settings/EConfig').default; const getConfig=require('./webpack.config').default; const c=getConfig(EConfig.getInstance()); console.log('webpack 兜底 experiments:', JSON.stringify(c.experiments), '| devServer?', !!c.devServer)"
 ```
 
-预期：第一条 `experiments: {"cache":true} | devServer? true`（rspack dev 配置）；第二条 `experiments: undefined | devServer? true`（webpack 版无 experiments 字段 = 原链路未被破坏）。
+预期：第一条 `experiments: {"newCache":true} | devServer? true`（rspack dev 配置）；第二条 `experiments: undefined | devServer? true`（webpack 版无 experiments 字段 = 原链路未被破坏）。
 
 - [ ] **步骤 3：Commit**
 
@@ -986,7 +988,7 @@ node bin/index.js dev --apps=app1 --engine=rspack
 - [ ] **步骤 2：HMR + 持久缓存验证**
 
 dev（rspack）运行中修改 `src/app1` 下任一文件保存 → 预期 1 秒内 `[rspack] 打包完成`。
-重启 dev（rspack）→ 预期第二次启动明显快于第一次（`experiments.cache` 持久缓存生效；字段名以安装版 d.ts 为准）。
+重启 dev（rspack）→ 预期第二次启动明显快于第一次（`experiments.newCache` 持久缓存生效）。
 
 - [ ] **步骤 3：build 双引擎自测 + 产物检查**
 

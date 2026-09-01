@@ -78,7 +78,7 @@ module.exports = resolveEngine;
 | webpack 版 | rspack 版 | 说明 |
 |---|---|---|
 | entry/mode/devtool `cheap-module-source-map` | 同 | Rspack 直接支持 |
-| `cache: filesystem(.webpack_cache)` | `experiments.cache`（默认 `node_modules/.cache/rspack`） | 两引擎缓存天然隔离 |
+| `cache: filesystem(.webpack_cache)` | `experiments.newCache`（@rspack/core 2.x；默认 `node_modules/.cache/rspack`） | 两引擎缓存天然隔离 |
 | `output.library` + `libraryTarget:'window'`（支持 string/function library） | 同 | Rspack 官方支持 window |
 | `chunkLoadingGlobal`/`filename`/`chunkFilename`/`publicPath`/`hashFunction: xxhash64` | 同 | qiankun 产物形态不变 |
 | `resolve.alias`（legions-nprogress/utils-tool esm 别名+项目别名）/`extensions`/`modules` | 同 | |
@@ -88,7 +88,7 @@ module.exports = resolveEngine;
 | getCssLoaders（style/css/postcss+px2rem/less+javascriptEnabled + `*.modules.css` 正则 + `loader_include`） | **显式 loader 链原样搬运，不用 experiments.css** | antd2 less/CSS Modules 正则/loader_include 行为最等价；MiniCssExtractPlugin 在 Rspack 兼容列表 |
 | 图片/字体/jsp asset 规则（dev 图片 `emit:false`） | 同 | dev emit:false 列为实现期验证点 |
 | TerserPlugin(drop_console/drop_debugger) | `SwcJsMinimizerRspackPlugin`（minimizerOptions 等价参数） | 以安装版 d.ts 为准 |
-| CssMinimizerWebpackPlugin | `CssMinimizerRspackPlugin`（内置） | 双压缩器数组对齐 webpack 版结构 |
+| CssMinimizerWebpackPlugin | `LightningCssMinimizerRspackPlugin`（@rspack/core 2.x 内置；1.x 的 CssMinimizerRspackPlugin 已不存在） | 双压缩器数组对齐 webpack 版结构 |
 | `...plugins` 透传（项目侧 ProgressBar/FixHtmlAssetsPath/DefinePlugin） | 原样透传 | |
 | webpack.DefinePlugin | `@rspack/core` 的 DefinePlugin | cfg/rspack 内一律用 @rspack/core 导出 |
 | Spritesmith | 不迁移（icons 全空死代码） | rspack 分支不放 |
