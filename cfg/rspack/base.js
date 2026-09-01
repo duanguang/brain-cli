@@ -221,7 +221,15 @@
                     : `[name]/js/[name].[chunkhash:5].bundle.js`, chunkFilename: 'common/js/[name].[chunkhash:5].bundle.js', publicPath: __DEV__ ? publicPath : process.env.cdnRelease || '../', hashFunction: 'xxhash64' }),
             resolve: Object.assign(Object.assign({}, webpackConfig.resolve), { alias: Object.assign({
                     // WP5 同款 UMD 模块别名
-                    'legions-nprogress': path.resolve(nodeModulesPath, 'legions-nprogress/dist/legions-nprogress.esm.js'), 'legions-utils-tool': path.resolve(nodeModulesPath, 'legions-utils-tool/dist/legions-utils-tool.esm.js') }, ((webpackConfig.resolve && webpackConfig.resolve.alias) || {})), extensions: ['.web.js', '.js', '.json', '.ts', '.tsx', '.jsx'], byDependency: { esm: { fullySpecified: false } }, modules: [
+                    'legions-nprogress': path.resolve(nodeModulesPath, 'legions-nprogress/dist/legions-nprogress.esm.js'), 'legions-utils-tool': path.resolve(nodeModulesPath, 'legions-utils-tool/dist/legions-utils-tool.esm.js'),
+                    // @legions/pro-design 对 @visactor/vtable-plugins 的深层子路径导入（exports 未声明）：
+                    // rspack 解析器缺 webpack javascript/auto 的文件系统回退，逐条精确映射（目标文件已核实存在）
+                    '@visactor/vtable-plugins/es/filter/filter-engine$': path.resolve(nodeModulesPath, '@visactor/vtable-plugins/es/filter/filter-engine.js'),
+                    '@visactor/vtable-plugins/es/filter/types$': path.resolve(nodeModulesPath, '@visactor/vtable-plugins/es/filter/types.js'),
+                    '@visactor/vtable-plugins/es/filter/value-filter$': path.resolve(nodeModulesPath, '@visactor/vtable-plugins/es/filter/value-filter.js'),
+                    '@visactor/vtable-plugins/es/table-export/csv$': path.resolve(nodeModulesPath, '@visactor/vtable-plugins/es/table-export/csv/'),
+                    '@visactor/vtable-plugins/es/table-export/excel$': path.resolve(nodeModulesPath, '@visactor/vtable-plugins/es/table-export/excel/'),
+                }, ((webpackConfig.resolve && webpackConfig.resolve.alias) || {})), extensions: ['.web.js', '.js', '.json', '.ts', '.tsx', '.jsx'], byDependency: { esm: { fullySpecified: false } }, modules: [
                     'src',
                     'node_modules',
                     path.join(process.cwd(), `src`),
