@@ -45,18 +45,21 @@
         publicPath += name + '/';
         const { disableReactHotLoader, commonsChunkPlugin, plugins, output, css, } = webpackConfig;
         const NewOptimization = (0, objects_1.merge)(Optimization, webpackConfig.optimization);
-        const library = {};
+        let libraryNested = {};
         if (output && typeof output === 'object' && !Array.isArray(output)) {
-            ['library', 'libraryTarget'].forEach((item) => {
-                if (output.hasOwnProperty(item)) {
-                    if (typeof output[item] === 'string') {
-                        library[item] = output[item];
-                    }
-                    else if (typeof output[item] === 'function') {
-                        library[item] = output[item](name);
-                    }
-                }
-            });
+            // @rspack/core 2.x 对 legacy「字符串 library + libraryTarget」的归一化会把 type 丢成 var
+            // （wms 首编译实证：window 类型被当 var 且拒绝带 - 的库名），必须用嵌套形式
+            const extract = (item) => {
+                const val = output[item];
+                if (typeof val === 'string') return val;
+                if (typeof val === 'function') return val(name);
+                return undefined;
+            };
+            const libName = extract('library');
+            const libType = extract('libraryTarget');
+            if (libName || libType) {
+                libraryNested.library = Object.assign(libType ? { type: libType } : {}, libName ? { name: libName } : {});
+            }
         }
         function getEntries() {
             return entries().reduce((prev, app) => {
@@ -211,7 +214,7 @@
                 type: 'persistent',
                 buildDependencies: [__filename],
             },
-            output: Object.assign(Object.assign({}, library), { 
+            output: Object.assign(Object.assign({}, libraryNested), { 
                 // qiankun 产物形态（对齐 cfg/base.js）
                 chunkLoadingGlobal: process.env.webpackJsonp || 'webpackJsonpName', path: path.join(process.cwd(), constants_1.DIST), filename: __DEV__
                     ? `[name]/js/[name].js`
