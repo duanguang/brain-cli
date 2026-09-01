@@ -250,6 +250,16 @@
             ],
         };
         config.module = {
+            parser: {
+                javascript: {
+                    // webpack 对 CJS/ESM 互操作命名导入缺导出仅告警（被 ignoreWarnings 吞掉），
+                    // rspack 2.x 升格为 ESModulesLinkingError 阻断编译（wms 实证 568 处）。
+                    // 关闭三导出存在性检查以对齐 webpack 行为（运行时 CJS 互操作本就可用）
+                    importExportsPresence: false,
+                    exportsPresence: false,
+                    reexportsExportsPresence: false,
+                },
+            },
             rules: [
                 ...(0, javaScriptLoader_1.getJSXLoadersed)((babel === null || babel === void 0 ? void 0 : babel.loader_include) || []),
                 ...(0, javaScriptLoader_1.getTsLoadersed)((babel === null || babel === void 0 ? void 0 : babel.loader_include) || []),
