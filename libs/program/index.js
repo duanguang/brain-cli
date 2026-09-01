@@ -13,6 +13,7 @@
     const EConfig_1 = require("../settings/EConfig");
     const webpack_config_1 = require("../../webpack.config");
     const webpack = require("webpack");
+    const resolveEngine_1 = require("../utils/engine");
     function programInit(env, options) {
         if (env === 'dev') {
             /**
@@ -30,7 +31,10 @@
                 webpackConfig.pendings.forEach(pending => pending());
             }
             delete webpackConfig.pendings;
-            webpack(webpackConfig, function (err, stats) {
+            // v3 双内核：build 按引擎分发（rspack 动态 require，webpack 路径零改动）
+            const engine = resolveEngine_1.default(eConfig);
+            const bundler = engine === 'rspack' ? require('@rspack/core').rspack : webpack;
+            bundler(webpackConfig, function (err, stats) {
                 if (err)
                     throw err;
                 process.stdout.write(stats.toString({
