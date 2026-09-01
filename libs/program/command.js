@@ -69,17 +69,26 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
                 }
             }
         }
+        setEngine(options) {
+            const engine = options && options['engine'];
+            if (typeof engine === 'string' && engine) {
+                process.env.BRAIN_ENGINE = engine;
+            }
+            // 未传 --engine 时不写 env，让 resolveEngine 走默认 rspack
+        }
         dev() {
             this.program
                 .command('dev')
                 .option('--env [value]', 'webpack Build environment')
                 .option('--apps [value]', 'webpack Build a specified app name')
+                .option('--engine [value]', 'bundler engine: webpack | rspack (default: rspack)')
                 .description('start webpack dev server for develoment mode')
                 .action(options => {
                 let env = 'dev';
                 let __env = options['env'] || 'dev';
                 this.setProcessEnv(__env, options['_name'] || 'dev');
                 this.setApps(options);
+                this.setEngine(options);
                 (0, logs_1.log)(`当前编译环境为: ${process.env.NODE_ENV} [${this.env[env]}]`);
                 (0, index_1.default)(env);
             });
@@ -89,12 +98,14 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
                 .command('start')
                 .option('--env [value]', 'webpack Build environment')
                 .option('--apps [value]', 'webpack Build a specified app name')
+                .option('--engine [value]', 'bundler engine: webpack | rspack (default: rspack)')
                 .description('start webpack dev server for develoment mode')
                 .action(options => {
                 let env = 'dev';
                 let __env = options['env'] || 'dev';
                 this.setProcessEnv(__env, 'dev');
                 this.setApps(options);
+                this.setEngine(options);
                 (0, logs_1.log)(`当前编译环境为: ${process.env.NODE_ENV} [${this.env[env]}]`);
                 (0, index_1.default)(env);
             });
@@ -118,10 +129,12 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
                 .option('--apps [value]', 'webpack Build a specified app name')
                 .option('--webpackJsonp [value]', 'webpack Generate a specified webpackJsonp name')
                 .option('--cdn [value]', 'The resource distribution server')
+                .option('--engine [value]', 'bundler engine: webpack | rspack (default: rspack)')
                 .description('webpack building')
                 .action((env = 'prod', options) => {
                 this.setProcessEnv(options.S ? 'report' : env, options['_name'] || 'build');
                 this.setApps(options);
+                this.setEngine(options);
                 process.env.webpackJsonp = options['webpackJsonp']
                     ? options['webpackJsonp']
                     : 'webpackJsonpName';
