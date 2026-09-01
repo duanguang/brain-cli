@@ -506,7 +506,7 @@ echo "（dev.js 在任务 5 完成后执行下一条）"
 node -e "process.env.NODE_ENV='dev'; const EConfig=require('./libs/settings/EConfig').default; const base=require('./cfg/rspack/base').default; const c=base(EConfig.getInstance()); console.log('entry:', Object.keys(c.entry).join(','), '| rules:', c.module.rules.length, '| experiments:', JSON.stringify(c.experiments))"
 ```
 
-预期：`entry: app1,app2 | rules: ≥10 | experiments: {"cache":true}`。报错则按信息修复（常见：路径别名笔误、@rspack/core 导出名）。
+预期：`entry: app1,app2 | rules: ≥10 | experiments: {"newCache":true}`。报错则按信息修复（常见：路径别名笔误、@rspack/core 导出名）。
 
 - [ ] **步骤 3：Commit**
 
@@ -632,7 +632,7 @@ rtk git commit -m "feat: cfg/rspack/dev.js（devServer 对齐 webpack 版，无 
     Object.defineProperty(exports, "__esModule", { value: true });
     const path = require("path");
     const base_1 = require("./base");
-    const LegionExtractStaticFilePlugin_1 = require("../libs/webpack/plugins/LegionExtractStaticFilePlugin");
+    const LegionExtractStaticFilePlugin_1 = require("../../libs/webpack/plugins/LegionExtractStaticFilePlugin");
     const { SwcJsMinimizerRspackPlugin, LightningCssMinimizerRspackPlugin } = require('@rspack/core');
     const CopyWebpackPlugin = require('copy-webpack-plugin');
     const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
