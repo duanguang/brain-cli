@@ -4,7 +4,7 @@
         if (v !== undefined) module.exports = v;
     }
     else if (typeof define === "function" && define.amd) {
-        define(["require", "exports", "../settings/EConfig", "./webpackCompiler", "../../webpack.config", "../utils/logs"], factory);
+        define(["require", "exports", "../settings/EConfig", "./webpackCompiler", "../../webpack.config", "../utils/logs", "../utils/engine"], factory);
     }
 })(function (require, exports) {
     "use strict";
@@ -14,6 +14,7 @@
     const WebpackDevServer = require('webpack-dev-server');
     const webpack_config_1 = require("../../webpack.config");
     const logs_1 = require("../utils/logs");
+    const resolveEngine_1 = require("../utils/engine");
     const eConfig = EConfig_1.default.getInstance();
     const { name: projectName, apps } = eConfig;
     /**
@@ -22,6 +23,26 @@
     function startWebpackDevServer(options) {
         return new Promise((resolve, reject) => {
             const { server = '0.0.0.0' } = eConfig;
+            // v3 双内核：按引擎分发（rspack 分支动态 require，避免污染 webpack 兜底路径）
+            if (resolveEngine_1.default(eConfig) === 'rspack') {
+                const { RspackDevServer } = require('@rspack/dev-server');
+                const rspackCompiler_1 = require('./rspackCompiler');
+                const { compiler, config } = rspackCompiler_1.default();
+                const devServerOptions = Object.assign({}, (config && config.devServer) || {}, {
+                    port: eConfig.defaultPort,
+                    host: server,
+                });
+                const devServer = new RspackDevServer(devServerOptions, compiler);
+                devServer.startCallback((err) => {
+                    if (err) {
+                        reject(err);
+                        return;
+                    }
+                    (0, logs_1.log)(`监听本地 ${server}:${eConfig.defaultPort}`);
+                    resolve(undefined);
+                });
+                return;
+            }
             const config = (0, webpack_config_1.default)(eConfig);
             // 处理 pendings（DLL 引用插件等）
             if (Array.isArray(config.pendings)) {
