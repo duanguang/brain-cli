@@ -26,11 +26,15 @@
 |---|---|
 | **（已核实 @rspack/core 2.2.1）** `SwcJsMinimizerRspackPlugin` | `minimizerOptions.compress` = TerserCompressOptions，含 `drop_console`/`drop_debugger`（d.ts 已核实）；去注释用 `extractComments: false`（`format.comments` 默认即 false） |
 | **（已核实 2.2.1）** CSS 压缩器 | `CssMinimizerRspackPlugin` **在 2.x 不存在**，等效导出为 `LightningCssMinimizerRspackPlugin`（exports.d.ts:158 已核实）——任务 6 用此名 |
-| **（已核实 2.2.1）** 持久缓存 | `experiments.cache` **在 2.x 不存在**，改为 `experiments: { newCache: true }`（Experiments 类型已核实；底层 PersistentCacheOptions 默认目录 `node_modules/.cache/rspack`）；验证标准 = dev 二次启动明显变快 |
+| **（已实证 2.2.1）** 持久缓存 | `experiments.cache/newCache` 在 2.x **均不落盘**（newCache 仅切换缓存引擎，实测排除）；正解 = 顶层 `cache: { type: 'persistent', buildDependencies: [__filename] }`（与 webpack 版 filesystem cache 同构，默认目录 `node_modules/.cache/rspack`） |
 | **（已核实 2.2.1）** `experiments.css` | 2.0 起 deprecated（需手动加 CSS 规则启用 CSS 支持）——与本计划"显式 loader 链"决策一致，无需开启 |
 | **（已实证 2.2.1）** CSS 提取插件 | `mini-css-extract-plugin@2.10.2` 在 @rspack/core 2.x 下构建崩溃（`webpack.util.serialization.registerLoader` 中 serialization 为 undefined，rspack build 实测复现）→ 改用 Rspack 原生 `CssExtractRspackPlugin`（导出已验证存在，filename/chunkFilename/`.loader` 语义与 MCEP 一致）；webpack 链路继续用 MCEP，互不影响 |
 | dev 图片规则 `generator.emit: false` | 任务 11 用 demo 图片实测：dev 产物不落盘、页面图片经内存服务可显示 |
 | **（已实证 2.2.1）** CopyPlugin | copy-webpack-plugin **11.0.0 与 14.0.0 均在** @rspack/core 2.x 的 processAssets 阶段崩溃（二分定位 + 升级复验实证，错误被包装为 `oneshot canceled`）→ rspack 链路（cfg/rspack/dist.js）改用 Rspack 原生 `CopyRspackPlugin`（patterns 语义一致）；webpack 链路维持 copy-webpack-plugin@11.0.0 不动（兜底依赖零漂移） |
+| **（wms 实证）** qiankun 产物 library | 2.x 归一化把 legacy「字符串 library + libraryTarget:'window'」的 type **丢成 var** 并拒绝带 `-` 库名 → 必须用嵌套形式 `library: { name, type }`（cfg/rspack/base.js 已实现 string/function 双形态提取） |
+| **（wms 实证）** 项目侧 DefinePlugin 透传 | webpack 5.106 的 DefinePlugin 值属性已改名 `definitions`（旧版 `values`），且其在 @rspack/core 2.x 下 hook 崩溃 → `normalizeProjectPlugins` 按构造名检测、原值替换（兼容新旧属性名） |
+| **（wms 实证）** ESM 严格链接 | rspack 2.x 将 CJS/ESM 命名导入缺导出从 webpack 的 warning 升格为 error（wms 实证 568 处）→ `module.parser.javascript.{import,exports,reexports}ExportsPresence: false` 对齐（568→4） |
+| **（wms 实证）** exports 子路径解析 | rspack 解析器缺 webpack javascript/auto 的文件系统回退：`@visactor/vtable-plugins/es/**` 深层导入报错 → 5 条精确 `$` alias（fullySpecified 顶层/规则级/byDependency 三处实测均无效，已排除） |
 | **（已实证 2.2.1）** ESM linking 严格性 | rspack 2.x 将「**非 modules 样式**的 default 导入」（`import x from './a.less'`，不含 `*.modules.less`）从 webpack 的 warning 提升为 **stats error**，ignoreWarnings 不抑制；CSS Modules 导入（`*.modules.*`）有 default 导出，rspack 下正常。**wms-aps-web 验收预警**：任务 15 build 验收若业务源码存在非 modules 样式的 default 导入会直接失败，处置 = 改副作用导入（brain-cli demo 源码已按此处理） |
 | BundleAnalyzerPlugin（`-s` report） | 兼容则 rspack 可用；不兼容则 report 模式仅 webpack 引擎可用（记录到 README，不算失败） |
 
