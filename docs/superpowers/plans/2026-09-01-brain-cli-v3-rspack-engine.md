@@ -40,7 +40,7 @@
 | **（已实证 2.2.1）** loader `parallel` 并行 | rspack 2.x 的 `parallel: true`（loader 移入 worker 线程池）与 ts-loader+transformer 链**不兼容——构建挂死**（CPU 空转无产物，已实测并回退）；根因是 TS API 实例不可跨 worker 共享。后续若试验，仅对 babel-loader 规则单独开（收益减半） |
 | **（SWC 化评估结论）** transformer 消除不可行 | ts-plugin-legions 的 `uniqueUid` 注入**无法运行时化**：uid = 源文件路径 + JSX 位置（编译期信息），是表格列宽/筛选持久化的稳定 key，打包后路径被抹除、运行时计数器/随机数会破坏跨会话稳定性 → **SWC 化必须完整重写两个 transformer 为 SWC 插件**（SWC 转换上下文含 filename，可等价生成路径 uid），周级工程 + 插件 API 稳定性风险。结论：transformer 留在 JS 侧是合理稳态，SWC 化仅在未来内存/速度收益有硬需求时立项 |
 | **（已实测）** 全面 SWC 化收益天花板 | wms spo 实测（`scripts/rspack/spike-swc-mem.js`，cache off/devtool off，两轮一致）：**内存不省反增**（RSS 峰值 1494~1638MB vs 基线 1080~1350MB，+28~37%——Rust 侧并行原生分配不归 V8 GC 管）；**收益仅在速度**（冷启 23.3s→9.7s，热态收窄至 12s→9.7s）。结合重写成本与 swc_core 版本耦合税：**不立项**，内存优化走 ②③④ 低成本路线 |
-| **（内存优化备选）** | ② `NODE_OPTIONS=--max-old-space-size=1536` 强制 GC 提前（立即可用）；③ devtool 降级 `eval-cheap-module-source-map`（有调试权衡）；④ `experiments.newCache`+persistent 组合（未验证兼容性） |
+| **（已实测）** 内存优化手段 | spo dev 实测（多臂 spike，`scripts/rspack/spike-swc-mem.js`）：**② `NODE_OPTIONS=--max-old-space-size=1536` 为双优冠军**（RSS 1927→1009MB -48%，耗时 22.9→12.6s——强制 GC 提前省掉 late major GC）；③ devtool 降级 eval -12%（弱于②）；devtool 关闭 -40% 但牺牲断点。全量 dev 建议用 2048 试探防 OOM。④ newCache 组合仍未验证 |
 
 ## 文件结构（锁定分解决策）
 
