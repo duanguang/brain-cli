@@ -28,6 +28,7 @@
 | **（已核实 2.2.1）** CSS 压缩器 | `CssMinimizerRspackPlugin` **在 2.x 不存在**，等效导出为 `LightningCssMinimizerRspackPlugin`（exports.d.ts:158 已核实）——任务 6 用此名 |
 | **（已核实 2.2.1）** 持久缓存 | `experiments.cache` **在 2.x 不存在**，改为 `experiments: { newCache: true }`（Experiments 类型已核实；底层 PersistentCacheOptions 默认目录 `node_modules/.cache/rspack`）；验证标准 = dev 二次启动明显变快 |
 | **（已核实 2.2.1）** `experiments.css` | 2.0 起 deprecated（需手动加 CSS 规则启用 CSS 支持）——与本计划"显式 loader 链"决策一致，无需开启 |
+| **（已实证 2.2.1）** CSS 提取插件 | `mini-css-extract-plugin@2.10.2` 在 @rspack/core 2.x 下构建崩溃（`webpack.util.serialization.registerLoader` 中 serialization 为 undefined，rspack build 实测复现）→ 改用 Rspack 原生 `CssExtractRspackPlugin`（导出已验证存在，filename/chunkFilename/`.loader` 语义与 MCEP 一致）；webpack 链路继续用 MCEP，互不影响 |
 | dev 图片规则 `generator.emit: false` | 任务 11 用 demo 图片实测：dev 产物不落盘、页面图片经内存服务可显示 |
 | BundleAnalyzerPlugin（`-s` report） | 兼容则 rspack 可用；不兼容则 report 模式仅 webpack 引擎可用（记录到 README，不算失败） |
 
@@ -268,7 +269,10 @@ rtk git commit -m "feat: CLI dev/start/build 支持 --engine 参数"
     const objects_1 = require("../libs/utils/objects");
     const javaScriptLoader_1 = require("../libs/webpack/javaScriptLoader");
     const nodeModulesPath = path.resolve(process.cwd(), 'node_modules');
-    const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+    // CSS 提取用 Rspack 原生 CssExtractRspackPlugin（mini-css-extract-plugin 2.10 在
+    // @rspack/core 2.x 下因 webpack.util.serialization 缺失崩溃，见执行者必读）；
+    // filename/chunkFilename 语义与 MCEP 一致
+    const { CssExtractRspackPlugin } = require('@rspack/core');
     // Rspack 内核：bundler 与核心插件一律取自 @rspack/core，不再 require('webpack')
     const { DefinePlugin } = require('@rspack/core');
     const entries = (0, getEntries_1.getApps)();
@@ -343,10 +347,10 @@ rtk git commit -m "feat: CLI dev/start/build 支持 --engine 参数"
                 if (__DEV__) {
                     return ['style-loader', ...style];
                 }
-                return [MiniCssExtractPlugin.loader, ...style];
+                return [CssExtractRspackPlugin.loader, ...style];
             }
             if (!__DEV__) {
-                config.plugins.push(new MiniCssExtractPlugin({
+                config.plugins.push(new CssExtractRspackPlugin({
                     filename: '[name]/styles/[name].[contenthash:8].bundle.css',
                     chunkFilename: 'common/styles/[name].[contenthash:8].bundle.css',
                 }));
