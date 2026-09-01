@@ -38,6 +38,7 @@
 | **（已实证 2.2.1）** ESM linking 严格性 | rspack 2.x 将「**非 modules 样式**的 default 导入」（`import x from './a.less'`，不含 `*.modules.less`）从 webpack 的 warning 提升为 **stats error**，ignoreWarnings 不抑制；CSS Modules 导入（`*.modules.*`）有 default 导出，rspack 下正常。**wms-aps-web 验收预警**：任务 15 build 验收若业务源码存在非 modules 样式的 default 导入会直接失败，处置 = 改副作用导入（brain-cli demo 源码已按此处理） |
 | BundleAnalyzerPlugin（`-s` report） | 兼容则 rspack 可用；不兼容则 report 模式仅 webpack 引擎可用（记录到 README，不算失败） |
 | **（已实证 2.2.1）** loader `parallel` 并行 | rspack 2.x 的 `parallel: true`（loader 移入 worker 线程池）与 ts-loader+transformer 链**不兼容——构建挂死**（CPU 空转无产物，已实测并回退）；根因是 TS API 实例不可跨 worker 共享。后续若试验，仅对 babel-loader 规则单独开（收益减半） |
+| **（SWC 化评估结论）** transformer 消除不可行 | ts-plugin-legions 的 `uniqueUid` 注入**无法运行时化**：uid = 源文件路径 + JSX 位置（编译期信息），是表格列宽/筛选持久化的稳定 key，打包后路径被抹除、运行时计数器/随机数会破坏跨会话稳定性 → **SWC 化必须完整重写两个 transformer 为 SWC 插件**（SWC 转换上下文含 filename，可等价生成路径 uid），周级工程 + 插件 API 稳定性风险。结论：transformer 留在 JS 侧是合理稳态，SWC 化仅在未来内存/速度收益有硬需求时立项 |
 | **（内存优化备选）** | ② `NODE_OPTIONS=--max-old-space-size=1536` 强制 GC 提前（立即可用）；③ devtool 降级 `eval-cheap-module-source-map`（有调试权衡）；④ `experiments.newCache`+persistent 组合（未验证兼容性） |
 
 ## 文件结构（锁定分解决策）
