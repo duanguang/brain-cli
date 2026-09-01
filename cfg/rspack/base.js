@@ -298,7 +298,14 @@
             if (!rule) return rule;
             const next = Object.assign({}, rule);
             if (Array.isArray(next.use)) {
-                next.use = next.use.map((u) => (typeof u === 'string' ? { loader: u, parallel: true } : Object.assign({}, u, { parallel: true })));
+                next.use = next.use.map((u) => {
+                    // rspack 校验要求 parallel 项必须带 options（可为空对象），否则配置报错
+                    if (typeof u === 'string') return { loader: u, options: {}, parallel: true };
+                    const withOpts = Object.assign({}, u);
+                    if (!withOpts.options) withOpts.options = {};
+                    withOpts.parallel = true;
+                    return withOpts;
+                });
             }
             else if (next.use && typeof next.use === 'object') {
                 next.use = Object.assign({}, next.use, { parallel: true });
