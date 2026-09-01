@@ -64,6 +64,18 @@
                 return prev;
             }, {});
         }
+        /**
+         * 项目侧透传插件归一化：webpack 包 DefinePlugin 实例 → @rspack/core DefinePlugin
+         * （检测构造名与 values 字段，避免误伤其他同名构造）
+         */
+        function normalizeProjectPlugins(list) {
+            return (list || []).map((p) => {
+                if (p && p.constructor && p.constructor.name === 'DefinePlugin' && p.values) {
+                    return new DefinePlugin(p.values);
+                }
+                return p;
+            });
+        }
         function getCssLoaders(css) {
             const CSS_MODULE_OPTION = {
                 modules: { localIdentName: `[local]-[hash:base64:6]` },
@@ -219,7 +231,10 @@
             optimization: NewOptimization,
             plugins: [
                 ...(0, htmlWebpackPlugin_1.default)(null, entries),
-                ...plugins,
+                // 项目侧 .e-config.js 可能传入 webpack 包的 DefinePlugin 实例（如 wms-aps-web 的
+                // LOCAL_OLD_URL/LOCAL_NEXT_URL 注入）。webpack 包的 DefinePlugin 在 @rspack/core 2.x
+                // 下 hook 签名不兼容（读 undefined 崩溃，wms 首编译实证），按构造名检测并原值替换
+                ...normalizeProjectPlugins(plugins),
                 new DefinePlugin({
                     'process.env.environment': '"' + process.env.environment + '"',
                     'process.env.apps': '"' + process.env.apps + '"',
