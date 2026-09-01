@@ -221,7 +221,7 @@
                     : `[name]/js/[name].[chunkhash:5].bundle.js`, chunkFilename: 'common/js/[name].[chunkhash:5].bundle.js', publicPath: __DEV__ ? publicPath : process.env.cdnRelease || '../', hashFunction: 'xxhash64' }),
             resolve: Object.assign(Object.assign({}, webpackConfig.resolve), { alias: Object.assign({
                     // WP5 同款 UMD 模块别名
-                    'legions-nprogress': path.resolve(nodeModulesPath, 'legions-nprogress/dist/legions-nprogress.esm.js'), 'legions-utils-tool': path.resolve(nodeModulesPath, 'legions-utils-tool/dist/legions-utils-tool.esm.js') }, ((webpackConfig.resolve && webpackConfig.resolve.alias) || {})), extensions: ['.web.js', '.js', '.json', '.ts', '.tsx', '.jsx'], fullySpecified: false, modules: [
+                    'legions-nprogress': path.resolve(nodeModulesPath, 'legions-nprogress/dist/legions-nprogress.esm.js'), 'legions-utils-tool': path.resolve(nodeModulesPath, 'legions-utils-tool/dist/legions-utils-tool.esm.js') }, ((webpackConfig.resolve && webpackConfig.resolve.alias) || {})), extensions: ['.web.js', '.js', '.json', '.ts', '.tsx', '.jsx'], byDependency: { esm: { fullySpecified: false } }, modules: [
                     'src',
                     'node_modules',
                     path.join(process.cwd(), `src`),
