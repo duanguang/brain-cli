@@ -261,6 +261,13 @@
                 },
             },
             rules: [
+                {
+                    // 对齐 webpack javascript/auto 语义：允许 exports 未声明的深层子路径
+                    // 回退到文件系统解析（rspack 2.x 默认严格，wms 的 @visactor/vtable-plugins
+                    // 深层导入实证 4 处 error）。fullySpecified 仅在规则级 resolve 生效
+                    test: /\.(m?js|jsx|ts|tsx)$/,
+                    resolve: { fullySpecified: false },
+                },
                 ...(0, javaScriptLoader_1.getJSXLoadersed)((babel === null || babel === void 0 ? void 0 : babel.loader_include) || []),
                 ...(0, javaScriptLoader_1.getTsLoadersed)((babel === null || babel === void 0 ? void 0 : babel.loader_include) || []),
                 ...getCssLoaders(css),
