@@ -33,6 +33,16 @@ var __rest = (this && this.__rest) || function (s, e) {
         const { name, devServer, defaultPort } = eConfig;
         const publicPath = eConfig.publicPath + name + '/';
         const { noInfo, proxy, before, stats, contentBase, historyApiFallback, headers = {}, hot, port } = devServer, serverProps = __rest(devServer, ["noInfo", "proxy", "before", "stats", "contentBase", "historyApiFallback", "headers", "hot", "port"]);
+        // @rspack/dev-server 内部 for...of 迭代 proxy，严格要求数组；
+        // webpack 版兼容对象形式（{ '/api': {...} }），此处规范化：
+        // 对象 → [{ context: key, ...value }]；未配置 → []（2.x 对 undefined/对象不容错）
+        let proxyList = proxy;
+        if (proxy && !Array.isArray(proxy) && typeof proxy === 'object') {
+            proxyList = Object.keys(proxy).map((key) => Object.assign({ context: key }, proxy[key]));
+        }
+        else if (!proxy) {
+            proxyList = [];
+        }
         config.devServer = Object.assign({}, serverProps, {
             static: { directory: path.resolve(process.cwd(), constants_1.WORKING_DIRECTORY) },
             // WP5 同款：publicPath 移到 devMiddleware
@@ -46,7 +56,7 @@ var __rest = (this && this.__rest) || function (s, e) {
             headers: Object.assign({ 'Access-Control-Allow-Origin': '*' }, headers),
             hot: true,
             port: defaultPort,
-            proxy: proxy,
+            proxy: proxyList,
             setupMiddlewares: function (middlewares, devServer) {
                 if (!devServer)
                     return middlewares;
