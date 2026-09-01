@@ -31,7 +31,7 @@
 | **（已实证 2.2.1）** CSS 提取插件 | `mini-css-extract-plugin@2.10.2` 在 @rspack/core 2.x 下构建崩溃（`webpack.util.serialization.registerLoader` 中 serialization 为 undefined，rspack build 实测复现）→ 改用 Rspack 原生 `CssExtractRspackPlugin`（导出已验证存在，filename/chunkFilename/`.loader` 语义与 MCEP 一致）；webpack 链路继续用 MCEP，互不影响 |
 | dev 图片规则 `generator.emit: false` | 任务 11 用 demo 图片实测：dev 产物不落盘、页面图片经内存服务可显示 |
 | **（已实证 2.2.1）** CopyPlugin | `copy-webpack-plugin@11.0.0` 在 @rspack/core 2.x 的 processAssets 阶段崩溃（二分定位实证，错误被包装为 `oneshot canceled`）→ 升级 copy-webpack-plugin@latest（版本以安装为准）；升级影响共享依赖，webpack 兜底 build 必须重验 |
-| **（已实证 2.2.1）** ESM linking 严格性 | rspack 2.x 将「样式 default 导入」（`import x from '*.less'`）从 webpack 的 warning 提升为 **stats error**，ignoreWarnings 不抑制。**wms-aps-web 验收预警**：任务 15 build 验收若业务源码存在此类导入会直接失败，处置 = 改副作用导入 `import '*.less'`（brain-cli demo 源码已按此处理） |
+| **（已实证 2.2.1）** ESM linking 严格性 | rspack 2.x 将「**非 modules 样式**的 default 导入」（`import x from './a.less'`，不含 `*.modules.less`）从 webpack 的 warning 提升为 **stats error**，ignoreWarnings 不抑制；CSS Modules 导入（`*.modules.*`）有 default 导出，rspack 下正常。**wms-aps-web 验收预警**：任务 15 build 验收若业务源码存在非 modules 样式的 default 导入会直接失败，处置 = 改副作用导入（brain-cli demo 源码已按此处理） |
 | BundleAnalyzerPlugin（`-s` report） | 兼容则 rspack 可用；不兼容则 report 模式仅 webpack 引擎可用（记录到 README，不算失败） |
 
 ## 文件结构（锁定分解决策）
