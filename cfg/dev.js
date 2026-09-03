@@ -26,6 +26,11 @@
         config.pendings = [
             () => {
                 //TODO:暂时放在这里
+                // DLL 显式关闭判定：用户原始配置 vendors 为空数组/空 value 时整段跳过
+                //（EConfig deep-assign 数组合并残留导致 EConfig 单例值不可信，读原始文件）
+                if ((0, helpers_1.isDllExplicitlyDisabled)()) {
+                    return;
+                }
                 const filepath = WebpackDllManifest_1.default.getInstance().resolveManifestPath();
                 let vencdn = '';
                 if (Object.prototype.toString.call(vendors) === '[object Object]') {

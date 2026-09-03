@@ -3,9 +3,16 @@ import WebpackDllManifest from '../settings/WebpackDllManifest';
 import { log } from '../utils/logs';
 import { DllPlugins } from '../../cfg/dllPlugins';
 import EConfig from '../settings/EConfig';
+import { isDllExplicitlyDisabled } from '../../cfg/helpers';
 const dllConfig = require('../../cfg/dll');
 const {vendors,customDll } = EConfig.getInstance().webpack.dllConfig;
 export default function webpackDllCompiler(): Promise<any> {
+    // DLL 显式关闭判定：用户原始配置 vendors 为空数组/空 value 时跳过自动构建
+    //（EConfig deep-assign 数组合并残留导致单例值不可信，读原始文件判断）
+    if (isDllExplicitlyDisabled()) {
+        log(`skip webpack dll manifest [vendors] (explicitly disabled)`);
+        return Promise.resolve();
+    }
     const requireCompile = WebpackDllManifest.getInstance().isCompileManifestDirty();
     return new Promise((resolve, reject) => {
         if (!dllConfig) {

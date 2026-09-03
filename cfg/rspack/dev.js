@@ -86,7 +86,15 @@ var __rest = (this && this.__rest) || function (s, e) {
         // 完整 DLL 模式（react-dom 在 DLL 内）下 Fast Refresh 降级说明见 DLL 注入段；
         // DLL 注入（对齐 webpack 引擎 cfg/dev.js pendings；仅 dev，dist 链路无此逻辑）。
         // 主 vendors 与 customDll 各项：manifest js 存在（已执行 brain-cli dll）才注入——
-        // 未构建 DLL 时自然跳过，行为与 vendors=[] 一致
+        // 未构建 DLL 时自然跳过，行为与 vendors=[] 一致。
+        // 用户显式关闭（vendors 原始配置为空数组/空 value，isDllExplicitlyDisabled）时整段跳过
+        var dllScripts = [];
+        var manifest_1 = WebpackDllManifest_1.default.getInstance();
+        if (helpers_1.isDllExplicitlyDisabled()) {
+            // Fast Refresh 照常（react-dom 走 rspack 编译，loader 时序修复命中）
+            config.plugins.push(new react_refresh_1.ReactRefreshRspackPlugin());
+            return config;
+        }
         var dllScripts = [];
         var manifest_1 = WebpackDllManifest_1.default.getInstance();
         var dllConfig = (eConfig.webpack && eConfig.webpack.dllConfig) || {};

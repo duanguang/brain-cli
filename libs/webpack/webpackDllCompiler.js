@@ -24,9 +24,16 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     const logs_1 = require("../utils/logs");
     const dllPlugins_1 = require("../../cfg/dllPlugins");
     const EConfig_1 = require("../settings/EConfig");
+    const helpers_1 = require("../../cfg/helpers");
     const dllConfig = require('../../cfg/dll');
     const { vendors, customDll } = EConfig_1.default.getInstance().webpack.dllConfig;
     function webpackDllCompiler() {
+        // DLL 显式关闭判定：用户原始配置 vendors 为空数组/空 value 时跳过自动构建
+        //（EConfig deep-assign 数组合并残留导致单例值不可信，读原始文件判断）
+        if (helpers_1.isDllExplicitlyDisabled()) {
+            (0, logs_1.log)(`skip webpack dll manifest [vendors] (explicitly disabled)`);
+            return Promise.resolve();
+        }
         const requireCompile = WebpackDllManifest_1.default.getInstance().isCompileManifestDirty();
         return new Promise((resolve, reject) => {
             if (!dllConfig) {

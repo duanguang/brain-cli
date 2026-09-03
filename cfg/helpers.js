@@ -4,12 +4,12 @@
         if (v !== undefined) module.exports = v;
     }
     else if (typeof define === "function" && define.amd) {
-        define(["require", "exports", "../libs/settings/WebpackDllManifest", "path"], factory);
+        define(["require", "exports", "../libs/settings/WebpackDllManifest", "../libs/settings/EConfig", "path"], factory);
     }
 })(function (require, exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
-    exports.getEntry = exports.getRspackDllReferencePlugin = exports.getDllReferencePlugin = void 0;
+    exports.getEntry = exports.isReactDomInDll = exports.getRspackDllReferencePlugin = exports.isDllExplicitlyDisabled = exports.getDllReferencePlugin = void 0;
     const WebpackDllManifest_1 = require("../libs/settings/WebpackDllManifest");
     const EConfig_1 = require("../libs/settings/EConfig");
     const path = require("path");
@@ -33,6 +33,49 @@
         }
     }
     exports.getDllReferencePlugin = getDllReferencePlugin;
+    /**
+     * DLL 显式关闭判定：读用户侧原始 .e-config.js / .e-config-ignore.js（后者优先），
+     * 判断 vendors 是否被显式配置为空——数组形式 [] 或对象形式 { value: [] } 均视为关闭。
+     *
+     * 为什么不读 EConfig 单例：EConfig 用 deep-assign 合并默认模板与项目配置，数组按索引
+     * 合并（[] 无法清空模板值，实测 vendors: [] 合并后残留为模板全量），导致「配置空数组
+     * 关闭 DLL」的直觉失效。本函数绕过合并语义直接读原始文件，尊重用户显式意图。
+     *
+     * 双引擎共用：rspack（cfg/rspack/dev.js、isReactDomInDll）与 webpack（cfg/dev.js、
+     * webpackDllCompiler 自动构建）的 DLL 判定均接入此函数，行为保持一致。
+     */
+    function isDllExplicitlyDisabled() {
+        const fs = require('fs');
+        const files = [
+            path.resolve(process.cwd(), '.e-config.js'),
+            path.resolve(process.cwd(), '.e-config-ignore.js'),
+        ];
+        let rawVendors;
+        // 按优先级取「最后显式配置了 vendors 的文件」的原始值
+        files.forEach(function (file) {
+            if (!fs.existsSync(file)) {
+                return;
+            }
+            try {
+                const raw = require(file);
+                const vendors = raw && raw.webpack && raw.webpack.dllConfig && raw.webpack.dllConfig.vendors;
+                if (typeof vendors !== 'undefined') {
+                    rawVendors = vendors;
+                }
+            }
+            catch (e) {
+                // 配置文件本身加载失败时交由 EConfig 主链路报错，此处静默
+            }
+        });
+        if (Array.isArray(rawVendors)) {
+            return rawVendors.length === 0;
+        }
+        if (rawVendors && typeof rawVendors === 'object') {
+            return Array.isArray(rawVendors.value) && rawVendors.value.length === 0;
+        }
+        return false;
+    }
+    exports.isDllExplicitlyDisabled = isDllExplicitlyDisabled;
     /**
      * rspack 版 DllReferencePlugin 工厂（cfg/rspack/dev.js DLL 注入用）。
      * webpack 包的 DllReferencePlugin 在 @rspack/core 2.x 编译器下 hook 不兼容会崩
@@ -65,6 +108,10 @@
      * （legions-pro-examples 实证缺陷，2026-09-04 修复）
      */
     function isReactDomInDll() {
+        // 用户显式关闭（vendors 为空数组/空 value）时 DLL 不生效，直接返回 false
+        if (isDllExplicitlyDisabled()) {
+            return false;
+        }
         const webpackDllManifest = WebpackDllManifest_1.default.getInstance();
         const eConfig = EConfig_1.default.getInstance();
         const dllConfig = (eConfig.webpack && eConfig.webpack.dllConfig) || {};

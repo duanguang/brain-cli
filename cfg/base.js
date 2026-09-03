@@ -15,7 +15,7 @@ var __rest = (this && this.__rest) || function (s, e) {
         if (v !== undefined) module.exports = v;
     }
     else if (typeof define === "function" && define.amd) {
-        define(["require", "exports", "path", "../libs/settings/EConfig", "../libs/constants/constants", "webpack", "../libs/webpack/plugins/htmlWebpackPlugin", "../libs/utils/env", "../libs/webpack/plugins/LegionExtractStaticFilePlugin", "../libs/webpack/entries/getEntries", "../libs/utils/objects", "../libs/webpack/javaScriptLoader"], factory);
+        define(["require", "exports", "path", "fs", "../libs/settings/EConfig", "../libs/constants/constants", "webpack", "../libs/webpack/plugins/htmlWebpackPlugin", "../libs/utils/env", "../libs/webpack/plugins/LegionExtractStaticFilePlugin", "../libs/webpack/entries/getEntries", "../libs/utils/objects", "../libs/webpack/javaScriptLoader"], factory);
     }
 })(function (require, exports) {
     "use strict";
@@ -339,7 +339,7 @@ var __rest = (this && this.__rest) || function (s, e) {
                         ...[
                             path.resolve(process.cwd(), constants_1.PROJECT_USER_CONFIG_FILE),
                             path.resolve(process.cwd(), constants_1.PROJECT_USER_CONFIG_IGNORE_FILE),
-                        ].filter(function (p) { return fs.existsSync(p); }),
+                        ].filter((p) => fs.existsSync(p)),
                     ],
                 },
                 cacheDirectory: path.resolve(process.cwd(), '.webpack_cache'),
