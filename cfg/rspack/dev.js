@@ -23,6 +23,9 @@ var __rest = (this && this.__rest) || function (s, e) {
     const path = require("path");
     const base_1 = require("./base");
     const constants_1 = require("../../libs/constants/constants");
+    // React Fast Refresh：runtime 注入由插件统一负责（builtin:react-refresh-loader），
+    // 组件签名转换由 babel 侧 react-refresh/babel 完成（javaScriptLoader reactRefresh 分支）
+    const react_refresh_1 = require("@rspack/plugin-react-refresh");
     const express = require('express');
     /**
      * Rspack dev 配置：devServer 组装语义对齐 webpack 版 cfg/base.js 的 __DEV__ 分支。
@@ -68,6 +71,12 @@ var __rest = (this && this.__rest) || function (s, e) {
                 return middlewares;
             },
         });
+        // React Fast Refresh（仅 dev）：给 React 组件模块注入 HMR accept 边界 + 刷新运行时，
+        // 无 hot() 包裹的业务组件改动不再冒泡整页刷新（函数组件保留状态，class 组件 remount）。
+        // injectEntry 保持默认（匿名 entry 模块被 splitChunks 抽进 common 后不会执行，无副作用）；
+        // hook 安装时序由 cfg/rspack/base.js 的 reactRefreshHookLoader 规则保证
+        //（react-dom 模块 prepend，先于其顶层注册执行，不受 chunk 拆分影响）
+        config.plugins.push(new react_refresh_1.ReactRefreshRspackPlugin());
         return config;
     }
     exports.default = getRspackDevConfig;

@@ -1,6 +1,5 @@
 import React from 'react';
 import '../assets/css/test.less'
-import { hot } from 'react-hot-loader/root';
 import styles from './index.modules.less'
 import * as rawObjectHash from 'object-hash';
 
@@ -34,4 +33,4 @@ class Test extends React.Component{
         )
     }
 }
-export default hot(Test);
+export default Test;

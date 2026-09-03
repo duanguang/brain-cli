@@ -30,7 +30,24 @@ export const tsloaderPlugin = () => {
     },
   };
 };
-export const getTsLoadersed = (include:string[]=[]) => {
+/**
+ * Fast Refresh babel 转换：给 babel options 合并 react-refresh/babel 插件（组件签名注册）。
+ * 必须浅拷贝合并：babel.query 对象被双引擎共享，直接 push 会污染 webpack 引擎路径；
+ * 插件用 require.resolve 绝对路径：由 brain-cli 上下文解析，不依赖项目侧依赖 hoist
+ */
+function withReactRefresh(babelOptions: any) {
+  return {
+    ...babelOptions,
+    plugins: [
+      ...(babelOptions.plugins || []),
+      // skipEnvCheck：brain-cli 用 NODE_ENV=dev 而非 development，
+      // react-refresh/babel 的环境检查不认识 "dev" 会直接抛错
+      [require.resolve('react-refresh/babel'), { skipEnvCheck: true }],
+    ],
+  };
+}
+
+export const getTsLoadersed = (include:string[]=[], reactRefresh: boolean = false) => {
   const loaders = [];
   // WP5: 统一使用 babel-loader + ts-loader，不再区分 HappyPack 模式
   loaders.push({
@@ -39,7 +56,7 @@ export const getTsLoadersed = (include:string[]=[]) => {
     use: [
       {
         loader: 'babel-loader',
-        options: babel.query,
+        options: reactRefresh ? withReactRefresh(babel.query) : babel.query,
       },
       tsloaderPlugin(),
     ],
@@ -52,10 +69,12 @@ export const getTsLoadersed = (include:string[]=[]) => {
   }
   return loaders;
 };
-export const getJSXLoadersed = (include:string[]=[]) => {
+export const getJSXLoadersed = (include:string[]=[], reactRefresh: boolean = false) => {
     const loaders = [];
     const hotLoader = [];
-  if (__DEV__) {
+  // react-refresh（Fast Refresh）与 react-hot-loader 是两套互斥的热替换机制，叠加会冲突；
+  // rspack 引擎启用 Fast Refresh 时跳过 react-hot-loader 规则（webpack 引擎不受影响）
+  if (__DEV__ && !reactRefresh) {
     if (!DisableReactHotLoader) {
         hotLoader.push({
         test: /\.(jsx|js)?$/,
@@ -82,7 +101,7 @@ export const getJSXLoadersed = (include:string[]=[]) => {
     use: [
       {
         loader: `babel-loader`,
-        options: babel.query,
+        options: reactRefresh ? withReactRefresh(babel.query) : babel.query,
       },
     ],
   });

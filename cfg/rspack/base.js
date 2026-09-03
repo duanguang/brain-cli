@@ -278,6 +278,15 @@
                 },
             },
             rules: [
+                // Fast Refresh 时序修复（仅 dev，loader 见 libs/webpack/loaders/reactRefreshHookLoader.js）：
+                // react-dom 模块执行前强制 require react-refresh/runtime 安装 devtools hook，
+                // 否则 react-dom 顶层的 renderer 注册因 hook 缺失被永久跳过（app1 实测 renderers=0）。
+                // 必须条件展开：无条件会导致 dist 生产包混入 react-refresh runtime
+                ...(__DEV__ ? [{
+                    test: /react-dom[\\/](cjs[\\/])?react-dom\.(development|production)\.js$/,
+                    include: [nodeModulesPath],
+                    loader: path.resolve(__dirname, '../../libs/webpack/loaders/reactRefreshHookLoader.js'),
+                }] : []),
                 {
                     // 对齐 webpack javascript/auto 语义：允许 exports 未声明的深层子路径
                     // 回退到文件系统解析（rspack 2.x 默认严格，wms 的 @visactor/vtable-plugins
@@ -285,8 +294,8 @@
                     test: /\.(m?js|jsx|ts|tsx)$/,
                     resolve: { fullySpecified: false },
                 },
-                ...(0, javaScriptLoader_1.getJSXLoadersed)((babel === null || babel === void 0 ? void 0 : babel.loader_include) || []),
-                ...(0, javaScriptLoader_1.getTsLoadersed)((babel === null || babel === void 0 ? void 0 : babel.loader_include) || []),
+                ...(0, javaScriptLoader_1.getJSXLoadersed)((babel === null || babel === void 0 ? void 0 : babel.loader_include) || [], __DEV__),
+                ...(0, javaScriptLoader_1.getTsLoadersed)((babel === null || babel === void 0 ? void 0 : babel.loader_include) || [], __DEV__),
                 ...getCssLoaders(css),
                 ...getImageLoaders(),
                 ...getFontLoaders(),
