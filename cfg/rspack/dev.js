@@ -26,10 +26,17 @@ var __rest = (this && this.__rest) || function (s, e) {
     // React Fast Refresh：runtime 注入由插件统一负责（builtin:react-refresh-loader），
     // 组件签名转换由 babel 侧 react-refresh/babel 完成（javaScriptLoader reactRefresh 分支）
     const react_refresh_1 = require("@rspack/plugin-react-refresh");
+    // DLL 支持（对齐 webpack 引擎 cfg/dev.js pendings 语义）：
+    // webpack 包的 DllReferencePlugin 在 rspack 编译器下不兼容，必须用 @rspack/core 实现
+    const helpers_1 = require("../helpers");
+    const WebpackDllManifest_1 = require("../../libs/settings/WebpackDllManifest");
+    const node_path_1 = require("path");
+    const RspackDllHtmlPlugin_1 = require("../../libs/webpack/plugins/rspackDllHtmlPlugin.js");
     const express = require('express');
     /**
      * Rspack dev 配置：devServer 组装语义对齐 webpack 版 cfg/base.js 的 __DEV__ 分支。
-     * dll pendings 不迁移（wms-aps-web vendors=[]，cfg/dll.js 返回 null，启动链路自然跳过）。
+     * DLL：vendors/customDll 有配置且存在已构建产物（brain-cli dll）时注入，
+     * 行为对齐 webpack 引擎；无 DLL 时零影响。
      */
     function getRspackDevConfig(eConfig) {
         const config = (0, base_1.default)(eConfig);
@@ -75,8 +82,79 @@ var __rest = (this && this.__rest) || function (s, e) {
         // 无 hot() 包裹的业务组件改动不再冒泡整页刷新（函数组件保留状态，class 组件 remount）。
         // injectEntry 保持默认（匿名 entry 模块被 splitChunks 抽进 common 后不会执行，无副作用）；
         // hook 安装时序由 cfg/rspack/base.js 的 reactRefreshHookLoader 规则保证
-        //（react-dom 模块 prepend，先于其顶层注册执行，不受 chunk 拆分影响）
-        config.plugins.push(new react_refresh_1.ReactRefreshRspackPlugin());
+        //（react-dom 模块 prepend，先于其顶层注册执行，不受 chunk 拆分影响）。
+        // 完整 DLL 模式（react-dom 在 DLL 内）下 Fast Refresh 降级说明见 DLL 注入段；
+        // 判定必须基于「实际注入的 DLL」——dllScripts 组装完成后再决策（见下）
+        var reactDomInDll = false;
+        // DLL 注入（对齐 webpack 引擎 cfg/dev.js pendings；仅 dev，dist 链路无此逻辑）。
+        // 主 vendors 与 customDll 各项：manifest js 存在（已执行 brain-cli dll）才注入——
+        // 未构建 DLL 时自然跳过，行为与 vendors=[] 一致
+        var dllScripts = [];
+        var manifest_1 = WebpackDllManifest_1.default.getInstance();
+        var dllConfig = (eConfig.webpack && eConfig.webpack.dllConfig) || {};
+        var vendors = dllConfig.vendors;
+        var vendorsValue = Array.isArray(vendors) ? vendors : ((vendors && vendors.value) || []);
+        if (vendorsValue.length && manifest_1.resolveManifestPath()) {
+            var vendorDllFile = manifest_1.resolveManifestPath();
+            dllScripts.push({
+                basename: node_path_1.basename(vendorDllFile),
+                diskPath: vendorDllFile,
+                // URL 语义对齐 webpack 引擎（AddAssetHtmlPlugin）：DLL emit 进编译产物，
+                // script src 走 output.publicPath
+                publicSrc: publicPath + node_path_1.basename(vendorDllFile),
+            });
+            var vendorRef = helpers_1.getRspackDllReferencePlugin();
+            if (vendorRef) {
+                config.plugins.push(vendorRef);
+            }
+        }
+        var customDll = dllConfig.customDll;
+        if (Array.isArray(customDll)) {
+            customDll.forEach(function (item) {
+                var hash = manifest_1.getDllPluginsHash(item.value || []);
+                var dllFile = manifest_1.resolveManifestPath(item.key, hash);
+                if (item.value && item.value.length && dllFile) {
+                    dllScripts.push({
+                        basename: node_path_1.basename(dllFile),
+                        diskPath: dllFile,
+                        publicSrc: publicPath + node_path_1.basename(dllFile),
+                    });
+                    var customRef = helpers_1.getRspackDllReferencePlugin(item.key);
+                    if (customRef) {
+                        config.plugins.push(customRef);
+                    }
+                }
+            });
+        }
+        if (dllScripts.length) {
+            // 完整 DLL 模式判定：react-dom 在实际注入的 DLL 内——DLL 为 production 构建
+            //（bundleType=0），其 react-dom 的 Fast Refresh API（scheduleRefresh 等）为 null
+            //（React 16 仅 DEV 构建提供），Fast Refresh 无法工作——对齐 webpack 引擎 + DLL 现状：
+            // 不接 Fast Refresh，更新走 HMR 冒泡整页刷新（行为明确可预期）
+            reactDomInDll = vendorsValue.indexOf('react-dom') !== -1 ||
+                (Array.isArray(customDll) && customDll.some(function (item) {
+                    return item.value && item.value.indexOf('react-dom') !== -1;
+                }));
+            if (!reactDomInDll) {
+                config.plugins.push(new react_refresh_1.ReactRefreshRspackPlugin());
+            }
+            // hook stub → DLL scripts 注入 HTML head 首位（script 顺序即依赖加载时序）
+            config.plugins.push(new RspackDllHtmlPlugin_1({ scripts: dllScripts, injectHookStub: !reactDomInDll }));
+            if (!reactDomInDll) {
+                // 半 DLL（react-dom 走 rspack 编译）：Fast Refresh 完整——
+                // 内联 stub 先装 hook，react-dom 模块的 loader 版 snippet 增强后登记 helpers；
+                // enhance loader 消费 __rrNeedsEnhance 做二次增强（幂等、无害）
+                config.module.rules.unshift({
+                    test: /\.(js|jsx|ts|tsx)$/,
+                    include: [node_path_1.resolve(process.cwd(), 'src')],
+                    loader: node_path_1.resolve(__dirname, '../../libs/webpack/loaders/rspackRefreshEnhanceLoader.js'),
+                });
+            }
+        }
+        else {
+            // 无 DLL：Fast Refresh 照常（react-dom 走 rspack 编译，loader 时序修复命中）
+            config.plugins.push(new react_refresh_1.ReactRefreshRspackPlugin());
+        }
         return config;
     }
     exports.default = getRspackDevConfig;
