@@ -10,6 +10,7 @@
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     const path = require("path");
+    const fs = require("fs");
     const EConfig_1 = require("../../libs/settings/EConfig");
     const constants_1 = require("../../libs/constants/constants");
     const htmlWebpackPlugin_1 = require("../../libs/webpack/plugins/htmlWebpackPlugin");
@@ -212,7 +213,15 @@
             // experiments.newCache 在 2.2.1 仅切换缓存引擎不落盘，已实测排除）
             cache: {
                 type: 'persistent',
-                buildDependencies: [__filename],
+                // 用户配置文件（.e-config.js/.e-config-ignore.js）纳入缓存依赖：
+                // 用户配置变更后持久缓存自动失效，避免改配置后重启仍命中旧缓存
+                buildDependencies: [
+                    __filename,
+                    ...[
+                        path.resolve(process.cwd(), constants_1.PROJECT_USER_CONFIG_FILE),
+                        path.resolve(process.cwd(), constants_1.PROJECT_USER_CONFIG_IGNORE_FILE),
+                    ].filter(fs.existsSync),
+                ],
             },
             output: Object.assign(Object.assign({}, libraryNested), { 
                 // qiankun 产物形态（对齐 cfg/base.js）

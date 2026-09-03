@@ -21,6 +21,7 @@ var __rest = (this && this.__rest) || function (s, e) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     const path = require("path");
+    const fs = require("fs");
     const EConfig_1 = require("../libs/settings/EConfig");
     const constants_1 = require("../libs/constants/constants");
     const webpack = require("webpack");
@@ -330,8 +331,16 @@ var __rest = (this && this.__rest) || function (s, e) {
             // WP5: 文件系统缓存，替代 DLL 解决内存增长问题
             cache: {
                 type: 'filesystem',
+                // 用户配置文件（.e-config.js/.e-config-ignore.js）纳入缓存依赖：
+                // 用户配置变更后缓存自动失效，避免改配置后重启仍命中旧缓存
                 buildDependencies: {
-                    config: [__filename],
+                    config: [
+                        __filename,
+                        ...[
+                            path.resolve(process.cwd(), constants_1.PROJECT_USER_CONFIG_FILE),
+                            path.resolve(process.cwd(), constants_1.PROJECT_USER_CONFIG_IGNORE_FILE),
+                        ].filter(function (p) { return fs.existsSync(p); }),
+                    ],
                 },
                 cacheDirectory: path.resolve(process.cwd(), '.webpack_cache'),
             },

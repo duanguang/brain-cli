@@ -1,10 +1,13 @@
 import * as path from 'path';
+import * as fs from 'fs';
 import EConfig from '../libs/settings/EConfig';
 import {
   HISTORY_REWRITE_FALL_BACK_REGEX_FUNC,
   DIST,
   WORKING_DIRECTORY,
   DEV,
+  PROJECT_USER_CONFIG_FILE,
+  PROJECT_USER_CONFIG_IGNORE_FILE,
 } from '../libs/constants/constants';
 import * as webpack from 'webpack';
 import htmlWebpackPlugins from '../libs/webpack/plugins/htmlWebpackPlugin';
@@ -361,8 +364,16 @@ export default function getBaseConfig({
     // WP5: 文件系统缓存，替代 DLL 解决内存增长问题
     cache: {
       type: 'filesystem',
+      // 用户配置文件（.e-config.js/.e-config-ignore.js）纳入缓存依赖：
+      // 用户配置变更后缓存自动失效，避免改配置后重启仍命中旧缓存
       buildDependencies: {
-        config: [__filename],
+        config: [
+          __filename,
+          ...[
+            path.resolve(process.cwd(), PROJECT_USER_CONFIG_FILE),
+            path.resolve(process.cwd(), PROJECT_USER_CONFIG_IGNORE_FILE),
+          ].filter((p) => fs.existsSync(p)),
+        ],
       },
       cacheDirectory: path.resolve(process.cwd(), '.webpack_cache'),
     },
