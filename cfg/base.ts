@@ -150,7 +150,7 @@ export default function getBaseConfig({
         test: /\.less/,
         use: generateLoaders(null, {
           loader: 'less-loader',
-          options: { lessOptions: { javascriptEnabled: true, math: 'always' } },
+          options: { lessOptions: { javascriptEnabled: true, math: 'always', quietDeprecations: true } },
         }),
         include: [path.resolve(nodeModulesPath, 'antd'),/antd/],
       },
@@ -169,7 +169,7 @@ export default function getBaseConfig({
         use: generateLoaders(
           null,
           postcss_loader,
-          { loader: 'less-loader', options: { lessOptions: { javascriptEnabled: true, math: 'always' } } },
+          { loader: 'less-loader', options: { lessOptions: { javascriptEnabled: true, math: 'always', quietDeprecations: true } } },
         ),
         include:  [path.join(process.cwd(), './src')].concat(css?.loader_include||[]),
       },
@@ -178,7 +178,7 @@ export default function getBaseConfig({
         use: generateLoaders(
           CSS_MODULE_OPTION,
           postcss_loader,
-          { loader: 'less-loader', options: { lessOptions: { javascriptEnabled: true, math: 'always' } } },
+          { loader: 'less-loader', options: { lessOptions: { javascriptEnabled: true, math: 'always', quietDeprecations: true } } },
         ),
         include:  [path.join(process.cwd(), './src')].concat(css?.loader_include||[]),
       },
@@ -450,6 +450,9 @@ export default function getBaseConfig({
       ...serverProps,
       static: {
         directory: path.resolve(process.cwd(), WORKING_DIRECTORY),
+        // WDS4 内核 static.watch 默认 true，会监听项目根目录（含 src），
+        // src 文件变化时 live reload 抢跑 HMR 导致整页刷新；关闭后由 HMR 接管
+        watch: false,
       },
       // WP5: publicPath 移到 devMiddleware
       devMiddleware: {

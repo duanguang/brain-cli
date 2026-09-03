@@ -401,6 +401,9 @@ var __rest = (this && this.__rest) || function (s, e) {
         if (__DEV__) {
             config.devServer = Object.assign(Object.assign({}, serverProps), { static: {
                     directory: path.resolve(process.cwd(), constants_1.WORKING_DIRECTORY),
+                    // WDS4 内核 static.watch 默认 true，会监听项目根目录（含 src），
+                    // src 文件变化时 live reload 抢跑 HMR 导致整页刷新；关闭后由 HMR 接管
+                    watch: false,
                 }, 
                 // WP5: publicPath 移到 devMiddleware
                 devMiddleware: {
