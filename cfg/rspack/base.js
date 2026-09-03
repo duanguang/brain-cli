@@ -18,6 +18,7 @@
     const getEntries_1 = require("../../libs/webpack/entries/getEntries");
     const objects_1 = require("../../libs/utils/objects");
     const javaScriptLoader_1 = require("../../libs/webpack/javaScriptLoader");
+    const helpers_1 = require("../helpers");
     const nodeModulesPath = path.resolve(process.cwd(), 'node_modules');
     // CSS 提取用 Rspack 原生 CssExtractRspackPlugin（mini-css-extract-plugin 2.10 在
     // @rspack/core 2.x 下因 webpack.util.serialization 缺失崩溃，见执行者必读）；
@@ -294,8 +295,13 @@
                     test: /\.(m?js|jsx|ts|tsx)$/,
                     resolve: { fullySpecified: false },
                 },
-                ...(0, javaScriptLoader_1.getJSXLoadersed)((babel === null || babel === void 0 ? void 0 : babel.loader_include) || [], __DEV__),
-                ...(0, javaScriptLoader_1.getTsLoadersed)((babel === null || babel === void 0 ? void 0 : babel.loader_include) || [], __DEV__),
+                // Fast Refresh babel 转换（reactRefresh 参数）必须与 ReactRefreshRspackPlugin
+                //（dev.js 注入）同开同关：插件提供 $RefreshSig$/$RefreshReg$ 的模块包装定义，
+                // babel 侧插入调用——完整 DLL 模式（react-dom 在 DLL，production 构建无 refresh API）
+                // 关闭插件时必须同步关闭转换，否则裸 $RefreshSig$ 调用无定义 → 启动即崩
+                //（legions-pro-examples 实证缺陷，2026-09-04 修复）
+                ...(0, javaScriptLoader_1.getJSXLoadersed)((babel === null || babel === void 0 ? void 0 : babel.loader_include) || [], __DEV__ && !(0, helpers_1.isReactDomInDll)()),
+                ...(0, javaScriptLoader_1.getTsLoadersed)((babel === null || babel === void 0 ? void 0 : babel.loader_include) || [], __DEV__ && !(0, helpers_1.isReactDomInDll)()),
                 ...getCssLoaders(css),
                 ...getImageLoaders(),
                 ...getFontLoaders(),

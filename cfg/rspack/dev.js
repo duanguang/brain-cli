@@ -84,8 +84,6 @@ var __rest = (this && this.__rest) || function (s, e) {
         // hook 安装时序由 cfg/rspack/base.js 的 reactRefreshHookLoader 规则保证
         //（react-dom 模块 prepend，先于其顶层注册执行，不受 chunk 拆分影响）。
         // 完整 DLL 模式（react-dom 在 DLL 内）下 Fast Refresh 降级说明见 DLL 注入段；
-        // 判定必须基于「实际注入的 DLL」——dllScripts 组装完成后再决策（见下）
-        var reactDomInDll = false;
         // DLL 注入（对齐 webpack 引擎 cfg/dev.js pendings；仅 dev，dist 链路无此逻辑）。
         // 主 vendors 与 customDll 各项：manifest js 存在（已执行 brain-cli dll）才注入——
         // 未构建 DLL 时自然跳过，行为与 vendors=[] 一致
@@ -127,14 +125,13 @@ var __rest = (this && this.__rest) || function (s, e) {
             });
         }
         if (dllScripts.length) {
-            // 完整 DLL 模式判定：react-dom 在实际注入的 DLL 内——DLL 为 production 构建
-            //（bundleType=0），其 react-dom 的 Fast Refresh API（scheduleRefresh 等）为 null
-            //（React 16 仅 DEV 构建提供），Fast Refresh 无法工作——对齐 webpack 引擎 + DLL 现状：
-            // 不接 Fast Refresh，更新走 HMR 冒泡整页刷新（行为明确可预期）
-            reactDomInDll = vendorsValue.indexOf('react-dom') !== -1 ||
-                (Array.isArray(customDll) && customDll.some(function (item) {
-                    return item.value && item.value.indexOf('react-dom') !== -1;
-                }));
+            // 完整 DLL 模式判定改用共享函数 helpers.isReactDomInDll()（单一事实源）：
+            // DLL 为 production 构建（bundleType=0），其 react-dom 的 Fast Refresh API
+            //（scheduleRefresh 等）为 null（React 16 仅 DEV 构建提供），Fast Refresh 无法工作——
+            // 对齐 webpack 引擎 + DLL 现状：不接 Fast Refresh，更新走 HMR 冒泡整页刷新。
+            // babel 侧转换已在 base.js 用同一函数同步关闭（两者必须同开同关，
+            // 否则裸 $RefreshSig$ 调用无定义 → 启动即崩，legions-pro-examples 实证）
+            var reactDomInDll = helpers_1.isReactDomInDll();
             if (!reactDomInDll) {
                 config.plugins.push(new react_refresh_1.ReactRefreshRspackPlugin());
             }
